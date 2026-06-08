@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+:root {
+  --crimson: #9e1b32;
+  --crimson-dark: #7a1426;
+  --crimson-light: #c8324c;
+  --ink: #1a1a1a;
+  --paper: #f7f7f8;
+
+  color-scheme: light;
+}
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-crimson: var(--crimson);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+a:focus-visible {
+  outline: none;
+}
+
+a:not([aria-disabled]):focus-visible {
+  box-shadow:
+    0 0 0 2px var(--paper),
+    0 0 0 4px rgb(158 27 50 / 0.55);
+  border-radius: 8px;
+}

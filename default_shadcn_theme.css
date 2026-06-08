@@ -1,0 +1,95 @@
+/*
+ * ACAMS / CAMS theme — crimson #9E1B32, ink #1A1A1A, paper #F7F7F8.
+ * shadcn HSL tokens are kept so all UI primitives inherit automatically.
+ */
+@layer base {
+  :root {
+    /* Surfaces */
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+
+    /* Brand */
+    --primary: 350 71% 36%;            /* crimson #9E1B32 */
+    --primary-foreground: 0 0% 100%;
+
+    /* Neutrals */
+    --secondary: 240 5% 97%;           /* paper #F7F7F8 */
+    --secondary-foreground: 0 0% 10%;
+    --muted: 240 5% 97%;
+    --muted-foreground: 0 0% 40%;
+    --accent: 240 5% 97%;
+    --accent-foreground: 0 0% 10%;
+
+    /* Status */
+    --destructive: 0 72% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders / inputs */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 350 71% 36%;
+    --radius: 0.5rem;
+
+    /* Chart palette — crimson family + neutral counterpoints */
+    --chart-1: 350 71% 36%;            /* crimson */
+    --chart-2: 350 60% 49%;            /* crimson light */
+    --chart-3: 348 70% 28%;            /* crimson dark */
+    --chart-4: 220 9% 46%;             /* slate */
+    --chart-5: 0 0% 25%;               /* near-ink */
+
+    /* Sidebar (used by DashboardShell primitives) */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 10%;
+    --sidebar-primary: 350 71% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 97%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 350 71% 36%;
+  }
+
+  .dark {
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 350 60% 49%;            /* lighter crimson reads better on dark */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 0 0% 95%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 350 60% 49%;
+
+    --chart-1: 350 60% 55%;
+    --chart-2: 350 55% 65%;
+    --chart-3: 348 50% 40%;
+    --chart-4: 220 9% 65%;
+    --chart-5: 0 0% 80%;
+
+    --sidebar-background: 0 0% 10%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 350 60% 49%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 16%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 350 60% 49%;
+  }
+}
