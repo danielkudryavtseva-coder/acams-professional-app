@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Checkbox } from "../components/ui/checkbox";
 import { useAuth } from "../context/AuthContext";
 import camsLogo from "../../assets/cams-logo.png";
 
@@ -24,6 +25,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,7 +33,7 @@ export default function Login() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setServerError(null);
-    const result = await login(data.email, data.password);
+    const result = await login(data.email, data.password, rememberMe);
     if (result.success) {
       navigate("/dashboard");
     } else {
@@ -40,7 +42,7 @@ export default function Login() {
   };
 
   const handleGuestLogin = async () => {
-    await login("dkwhitfield@crimson.ua.edu", "cams2026");
+    await login("dkwhitfield@crimson.ua.edu", "cams2026", rememberMe);
     navigate("/dashboard");
   };
 
@@ -73,6 +75,16 @@ export default function Login() {
                 {...register("password")}
               />
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="rememberMe"
+                checked={rememberMe}
+                onCheckedChange={(v) => setRememberMe(v === true)}
+              />
+              <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
+                Keep me logged in
+              </Label>
             </div>
             {serverError && (
               <p className="text-xs text-destructive text-center">{serverError}</p>
