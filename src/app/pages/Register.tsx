@@ -53,7 +53,7 @@ const step1Schema = z.object({
 });
 
 const step2Schema = z.object({
-  personalStatement: z.string().min(50, "Personal statement must be at least 50 characters"),
+  personalStatement: z.string().min(1, "Personal statement is required"),
   committee: z.string().min(1, "Select a committee"),
 });
 
