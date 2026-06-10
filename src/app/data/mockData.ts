@@ -170,8 +170,24 @@ export const MOCK_CONTACTS: Contact[] = [
  * RecruitingPage, etc.) keep working with no import changes.
  */
 import { RECRUITING_PROGRAMS } from "./recruitingPrograms";
+import { adaptInternships } from "./internshipAdapter";
 
-export const MOCK_PROGRAMS: Program[] = RECRUITING_PROGRAMS;
+// Merge the curated recruiting calendar with the 522-entry internship dataset.
+// Deduplicate by firm+role so no program appears twice.
+function mergePrograms(): Program[] {
+  const seen = new Set<string>();
+  const result: Program[] = [];
+  for (const p of [...RECRUITING_PROGRAMS, ...adaptInternships()]) {
+    const key = `${p.firm.toLowerCase()}|${p.role.toLowerCase()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      result.push(p);
+    }
+  }
+  return result;
+}
+
+export const MOCK_PROGRAMS: Program[] = mergePrograms();
 
 export const MOCK_STOCK_HOLDINGS: StockHolding[] = [
   { ticker: "AAPL", name: "Apple Inc.", shares: 50, avgCost: 155.0, currentPrice: 189.3, sector: "Technology", marketCap: "large" },

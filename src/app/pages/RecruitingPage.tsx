@@ -73,7 +73,6 @@ type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 function getProgramClassYears(p: Program): ProgramClassYear[] {
   if (p.classYears && p.classYears.length) return p.classYears;
-  // Fall back to parsing the role text for legacy entries.
   const lower = p.role.toLowerCase();
   const inferred: ProgramClassYear[] = [];
   if (lower.includes("freshman")) inferred.push("Freshman");
@@ -83,10 +82,23 @@ function getProgramClassYears(p: Program): ProgramClassYear[] {
   return inferred.length ? inferred : ["Junior"];
 }
 
+/**
+ * Parse an ISO date string as local noon to avoid UTC-midnight timezone drift.
+ * e.g. "2026-06-09" → June 9 12:00 local (not June 8 19:00 in UTC-5).
+ * Non-ISO strings fall through to the browser's native parser.
+ */
+function parseLocalDate(iso: string): Date {
+  const parts = iso.split("T")[0].split("-").map(Number);
+  if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
+    return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+  }
+  return new Date(iso);
+}
+
 function programIsNowOpen(p: Program, today: Date): boolean {
   if (p.status === "closed") return false;
-  const open = p.openDate ? new Date(p.openDate) : null;
-  const close = p.deadline ? new Date(p.deadline) : null;
+  const open = p.openDate ? parseLocalDate(p.openDate) : null;
+  const close = p.deadline ? parseLocalDate(p.deadline) : null;
   if (open && open > today) return false;
   if (close && close < today && !p.rolling) return false;
   return p.status === "open" || p.status === "applied" || p.status === "interviewing";
@@ -94,14 +106,15 @@ function programIsNowOpen(p: Program, today: Date): boolean {
 
 function programIsOpeningSoon(p: Program, today: Date): boolean {
   if (!p.openDate) return false;
-  const open = new Date(p.openDate);
+  const open = parseLocalDate(p.openDate);
+  if (isNaN(open.getTime())) return false;
   const days = (open.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
   return days > 0 && days <= 60;
 }
 
 function programIsClosingSoon(p: Program, today: Date): boolean {
   if (!p.deadline) return false;
-  const close = new Date(p.deadline);
+  const close = parseLocalDate(p.deadline);
   if (close < today) return false;
   const days = (close.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
   return days <= 14;
@@ -109,8 +122,8 @@ function programIsClosingSoon(p: Program, today: Date): boolean {
 
 function formatDateShort(iso?: string): string {
   if (!iso) return "TBD";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
+  const d = parseLocalDate(iso);
+  if (isNaN(d.getTime())) return iso;
   return format(d, "MMM d, yyyy");
 }
 
@@ -118,7 +131,7 @@ export default function RecruitingPage() {
   const [search, setSearch] = React.useState("");
   const [filtersOpen, setFiltersOpen] = React.useState(true);
   const [selectedTargetYears, setSelectedTargetYears] = React.useState<ProgramClassYear[]>([...TARGET_YEARS]);
-  const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<StatusFilter[]>(["now"]);
+  const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<StatusFilter[]>([]);
   const [selectedTracks, setSelectedTracks] = React.useState<ProgramTrack[]>(
     Object.keys(TRACK_LABELS) as ProgramTrack[],
   );
@@ -127,9 +140,9 @@ export default function RecruitingPage() {
   );
   const [diversityOnly, setDiversityOnly] = React.useState(false);
   const [expandedFilters, setExpandedFilters] = React.useState<Record<string, boolean>>({
-    "Target Year": false,
-    Sectors: false,
-    "Opportunity Type": false,
+    "Target Year": true,
+    Sectors: true,
+    "Opportunity Type": true,
     Firms: false,
     Other: false,
   });
@@ -145,39 +158,7 @@ export default function RecruitingPage() {
 
   const today = React.useMemo(() => new Date(), []);
 
-  const deadlineCalendar = React.useMemo(() => {
-    const start = startOfMonth(deadlineMonth);
-    const daysInMonth = endOfMonth(deadlineMonth).getDate();
-    const offset = start.getDay();
-    const cells = Array.from({ length: 42 }).map((_, idx) => {
-      const day = idx - offset + 1;
-      return day > 0 && day <= daysInMonth ? day : null;
-    });
-    const byDay = new Map<number, Program[]>();
-    const y = deadlineMonth.getFullYear();
-    const m = deadlineMonth.getMonth();
-    for (const p of MOCK_PROGRAMS) {
-      if (!p.deadline) continue;
-      const d = new Date(p.deadline);
-      if (d.getFullYear() !== y || d.getMonth() !== m) continue;
-      const day = d.getDate();
-      const arr = byDay.get(day) ?? [];
-      arr.push(p);
-      byDay.set(day, arr);
-    }
-    return { cells, byDay };
-  }, [deadlineMonth]);
-
-  const deadlineCount = React.useMemo(() => {
-    let total = 0;
-    for (const arr of deadlineCalendar.byDay.values()) total += arr.length;
-    return total;
-  }, [deadlineCalendar]);
-
-  const isCurrentMonth =
-    deadlineMonth.getFullYear() === today.getFullYear() && deadlineMonth.getMonth() === today.getMonth();
-
-  // Sector distribution derived from the dataset itself (not a hardcoded array).
+  // Sector distribution derived from the dataset itself.
   const sectorData = React.useMemo(() => {
     const counts = new Map<ProgramTrack, number>();
     for (const p of MOCK_PROGRAMS) counts.set(p.type, (counts.get(p.type) ?? 0) + 1);
@@ -202,7 +183,8 @@ export default function RecruitingPage() {
     }
     for (const p of MOCK_PROGRAMS) {
       if (!p.deadline) continue;
-      const d = new Date(p.deadline);
+      const d = parseLocalDate(p.deadline);
+      if (isNaN(d.getTime())) continue;
       const days = Math.floor((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       if (days < 0 || days >= 56) continue;
       const idx = Math.floor(days / 7);
@@ -243,17 +225,51 @@ export default function RecruitingPage() {
     today,
   ]);
 
-  // Sort programs: now-open first, then by closest deadline.
+  // Sort: now-open first, then by closest deadline.
   const sortedPrograms = React.useMemo(() => {
     return [...filteredPrograms].sort((a, b) => {
       const aOpen = programIsNowOpen(a, today) ? 0 : 1;
       const bOpen = programIsNowOpen(b, today) ? 0 : 1;
       if (aOpen !== bOpen) return aOpen - bOpen;
-      const aD = a.deadline ? new Date(a.deadline).getTime() : Number.MAX_SAFE_INTEGER;
-      const bD = b.deadline ? new Date(b.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+      const aD = a.deadline ? parseLocalDate(a.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+      const bD = b.deadline ? parseLocalDate(b.deadline).getTime() : Number.MAX_SAFE_INTEGER;
       return aD - bD;
     });
   }, [filteredPrograms, today]);
+
+  // Deadline mini-calendar — uses filteredPrograms so it respects active filters.
+  const deadlineCalendar = React.useMemo(() => {
+    const start = startOfMonth(deadlineMonth);
+    const daysInMonth = endOfMonth(deadlineMonth).getDate();
+    const offset = start.getDay();
+    const cells = Array.from({ length: 42 }).map((_, idx) => {
+      const day = idx - offset + 1;
+      return day > 0 && day <= daysInMonth ? day : null;
+    });
+    const byDay = new Map<number, Program[]>();
+    const y = deadlineMonth.getFullYear();
+    const m = deadlineMonth.getMonth();
+    for (const p of filteredPrograms) {
+      if (!p.deadline) continue;
+      const d = parseLocalDate(p.deadline);
+      if (isNaN(d.getTime())) continue;
+      if (d.getFullYear() !== y || d.getMonth() !== m) continue;
+      const day = d.getDate();
+      const arr = byDay.get(day) ?? [];
+      arr.push(p);
+      byDay.set(day, arr);
+    }
+    return { cells, byDay };
+  }, [deadlineMonth, filteredPrograms]);
+
+  const deadlineCount = React.useMemo(() => {
+    let total = 0;
+    for (const arr of deadlineCalendar.byDay.values()) total += arr.length;
+    return total;
+  }, [deadlineCalendar]);
+
+  const isCurrentMonth =
+    deadlineMonth.getFullYear() === today.getFullYear() && deadlineMonth.getMonth() === today.getMonth();
 
   const calendarCells = React.useMemo(() => {
     const start = startOfMonth(month);
@@ -286,7 +302,7 @@ export default function RecruitingPage() {
     setSelectedStatusFilters((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto bg-[#e1e7f74d] min-h-screen">
+    <div className="p-4 w-full bg-[#e1e7f74d] min-h-screen">
       <Tabs defaultValue="programs" className="space-y-4">
         <TabsList>
           <TabsTrigger value="programs">Programs</TabsTrigger>
@@ -294,7 +310,7 @@ export default function RecruitingPage() {
         </TabsList>
 
         <TabsContent value="programs" className="space-y-4">
-          <div className={cn("grid grid-cols-1 gap-4", filtersOpen ? "xl:grid-cols-[300px_1fr]" : "xl:grid-cols-1")}>
+          <div className={cn("grid grid-cols-1 gap-4", filtersOpen ? "xl:grid-cols-[280px_1fr]" : "xl:grid-cols-1")}>
             {filtersOpen && (
               <div className="space-y-4">
               <aside className="bg-white border rounded-xl p-4 h-fit space-y-4">
@@ -329,6 +345,13 @@ export default function RecruitingPage() {
                   onToggle={() => setExpandedFilters((p) => ({ ...p, "Target Year": !p["Target Year"] }))}
                 >
                   <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTargetYears([...TARGET_YEARS])}
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                    >
+                      All
+                    </button>
                     {TARGET_YEARS.map((year) => (
                       <button
                         key={year}
@@ -359,9 +382,25 @@ export default function RecruitingPage() {
                   expanded={expandedFilters.Sectors}
                   onToggle={() => setExpandedFilters((p) => ({ ...p, Sectors: !p.Sectors }))}
                 >
+                  <div className="flex gap-2 mb-2">
+                    <button
+                      type="button"
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                      onClick={() => setSelectedTracks(Object.keys(TRACK_LABELS) as ProgramTrack[])}
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                      onClick={() => setSelectedTracks([])}
+                    >
+                      None
+                    </button>
+                  </div>
                   <div className="space-y-1.5">
                     {(Object.keys(TRACK_LABELS) as ProgramTrack[]).map((t) => (
-                      <label key={t} className="flex items-center gap-2 text-sm">
+                      <label key={t} className="flex items-center gap-2 text-sm cursor-pointer">
                         <input
                           type="checkbox"
                           checked={selectedTracks.includes(t)}
@@ -369,7 +408,7 @@ export default function RecruitingPage() {
                           className="accent-[#c63f60]"
                         />
                         <span
-                          className="inline-block h-2 w-2 rounded-full"
+                          className="inline-block h-2 w-2 rounded-full flex-shrink-0"
                           style={{ backgroundColor: TRACK_COLORS[t] }}
                         />
                         <span className="flex-1">{TRACK_LABELS[t]}</span>
@@ -383,12 +422,28 @@ export default function RecruitingPage() {
                   expanded={expandedFilters["Opportunity Type"]}
                   onToggle={() => setExpandedFilters((p) => ({ ...p, "Opportunity Type": !p["Opportunity Type"] }))}
                 >
+                  <div className="flex gap-2 mb-2">
+                    <button
+                      type="button"
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                      onClick={() => setSelectedCategories(Object.keys(CATEGORY_LABELS) as ProgramCategory[])}
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                      onClick={() => setSelectedCategories([])}
+                    >
+                      None
+                    </button>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {(Object.keys(CATEGORY_LABELS) as ProgramCategory[]).map((c) => (
                       <button key={c} type="button" onClick={() => toggleCategory(c)}>
                         <Badge
                           className={cn(
-                            "hover:bg-[#c63f60]",
+                            "hover:bg-[#c63f60] cursor-pointer",
                             selectedCategories.includes(c)
                               ? "bg-[#c63f60] text-white"
                               : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
@@ -406,7 +461,7 @@ export default function RecruitingPage() {
                   expanded={expandedFilters.Other}
                   onToggle={() => setExpandedFilters((p) => ({ ...p, Other: !p.Other }))}
                 >
-                  <label className="flex items-center gap-2 text-sm">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
                     <input
                       type="checkbox"
                       checked={diversityOnly}
@@ -445,7 +500,7 @@ export default function RecruitingPage() {
                   </div>
                   <div className="space-y-1 max-h-56 overflow-y-auto">
                     {allFirms.map((f) => (
-                      <label key={f} className="flex items-center gap-2 text-sm">
+                      <label key={f} className="flex items-center gap-2 text-sm cursor-pointer">
                         <input
                           type="checkbox"
                           checked={selectedFirms.includes(f)}
@@ -467,7 +522,7 @@ export default function RecruitingPage() {
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-4 min-w-0">
               {!filtersOpen && (
                 <Button
                   type="button"
@@ -506,32 +561,6 @@ export default function RecruitingPage() {
               </div>
 
               <div className="bg-white border rounded-xl p-4 space-y-4">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-muted-foreground">Quick Target Year</span>
-                  {TARGET_YEARS.map((year) => (
-                    <button
-                      key={year}
-                      type="button"
-                      onClick={() =>
-                        setSelectedTargetYears((prev) =>
-                          prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year],
-                        )
-                      }
-                    >
-                      <Badge
-                        className={cn(
-                          "hover:bg-[#c63f60]",
-                          selectedTargetYears.includes(year)
-                            ? "bg-[#c63f60] text-white"
-                            : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
-                        )}
-                      >
-                        {year}
-                      </Badge>
-                    </button>
-                  ))}
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
                   <Card className="bg-white h-full">
                     <CardHeader className="pb-2">
@@ -563,7 +592,7 @@ export default function RecruitingPage() {
                       <div className="space-y-1.5 mt-2 max-h-32 overflow-y-auto">
                         {sectorData.map((s) => (
                           <div key={s.name} className="flex items-center gap-2 text-xs">
-                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.fill }} />
+                            <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: s.fill }} />
                             <span className="text-muted-foreground flex-1 truncate">{s.name}</span>
                             <span className="font-medium tabular-nums">
                               {s.count} · {s.value.toFixed(0)}%
@@ -608,7 +637,7 @@ export default function RecruitingPage() {
                         <p className="text-[11px] text-muted-foreground">
                           {deadlineCount === 0
                             ? "No deadlines this month"
-                            : `${deadlineCount} deadline${deadlineCount === 1 ? "" : "s"}`}
+                            : `${deadlineCount} deadline${deadlineCount === 1 ? "" : "s"} (filtered)`}
                         </p>
                         {!isCurrentMonth && (
                           <button
@@ -624,7 +653,7 @@ export default function RecruitingPage() {
                     <CardContent className="pt-0 flex-1">
                       <div className="grid grid-cols-7 gap-1 text-center text-xs w-full">
                         {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                          <div key={`dow-${i}`} className="text-muted-foreground py-1">
+                          <div key={`dow-${i}`} className="text-muted-foreground py-1 font-medium">
                             {d}
                           </div>
                         ))}
@@ -637,21 +666,22 @@ export default function RecruitingPage() {
                               key={i}
                               title={
                                 marked
-                                  ? dayPrograms!.map((p) => `${p.firm} - ${p.role}`).join("\n")
+                                  ? dayPrograms!.map((p) => `${p.firm} — ${p.role}`).join("\n")
                                   : undefined
                               }
                               className={cn(
-                                "h-8 rounded-md flex items-center justify-center border text-[11px] relative",
+                                "h-8 rounded-md flex items-center justify-center border text-[11px] relative cursor-default",
+                                day === null && "border-transparent",
                                 marked
-                                  ? "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-medium"
-                                  : "border-border",
+                                  ? "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold"
+                                  : day !== null && "border-border",
                                 isToday && !marked && "border-[#c63f60]/60",
                                 isToday && "ring-1 ring-[#c63f60]",
                               )}
                             >
                               {day ?? ""}
                               {marked && dayPrograms!.length > 1 && (
-                                <span className="absolute top-0.5 right-1 text-[8px] leading-none">
+                                <span className="absolute top-0.5 right-0.5 text-[8px] leading-none font-bold">
                                   {dayPrograms!.length}
                                 </span>
                               )}
@@ -693,6 +723,14 @@ export default function RecruitingPage() {
                     </span>
                   </h3>
                   <div className="flex gap-2 flex-wrap">
+                    <Button
+                      variant={selectedStatusFilters.length === 0 ? "default" : "outline"}
+                      size="sm"
+                      className={selectedStatusFilters.length === 0 ? "bg-[#2f2e2e] hover:bg-[#2f2e2e]" : ""}
+                      onClick={() => setSelectedStatusFilters([])}
+                    >
+                      All Programs
+                    </Button>
                     <Button
                       variant={selectedStatusFilters.includes("now") ? "default" : "outline"}
                       size="sm"
@@ -742,15 +780,20 @@ export default function RecruitingPage() {
         <TabsContent value="calendar">
           <Card className="bg-white">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Recruiting Calendar</CardTitle>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <CardTitle>Recruiting Calendar</CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Showing deadlines for {filteredPrograms.length} filtered programs
+                  </p>
+                </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => setMonth((m) => addMonths(m, -1))}>
-                    Prev
+                    <ChevronLeft className="h-3.5 w-3.5" />
                   </Button>
-                  <Badge variant="outline">{format(month, "MMMM yyyy")}</Badge>
+                  <Badge variant="outline" className="px-3 text-sm font-medium">{format(month, "MMMM yyyy")}</Badge>
                   <Button variant="outline" size="sm" onClick={() => setMonth((m) => addMonths(m, 1))}>
-                    Next
+                    <ChevronRight className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
@@ -758,15 +801,16 @@ export default function RecruitingPage() {
             <CardContent>
               <div className="grid grid-cols-7 gap-2 text-center text-sm">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                  <div key={d} className="font-medium text-muted-foreground">
+                  <div key={d} className="font-semibold text-muted-foreground pb-1">
                     {d}
                   </div>
                 ))}
                 {calendarCells.map((day, idx) => {
                   const matches = day
-                    ? MOCK_PROGRAMS.filter((p) => {
+                    ? filteredPrograms.filter((p) => {
                         if (!p.deadline) return false;
-                        const d = new Date(p.deadline);
+                        const d = parseLocalDate(p.deadline);
+                        if (isNaN(d.getTime())) return false;
                         return (
                           d.getFullYear() === month.getFullYear() &&
                           d.getMonth() === month.getMonth() &&
@@ -774,23 +818,33 @@ export default function RecruitingPage() {
                         );
                       })
                     : [];
+                  const isToday =
+                    day != null &&
+                    month.getFullYear() === today.getFullYear() &&
+                    month.getMonth() === today.getMonth() &&
+                    day === today.getDate();
                   return (
                     <div
                       key={idx}
-                      className="h-20 border rounded p-1 text-left text-xs overflow-hidden"
+                      className={cn(
+                        "min-h-[88px] border rounded-lg p-1.5 text-left text-xs overflow-hidden",
+                        day === null && "border-transparent bg-transparent",
+                        matches.length > 0 && "border-[#c63f60]/40 bg-[#c63f60]/5",
+                        isToday && "ring-2 ring-[#c63f60]",
+                      )}
                       title={matches.map((p) => `${p.firm} – ${p.role}`).join("\n") || undefined}
                     >
-                      <div className="font-medium">{day ?? ""}</div>
-                      {matches.slice(0, 2).map((p) => (
+                      <div className={cn("font-semibold mb-0.5", isToday && "text-[#c63f60]")}>{day ?? ""}</div>
+                      {matches.slice(0, 3).map((p) => (
                         <div
                           key={p.id}
-                          className="mt-0.5 truncate text-[10px] text-[#c63f60]"
+                          className="truncate text-[10px] text-[#c63f60] leading-snug"
                         >
                           {p.firm}
                         </div>
                       ))}
-                      {matches.length > 2 && (
-                        <div className="text-[10px] text-muted-foreground">+{matches.length - 2} more</div>
+                      {matches.length > 3 && (
+                        <div className="text-[10px] text-muted-foreground">+{matches.length - 3} more</div>
                       )}
                     </div>
                   );
@@ -820,10 +874,10 @@ function FilterGroup({
     <div>
       <button
         type="button"
-        className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+        className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground w-full"
         onClick={onToggle}
       >
-        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", !expanded && "-rotate-90")} />
+        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform flex-shrink-0", !expanded && "-rotate-90")} />
         {label}
       </button>
       {expanded && <div className="mt-2">{children}</div>}
@@ -1105,6 +1159,11 @@ function ProgramRow({
             <Badge className="bg-[#7d2c45] text-white gap-1">
               <ShieldCheck className="h-3 w-3" />
               Diversity
+            </Badge>
+          )}
+          {isOpen && !closingSoon && (
+            <Badge className="bg-emerald-600 text-white gap-1">
+              <Sparkles className="h-3 w-3" /> Open
             </Badge>
           )}
           {closingSoon && (
