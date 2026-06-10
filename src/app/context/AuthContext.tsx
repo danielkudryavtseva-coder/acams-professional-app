@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { MOCK_MEMBERS, type FinanceTrack, type Member } from "../data/mockData";
-import { CLASS_PASSWORD, CRIMSON_EMAIL_DOMAIN, CURRENT_COHORT } from "../data/constants";
+import { CRIMSON_EMAIL_DOMAIN, CURRENT_COHORT } from "../data/constants";
 import { useMembers } from "./MembersContext";
 
 export interface RegisterPayload {
@@ -8,7 +8,7 @@ export interface RegisterPayload {
   lastName: string;
   email: string;
   phone: string;
-  classPassword: string;
+  password: string;
   personalStatement: string;
   resumeFilename: string | null;
   interests: FinanceTrack[];
@@ -57,19 +57,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [members, currentUser]);
 
-  const login = async (email: string, classPassword: string) => {
+  const login = async (email: string, password: string) => {
     if (!email.endsWith(CRIMSON_EMAIL_DOMAIN)) return { success: false, error: "Must use a @crimson.ua.edu email address." };
-    if (classPassword !== CLASS_PASSWORD) return { success: false, error: "Incorrect class password." };
-    const user =
-      members.find((m) => m.email.toLowerCase() === email.toLowerCase()) ?? members[0] ?? null;
-    if (!user) return { success: false, error: "No members roster loaded." };
+    const user = members.find((m) => m.email.toLowerCase() === email.toLowerCase());
+    if (!user) return { success: false, error: "No account found with that email. Register first." };
+    // Seeded members without a stored password skip the check (demo/exec accounts)
+    if (user.password && user.password !== password) return { success: false, error: "Incorrect password." };
     setCurrentUser(user);
     localStorage.setItem("cams_user", JSON.stringify(user));
     return { success: true };
   };
   const register = async (data: RegisterPayload) => {
     if (!data.email.endsWith(CRIMSON_EMAIL_DOMAIN)) return { success: false, error: "Must use a @crimson.ua.edu email address." };
-    if (data.classPassword !== CLASS_PASSWORD) return { success: false, error: "Incorrect class password." };
+    const existing = members.find((m) => m.email.toLowerCase() === data.email.toLowerCase());
+    if (existing) return { success: false, error: "An account with that email already exists. Try logging in." };
     const map: Record<string, number> = { Freshman: 4, Sophomore: 3, Junior: 2, Senior: 1 };
     const member: Member = {
       id: `m${Date.now()}`,
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       resumeFilename: data.resumeFilename,
       linkedin: "",
       role: "member",
+      password: data.password,
       pnlTagged: false,
       active: true,
       cohort: CURRENT_COHORT,

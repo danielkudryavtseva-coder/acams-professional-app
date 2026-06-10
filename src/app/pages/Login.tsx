@@ -15,7 +15,7 @@ const loginSchema = z.object({
     (v) => v.endsWith("@crimson.ua.edu"),
     { message: "Must be a @crimson.ua.edu email address" }
   ),
-  password: z.string().min(1, "Class password is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -65,11 +65,11 @@ export default function Login() {
               {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">Class Password</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Class password"
+                placeholder="Your password"
                 {...register("password")}
               />
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}

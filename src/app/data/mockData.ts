@@ -261,6 +261,7 @@ export interface Member {
   gpa?: string;
   location?: string;
   major?: string;
+  password?: string;
   /** Optional profile photo URL. When omitted, the roster shows initials. */
   avatarUrl?: string;
   pnlTagged: boolean;

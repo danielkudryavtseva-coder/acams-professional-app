@@ -22,7 +22,11 @@ const step1Schema = z.object({
     { message: "Must be a @crimson.ua.edu email address" }
   ),
   phone: z.string().min(7, "Phone number required"),
-  classPassword: z.string().min(1, "Class password required"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+}).refine((d) => d.password === d.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 // Step 2 schema
@@ -52,7 +56,8 @@ export default function Register() {
   const step2Form = useForm<Step2Values>({ resolver: zodResolver(step2Schema) });
 
   const handleStep1 = (data: Step1Values) => {
-    accumulated.current = { ...accumulated.current, ...data };
+    const { confirmPassword: _confirm, ...rest } = data;
+    accumulated.current = { ...accumulated.current, ...rest };
     setStep(2);
   };
 
@@ -136,9 +141,14 @@ export default function Register() {
                 {step1Form.formState.errors.phone && <p className="text-xs text-destructive">{step1Form.formState.errors.phone.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="classPassword">Class Password</Label>
-                <Input id="classPassword" type="password" placeholder="Provided by exec" {...step1Form.register("classPassword")} />
-                {step1Form.formState.errors.classPassword && <p className="text-xs text-destructive">{step1Form.formState.errors.classPassword.message}</p>}
+                <Label htmlFor="password">Password</Label>
+                <Input id="password" type="password" placeholder="Min. 8 characters" {...step1Form.register("password")} />
+                {step1Form.formState.errors.password && <p className="text-xs text-destructive">{step1Form.formState.errors.password.message}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input id="confirmPassword" type="password" placeholder="Re-enter your password" {...step1Form.register("confirmPassword")} />
+                {step1Form.formState.errors.confirmPassword && <p className="text-xs text-destructive">{step1Form.formState.errors.confirmPassword.message}</p>}
               </div>
               <Button type="submit" className="w-full">Next →</Button>
             </form>
