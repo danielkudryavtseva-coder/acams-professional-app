@@ -9,11 +9,30 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Textarea } from "../components/ui/textarea";
 import { Progress } from "../components/ui/progress";
+import { Badge } from "../components/ui/badge";
 import { useAuth, type RegisterPayload } from "../context/AuthContext";
-import { INTEREST_QUIZ, FINANCE_TRACKS, COMMITTEES, CLASS_YEARS } from "../data/constants";
+import { INTEREST_QUIZ, FINANCE_TRACKS, COMMITTEES } from "../data/constants";
 import type { FinanceTrack } from "../data/mockData";
 
-// Step 1 schema
+// ALABAMACAMS{year} — year must be 1–4 years out from today.
+// The code encodes the graduation year, which auto-determines class year.
+function parseClassCode(code: string): { classYear: string; gradYear: number } | null {
+  const match = code.trim().toUpperCase().match(/^ALABAMACAMS(\d{4})$/);
+  if (!match) return null;
+  const gradYear = parseInt(match[1]);
+  const current = new Date().getFullYear();
+  const yearsOut = gradYear - current;
+  const classYearMap: Record<number, string> = {
+    1: "Senior",
+    2: "Junior",
+    3: "Sophomore",
+    4: "Freshman",
+  };
+  const classYear = classYearMap[yearsOut];
+  if (!classYear) return null;
+  return { classYear, gradYear };
+}
+
 const step1Schema = z.object({
   firstName: z.string().min(2, "First name required"),
   lastName: z.string().min(2, "Last name required"),
@@ -22,6 +41,10 @@ const step1Schema = z.object({
     { message: "Must be a @crimson.ua.edu email address" }
   ),
   phone: z.string().min(7, "Phone number required"),
+  classCode: z.string().min(1, "Class code required").refine(
+    (v) => parseClassCode(v) !== null,
+    { message: "Incorrect class code. Contact an exec board member." }
+  ),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string().min(1, "Please confirm your password"),
 }).refine((d) => d.password === d.confirmPassword, {
@@ -29,11 +52,9 @@ const step1Schema = z.object({
   path: ["confirmPassword"],
 });
 
-// Step 2 schema
 const step2Schema = z.object({
   personalStatement: z.string().min(50, "Personal statement must be at least 50 characters"),
   committee: z.string().min(1, "Select a committee"),
-  classYear: z.string().min(1, "Select your class year"),
 });
 
 type Step1Values = z.infer<typeof step1Schema>;
@@ -50,14 +71,21 @@ export default function Register() {
   const [interestError, setInterestError] = useState<string | null>(null);
   const [resumeFilename, setResumeFilename] = useState<string | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
+  const [detectedClassYear, setDetectedClassYear] = useState<string>("");
   const accumulated = useRef<Partial<RegisterPayload>>({});
 
   const step1Form = useForm<Step1Values>({ resolver: zodResolver(step1Schema) });
   const step2Form = useForm<Step2Values>({ resolver: zodResolver(step2Schema) });
 
   const handleStep1 = (data: Step1Values) => {
-    const { confirmPassword: _confirm, ...rest } = data;
-    accumulated.current = { ...accumulated.current, ...rest };
+    const parsed = parseClassCode(data.classCode)!;
+    const { confirmPassword: _c, classCode: _k, ...rest } = data;
+    accumulated.current = {
+      ...accumulated.current,
+      ...rest,
+      classYear: parsed.classYear,
+    };
+    setDetectedClassYear(parsed.classYear);
     setStep(2);
   };
 
@@ -141,6 +169,14 @@ export default function Register() {
                 {step1Form.formState.errors.phone && <p className="text-xs text-destructive">{step1Form.formState.errors.phone.message}</p>}
               </div>
               <div className="space-y-1.5">
+                <Label htmlFor="classCode">Class Code</Label>
+                <Input id="classCode" type="password" placeholder="Provided by exec board" {...step1Form.register("classCode")} />
+                {step1Form.formState.errors.classCode
+                  ? <p className="text-xs text-destructive">{step1Form.formState.errors.classCode.message}</p>
+                  : <p className="text-xs text-muted-foreground">Your class code determines your graduation year automatically.</p>
+                }
+              </div>
+              <div className="space-y-1.5">
                 <Label htmlFor="password">Password</Label>
                 <Input id="password" type="password" placeholder="Min. 8 characters" {...step1Form.register("password")} />
                 {step1Form.formState.errors.password && <p className="text-xs text-destructive">{step1Form.formState.errors.password.message}</p>}
@@ -151,12 +187,20 @@ export default function Register() {
                 {step1Form.formState.errors.confirmPassword && <p className="text-xs text-destructive">{step1Form.formState.errors.confirmPassword.message}</p>}
               </div>
               <Button type="submit" className="w-full">Next →</Button>
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link to="/login" className="text-primary hover:underline font-medium">Sign in</Link>
+              </p>
             </form>
           )}
 
           {/* STEP 2 — Profile */}
           {step === 2 && (
             <form onSubmit={step2Form.handleSubmit(handleStep2)} className="space-y-4">
+              <div className="flex items-center gap-2 rounded-md border bg-muted/50 px-3 py-2">
+                <span className="text-xs text-muted-foreground">Class year detected:</span>
+                <Badge variant="secondary">{detectedClassYear}</Badge>
+              </div>
               <div className="space-y-1.5">
                 <Label htmlFor="personalStatement">Personal Statement</Label>
                 <Textarea
@@ -205,14 +249,6 @@ export default function Register() {
                 </select>
                 {step2Form.formState.errors.committee && <p className="text-xs text-destructive">{step2Form.formState.errors.committee.message}</p>}
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="classYear">Class Year</Label>
-                <select id="classYear" {...step2Form.register("classYear")} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                  <option value="">Select year</option>
-                  {CLASS_YEARS.map(y => <option key={y} value={y}>{y}</option>)}
-                </select>
-                {step2Form.formState.errors.classYear && <p className="text-xs text-destructive">{step2Form.formState.errors.classYear.message}</p>}
-              </div>
               <div className="flex gap-2">
                 <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(1)}>← Back</Button>
                 <Button type="submit" className="flex-1">Next →</Button>
@@ -251,12 +287,6 @@ export default function Register() {
             </div>
           )}
 
-          {step === 1 && (
-            <p className="mt-4 text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary hover:underline font-medium">Sign in</Link>
-            </p>
-          )}
         </CardContent>
       </Card>
     </div>
