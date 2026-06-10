@@ -434,12 +434,11 @@ export interface Notification {
   sentBy: string;
 }
 
+// Only exec accounts are seeded here — they are required for the isExec privilege check
+// in AuthContext. Regular members are created via registration and persisted in localStorage.
 export const MOCK_MEMBERS: Member[] = [
   { id: "m1", firstName: "Drew", lastName: "Whitfield", email: "dkwhitfield@crimson.ua.edu", phone: "205-555-0101", classYear: "Junior", graduationYear: 2027, committee: "Investment", interests: ["IB", "PE"], personalStatement: "Passionate about leveraged buyouts and capital structure optimization.", resumeFilename: "whitfield_resume.pdf", linkedin: "linkedin.com/in/drewwhitfield", role: "exec", gpa: "3.91", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 12, pitchesSubmitted: 3, coffeeChatsCompleted: 5, offers: 2 },
-  { id: "m2", firstName: "Jordan", lastName: "Hayes", email: "jhayes@crimson.ua.edu", phone: "205-555-0102", classYear: "Junior", graduationYear: 2027, committee: "Recruiting", interests: ["VC", "Consulting"], personalStatement: "Interested in early-stage venture and strategic advisory work.", resumeFilename: "hayes_resume.pdf", linkedin: "linkedin.com/in/jordanhayes", role: "member", gpa: "3.75", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 8, pitchesSubmitted: 2, coffeeChatsCompleted: 3, offers: 1 },
-  { id: "m3", firstName: "Priya", lastName: "Sharma", email: "psharma@crimson.ua.edu", phone: "205-555-0103", classYear: "Sophomore", graduationYear: 2028, committee: "Investment", interests: ["ER", "AM"], personalStatement: "Equity research enthusiast with a focus on healthcare and biotech.", resumeFilename: "sharma_resume.pdf", linkedin: "linkedin.com/in/priyasharma", role: "member", gpa: "3.88", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 6, pitchesSubmitted: 2, coffeeChatsCompleted: 2, offers: 1 },
   { id: "m4", firstName: "Marcus", lastName: "Davis", email: "mdavis@crimson.ua.edu", phone: "205-555-0104", classYear: "Senior", graduationYear: 2026, committee: "Operations", interests: ["IB", "Consulting"], personalStatement: "Focused on M&A and strategic advisory.", resumeFilename: "davis_resume.pdf", linkedin: "linkedin.com/in/marcusdavis", role: "exec", gpa: "3.62", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 15, pitchesSubmitted: 4, coffeeChatsCompleted: 7, offers: 3 },
-  { id: "m5", firstName: "Chloe", lastName: "Park", email: "cpark@crimson.ua.edu", phone: "205-555-0105", classYear: "Junior", graduationYear: 2027, committee: "Marketing", interests: ["PE", "VC"], personalStatement: "Growth equity focus.", resumeFilename: null, linkedin: "linkedin.com/in/chloepark", role: "member", gpa: "3.55", pnlTagged: true, pnlReason: "3 consecutive mandatory event misses + no pitches submitted Q1", active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 2, pitchesSubmitted: 0, coffeeChatsCompleted: 1, offers: 0 },
 ];
 
 /** Sourced from CAMS Alumni Rolodex spreadsheet; regenerate via `py -3 scripts/generate_alumni_rolodex.py`. */
@@ -452,14 +451,7 @@ export const MOCK_EVENTS: ClubEvent[] = [
   { id: "e4", title: "Investment Pitch — Q1", description: "Committee pitch presentations.", date: "2026-03-10T17:00:00", location: "Bidgood Hall 130", mandatory: true },
 ];
 
-export const MOCK_ATTENDANCE: AttendanceRecord[] = [
-  { memberId: "m1", eventId: "e1", rsvp: "confirmed", attended: true },
-  { memberId: "m1", eventId: "e2", rsvp: "confirmed", attended: true },
-  { memberId: "m1", eventId: "e4", rsvp: "confirmed", attended: true },
-  { memberId: "m5", eventId: "e1", rsvp: "denied", attended: false, missReason: "Personal" },
-  { memberId: "m5", eventId: "e2", rsvp: "denied", attended: false, missReason: "Travel" },
-  { memberId: "m5", eventId: "e4", rsvp: "pending", attended: false },
-];
+export const MOCK_ATTENDANCE: AttendanceRecord[] = [];
 
 export const MOCK_JOB_POSTINGS: JobPosting[] = [
   { id: "j1", firm: "Goldman Sachs", role: "Summer Analyst — IBD", track: "IB", deadline: "2026-09-01", applicationLink: "https://goldmansachs.com/careers", alumniReferralId: "alum-033", description: "10-week IBD program.", postedBy: "cams" },
