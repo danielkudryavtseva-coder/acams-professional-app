@@ -21,7 +21,7 @@ import {
 export default function ExecToolsPage() {
   const { isExec, currentUser } = useAuth();
   const { members, setPnlTag } = useMembers();
-  const { getConsecutiveMisses } = useEvents();
+  const { getConsecutiveMisses, events, attendance } = useEvents();
   const {
     tags,
     assignments,
@@ -38,8 +38,24 @@ export default function ExecToolsPage() {
   const [customColor, setCustomColor] = React.useState("");
   const [customRequiresApproval, setCustomRequiresApproval] = React.useState(false);
 
-  const attendancePct = 78;
-  const checkinPct = 64;
+  const pastMandatory = React.useMemo(
+    () => events.filter((e) => e.mandatory && new Date(e.date) < new Date()),
+    [events],
+  );
+  const attendancePct = React.useMemo(() => {
+    const expected = pastMandatory.length * members.length;
+    if (expected === 0) return 100;
+    const attended = attendance.filter(
+      (a) => a.attended === true && pastMandatory.some((e) => e.id === a.eventId),
+    ).length;
+    return Math.round((attended / expected) * 100);
+  }, [pastMandatory, members, attendance]);
+  const checkinPct = React.useMemo(() => {
+    const total = attendance.filter((a) => a.rsvp === "confirmed").length;
+    if (total === 0) return 100;
+    const confirmed = attendance.filter((a) => a.attended === true).length;
+    return Math.round((confirmed / total) * 100);
+  }, [attendance]);
   const pnlPenalty = Math.min(20, members.filter((m) => m.pnlTagged).length * 2);
   const score = Math.max(0, Math.round(attendancePct * 0.5 + checkinPct * 0.3 - pnlPenalty));
 

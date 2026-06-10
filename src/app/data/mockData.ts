@@ -259,6 +259,8 @@ export interface Member {
   linkedin: string;
   role: MemberRole;
   gpa?: string;
+  location?: string;
+  major?: string;
   /** Optional profile photo URL. When omitted, the roster shows initials. */
   avatarUrl?: string;
   pnlTagged: boolean;

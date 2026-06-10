@@ -7,6 +7,7 @@ import React, {
   useState,
 } from "react";
 import {
+  MOCK_MEMBERS,
   MOCK_NEWS,
   type NewsCategory,
   type NewsPost,
@@ -90,7 +91,8 @@ export function NewsProvider({ children }: { children: React.ReactNode }) {
 
   const addPost = useCallback(
     (input: AddNewsPostInput): NewsPost | null => {
-      if (!currentUser || currentUser.role !== "exec") return null;
+      const canonical = MOCK_MEMBERS.find((m) => m.id === currentUser?.id);
+      if (!currentUser || canonical?.role !== "exec") return null;
       const title = input.title.trim();
       const body = input.body.trim();
       if (!title || !body) return null;
