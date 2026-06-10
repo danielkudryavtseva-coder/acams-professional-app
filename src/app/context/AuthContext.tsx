@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { type FinanceTrack, type Member } from "../data/mockData";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { MOCK_MEMBERS, type FinanceTrack, type Member } from "../data/mockData";
 import { CLASS_PASSWORD, CRIMSON_EMAIL_DOMAIN, CURRENT_COHORT } from "../data/constants";
 import { useMembers } from "./MembersContext";
 
@@ -37,7 +37,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     }
   });
-  const isExec = currentUser?.role === "exec";
+  // Derive exec status from the bundle-compiled MOCK_MEMBERS roster, NOT from
+  // the mutable localStorage session. This prevents privilege escalation via
+  // DevTools localStorage tampering (setting role:"exec" on one's own session).
+  const isExec = useMemo(() => {
+    if (!currentUser) return false;
+    const canonical = MOCK_MEMBERS.find((m) => m.id === currentUser.id);
+    return canonical?.role === "exec";
+  }, [currentUser]);
 
   /** Roster (`MembersContext`) is source of truth; keep session user aligned after external edits. */
   useEffect(() => {

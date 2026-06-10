@@ -1,7 +1,9 @@
 import type { FinanceTrack, Committee } from "./mockData";
 
-export const CLASS_PASSWORD = "cams2026";
-export const EXEC_PASSWORD = "exec2026";
+// Passwords are set via Vercel env vars (VITE_CLASS_PASSWORD, VITE_EXEC_PASSWORD).
+// They are NOT hardcoded here — if the env var is missing, auth rejects all attempts.
+export const CLASS_PASSWORD = (import.meta.env.VITE_CLASS_PASSWORD as string | undefined) ?? "";
+export const EXEC_PASSWORD = (import.meta.env.VITE_EXEC_PASSWORD as string | undefined) ?? "";
 export const CRIMSON_EMAIL_DOMAIN = "@crimson.ua.edu";
 export const CURRENT_COHORT = "Spring 2026";
 export const FINANCE_TRACKS: FinanceTrack[] = ["IB", "PE", "VC", "ER", "AM", "Consulting"];
