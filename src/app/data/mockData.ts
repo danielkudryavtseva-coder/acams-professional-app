@@ -174,14 +174,18 @@ import { adaptInternships } from "./internshipAdapter";
 
 // Merge the curated recruiting calendar with the 522-entry internship dataset.
 // Deduplicate by firm+role so no program appears twice.
+// Auto-close any program whose published deadline has passed, regardless of rolling flag.
 function mergePrograms(): Program[] {
   const seen = new Set<string>();
   const result: Program[] = [];
+  const today = new Date().toISOString().split("T")[0];
   for (const p of [...RECRUITING_PROGRAMS, ...adaptInternships()]) {
     const key = `${p.firm.toLowerCase()}|${p.role.toLowerCase()}`;
     if (!seen.has(key)) {
       seen.add(key);
-      result.push(p);
+      const status: Program["status"] =
+        p.status === "open" && p.deadline && p.deadline < today ? "closed" : p.status;
+      result.push({ ...p, status });
     }
   }
   return result;
