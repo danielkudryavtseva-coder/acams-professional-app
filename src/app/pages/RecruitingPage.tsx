@@ -679,9 +679,9 @@ export default function RecruitingPage() {
                           </div>
                         ))}
                         <div className="col-span-7 flex items-center gap-3 pb-1 pt-0.5 text-[10px] text-muted-foreground">
-                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" /> Opens</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#5a8ca8] inline-block" /> Opens</span>
                           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#c63f60] inline-block" /> Closes</span>
-                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500 inline-block" /> Both</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#7d2c45] inline-block" /> Both</span>
                         </div>
                         {deadlineCalendar.cells.map((day, i) => {
                           const closePrograms = day ? deadlineCalendar.byDay.get(day) : undefined;
@@ -701,8 +701,8 @@ export default function RecruitingPage() {
                                 "h-8 rounded-md flex items-center justify-center border text-[11px] relative cursor-default",
                                 day === null && "border-transparent",
                                 hasClose && !hasOpen && "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold",
-                                hasOpen && !hasClose && "bg-emerald-50 border-emerald-500 text-emerald-700 font-semibold",
-                                hasOpen && hasClose && "bg-amber-50 border-amber-500 text-amber-700 font-semibold",
+                                hasOpen && !hasClose && "bg-[#5a8ca8]/10 border-[#5a8ca8] text-[#5a8ca8] font-semibold",
+                                hasOpen && hasClose && "bg-[#7d2c45]/10 border-[#7d2c45] text-[#7d2c45] font-semibold",
                                 !hasClose && !hasOpen && day !== null && "border-border",
                                 isToday && "ring-1 ring-[#c63f60]",
                               )}
@@ -710,7 +710,7 @@ export default function RecruitingPage() {
                               {day ?? ""}
                               {(hasClose || hasOpen) && (
                                 <span className="absolute bottom-0.5 left-0 right-0 flex justify-center gap-0.5">
-                                  {hasOpen && <span className="h-1 w-1 rounded-full bg-emerald-500 inline-block" />}
+                                  {hasOpen && <span className="h-1 w-1 rounded-full bg-[#5a8ca8] inline-block" />}
                                   {hasClose && <span className="h-1 w-1 rounded-full bg-[#c63f60] inline-block" />}
                                 </span>
                               )}
@@ -740,7 +740,7 @@ export default function RecruitingPage() {
                             <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
                             <Tooltip />
                             <Legend wrapperStyle={{ fontSize: 10 }} />
-                            <Bar dataKey="opening" name="Opening" fill="#10b981" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="opening" name="Opening" fill="#5a8ca8" radius={[4, 4, 0, 0]} />
                             <Bar dataKey="closing" name="Closing" fill="#c63f60" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
