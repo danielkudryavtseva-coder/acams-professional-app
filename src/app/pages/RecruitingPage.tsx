@@ -562,9 +562,10 @@ export default function RecruitingPage() {
 
               <div className="bg-white border rounded-xl p-4 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-                  <Card className="bg-white h-full">
+                  <Card className="bg-white h-full flex flex-col">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">Sector Distribution</CardTitle>
+                      <p className="text-[11px] text-muted-foreground mt-1">{MOCK_PROGRAMS.length} programs across {sectorData.length} sectors</p>
                     </CardHeader>
                     <CardContent className="pt-0">
                       <ResponsiveContainer width="100%" height={190}>
@@ -695,6 +696,7 @@ export default function RecruitingPage() {
                   <Card className="bg-white h-full flex flex-col">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">Deadline Timeline (Next 8 weeks)</CardTitle>
+                      <p className="text-[11px] text-muted-foreground mt-1">Deadlines grouped by calendar week</p>
                     </CardHeader>
                     <CardContent className="pt-0 flex-1">
                       <div className="h-full min-h-[260px]">
