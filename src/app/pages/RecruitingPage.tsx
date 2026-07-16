@@ -19,7 +19,7 @@ import {
   TrendingDown,
   Users,
 } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -174,21 +174,28 @@ export default function RecruitingPage() {
       .sort((a, b) => b.value - a.value);
   }, []);
 
-  // Deadline timeline: bucket the next 8 weeks of deadlines.
+  // Opening + closing timeline: bucket the next 8 weeks of open dates and deadlines.
   const deadlineBars = React.useMemo(() => {
-    const buckets: { week: string; count: number; date: Date }[] = [];
+    const buckets: { week: string; opening: number; closing: number; date: Date }[] = [];
     for (let i = 0; i < 8; i++) {
       const weekStart = addDays(today, i * 7);
-      buckets.push({ week: format(weekStart, "MMM d"), count: 0, date: weekStart });
+      buckets.push({ week: format(weekStart, "MMM d"), opening: 0, closing: 0, date: weekStart });
     }
     for (const p of MOCK_PROGRAMS) {
-      if (!p.deadline) continue;
-      const d = parseLocalDate(p.deadline);
-      if (isNaN(d.getTime())) continue;
-      const days = Math.floor((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      if (days < 0 || days >= 56) continue;
-      const idx = Math.floor(days / 7);
-      buckets[idx].count += 1;
+      if (p.deadline) {
+        const d = parseLocalDate(p.deadline);
+        if (!isNaN(d.getTime())) {
+          const days = Math.floor((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          if (days >= 0 && days < 56) buckets[Math.floor(days / 7)].closing += 1;
+        }
+      }
+      if (p.openDate) {
+        const d = parseLocalDate(p.openDate);
+        if (!isNaN(d.getTime())) {
+          const days = Math.floor((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          if (days >= 0 && days < 56) buckets[Math.floor(days / 7)].opening += 1;
+        }
+      }
     }
     return buckets;
   }, [today]);
@@ -237,7 +244,7 @@ export default function RecruitingPage() {
     });
   }, [filteredPrograms, today]);
 
-  // Deadline mini-calendar — uses filteredPrograms so it respects active filters.
+  // Deadline + opening mini-calendar — uses filteredPrograms so it respects active filters.
   const deadlineCalendar = React.useMemo(() => {
     const start = startOfMonth(deadlineMonth);
     const daysInMonth = endOfMonth(deadlineMonth).getDate();
@@ -247,25 +254,38 @@ export default function RecruitingPage() {
       return day > 0 && day <= daysInMonth ? day : null;
     });
     const byDay = new Map<number, Program[]>();
+    const byOpenDay = new Map<number, Program[]>();
     const y = deadlineMonth.getFullYear();
     const m = deadlineMonth.getMonth();
     for (const p of filteredPrograms) {
-      if (!p.deadline) continue;
-      const d = parseLocalDate(p.deadline);
-      if (isNaN(d.getTime())) continue;
-      if (d.getFullYear() !== y || d.getMonth() !== m) continue;
-      const day = d.getDate();
-      const arr = byDay.get(day) ?? [];
-      arr.push(p);
-      byDay.set(day, arr);
+      if (p.deadline) {
+        const d = parseLocalDate(p.deadline);
+        if (!isNaN(d.getTime()) && d.getFullYear() === y && d.getMonth() === m) {
+          const day = d.getDate();
+          const arr = byDay.get(day) ?? [];
+          arr.push(p);
+          byDay.set(day, arr);
+        }
+      }
+      if (p.openDate) {
+        const d = parseLocalDate(p.openDate);
+        if (!isNaN(d.getTime()) && d.getFullYear() === y && d.getMonth() === m) {
+          const day = d.getDate();
+          const arr = byOpenDay.get(day) ?? [];
+          arr.push(p);
+          byOpenDay.set(day, arr);
+        }
+      }
     }
-    return { cells, byDay };
+    return { cells, byDay, byOpenDay };
   }, [deadlineMonth, filteredPrograms]);
 
   const deadlineCount = React.useMemo(() => {
-    let total = 0;
-    for (const arr of deadlineCalendar.byDay.values()) total += arr.length;
-    return total;
+    let closing = 0;
+    let opening = 0;
+    for (const arr of deadlineCalendar.byDay.values()) closing += arr.length;
+    for (const arr of deadlineCalendar.byOpenDay.values()) opening += arr.length;
+    return { closing, opening, total: closing + opening };
   }, [deadlineCalendar]);
 
   const isCurrentMonth =
@@ -636,9 +656,9 @@ export default function RecruitingPage() {
                       </div>
                       <div className="flex items-center justify-between mt-1">
                         <p className="text-[11px] text-muted-foreground">
-                          {deadlineCount === 0
-                            ? "No deadlines this month"
-                            : `${deadlineCount} deadline${deadlineCount === 1 ? "" : "s"} (filtered)`}
+                          {deadlineCount.total === 0
+                            ? "No events this month"
+                            : `${deadlineCount.opening} opening · ${deadlineCount.closing} closing (filtered)`}
                         </p>
                         {!isCurrentMonth && (
                           <button
@@ -658,32 +678,45 @@ export default function RecruitingPage() {
                             {d}
                           </div>
                         ))}
+                        <div className="col-span-7 flex items-center gap-3 pb-1 pt-0.5 text-[10px] text-muted-foreground">
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" /> Opens</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#c63f60] inline-block" /> Closes</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500 inline-block" /> Both</span>
+                        </div>
                         {deadlineCalendar.cells.map((day, i) => {
-                          const dayPrograms = day ? deadlineCalendar.byDay.get(day) : undefined;
-                          const marked = !!dayPrograms?.length;
+                          const closePrograms = day ? deadlineCalendar.byDay.get(day) : undefined;
+                          const openPrograms = day ? deadlineCalendar.byOpenDay.get(day) : undefined;
+                          const hasClose = !!closePrograms?.length;
+                          const hasOpen = !!openPrograms?.length;
                           const isToday = day != null && isCurrentMonth && day === today.getDate();
+                          const titleLines = [
+                            ...(openPrograms ?? []).map((p) => `↑ Opens: ${p.firm} — ${p.role}`),
+                            ...(closePrograms ?? []).map((p) => `✕ Closes: ${p.firm} — ${p.role}`),
+                          ];
                           return (
                             <div
                               key={i}
-                              title={
-                                marked
-                                  ? dayPrograms!.map((p) => `${p.firm} — ${p.role}`).join("\n")
-                                  : undefined
-                              }
+                              title={titleLines.length ? titleLines.join("\n") : undefined}
                               className={cn(
                                 "h-8 rounded-md flex items-center justify-center border text-[11px] relative cursor-default",
                                 day === null && "border-transparent",
-                                marked
-                                  ? "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold"
-                                  : day !== null && "border-border",
-                                isToday && !marked && "border-[#c63f60]/60",
+                                hasClose && !hasOpen && "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold",
+                                hasOpen && !hasClose && "bg-emerald-50 border-emerald-500 text-emerald-700 font-semibold",
+                                hasOpen && hasClose && "bg-amber-50 border-amber-500 text-amber-700 font-semibold",
+                                !hasClose && !hasOpen && day !== null && "border-border",
                                 isToday && "ring-1 ring-[#c63f60]",
                               )}
                             >
                               {day ?? ""}
-                              {marked && dayPrograms!.length > 1 && (
+                              {(hasClose || hasOpen) && (
+                                <span className="absolute bottom-0.5 left-0 right-0 flex justify-center gap-0.5">
+                                  {hasOpen && <span className="h-1 w-1 rounded-full bg-emerald-500 inline-block" />}
+                                  {hasClose && <span className="h-1 w-1 rounded-full bg-[#c63f60] inline-block" />}
+                                </span>
+                              )}
+                              {(hasClose || hasOpen) && ((closePrograms?.length ?? 0) + (openPrograms?.length ?? 0)) > 1 && (
                                 <span className="absolute top-0.5 right-0.5 text-[8px] leading-none font-bold">
-                                  {dayPrograms!.length}
+                                  {(closePrograms?.length ?? 0) + (openPrograms?.length ?? 0)}
                                 </span>
                               )}
                             </div>
@@ -695,18 +728,20 @@ export default function RecruitingPage() {
 
                   <Card className="bg-white h-full flex flex-col">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm">Deadline Timeline (Next 8 weeks)</CardTitle>
-                      <p className="text-[11px] text-muted-foreground mt-1">Deadlines grouped by calendar week</p>
+                      <CardTitle className="text-sm">Opening & Closing Timeline (Next 8 weeks)</CardTitle>
+                      <p className="text-[11px] text-muted-foreground mt-1">Programs opening and closing by calendar week</p>
                     </CardHeader>
                     <CardContent className="pt-0 flex-1">
                       <div className="h-full min-h-[260px]">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={deadlineBars}>
+                          <BarChart data={deadlineBars} barCategoryGap="20%">
                             <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                             <XAxis dataKey="week" tick={{ fontSize: 10 }} />
                             <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
                             <Tooltip />
-                            <Bar dataKey="count" fill="#c63f60" radius={[4, 4, 0, 0]} />
+                            <Legend wrapperStyle={{ fontSize: 10 }} />
+                            <Bar dataKey="opening" name="Opening" fill="#10b981" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="closing" name="Closing" fill="#c63f60" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
