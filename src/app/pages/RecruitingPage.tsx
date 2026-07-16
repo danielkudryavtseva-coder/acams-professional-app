@@ -678,10 +678,11 @@ export default function RecruitingPage() {
                             {d}
                           </div>
                         ))}
-                        <div className="col-span-7 flex items-center gap-3 pb-1 pt-0.5 text-[10px] text-muted-foreground">
+                        <div className="col-span-7 flex items-center gap-3 pb-1 pt-0.5 text-[10px] text-muted-foreground flex-wrap">
                           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#5a8ca8] inline-block" /> Opens</span>
                           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#c63f60] inline-block" /> Closes</span>
                           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#7d2c45] inline-block" /> Both</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-muted-foreground/40 inline-block" /> Past open</span>
                         </div>
                         {deadlineCalendar.cells.map((day, i) => {
                           const closePrograms = day ? deadlineCalendar.byDay.get(day) : undefined;
@@ -689,6 +690,11 @@ export default function RecruitingPage() {
                           const hasClose = !!closePrograms?.length;
                           const hasOpen = !!openPrograms?.length;
                           const isToday = day != null && isCurrentMonth && day === today.getDate();
+                          // Past open dates (open date already passed) rendered in muted grey
+                          const isPastDay = day != null && isCurrentMonth && day < today.getDate();
+                          const hasOpenPast = hasOpen && isPastDay;
+                          const hasOpenFuture = hasOpen && !isPastDay;
+                          const totalCount = (closePrograms?.length ?? 0) + (openPrograms?.length ?? 0);
                           const titleLines = [
                             ...(openPrograms ?? []).map((p) => `↑ Opens: ${p.firm} — ${p.role}`),
                             ...(closePrograms ?? []).map((p) => `✕ Closes: ${p.firm} — ${p.role}`),
@@ -701,8 +707,10 @@ export default function RecruitingPage() {
                                 "h-8 rounded-md flex items-center justify-center border text-[11px] relative cursor-default",
                                 day === null && "border-transparent",
                                 hasClose && !hasOpen && "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold",
-                                hasOpen && !hasClose && "bg-[#5a8ca8]/10 border-[#5a8ca8] text-[#5a8ca8] font-semibold",
-                                hasOpen && hasClose && "bg-[#7d2c45]/10 border-[#7d2c45] text-[#7d2c45] font-semibold",
+                                hasOpenFuture && !hasClose && "bg-[#5a8ca8]/10 border-[#5a8ca8] text-[#5a8ca8] font-semibold",
+                                hasOpenFuture && hasClose && "bg-[#7d2c45]/10 border-[#7d2c45] text-[#7d2c45] font-semibold",
+                                hasOpenPast && !hasClose && "bg-muted/60 border-muted-foreground/30 text-muted-foreground font-semibold",
+                                hasOpenPast && hasClose && "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold",
                                 !hasClose && !hasOpen && day !== null && "border-border",
                                 isToday && "ring-1 ring-[#c63f60]",
                               )}
@@ -710,13 +718,14 @@ export default function RecruitingPage() {
                               {day ?? ""}
                               {(hasClose || hasOpen) && (
                                 <span className="absolute bottom-0.5 left-0 right-0 flex justify-center gap-0.5">
-                                  {hasOpen && <span className="h-1 w-1 rounded-full bg-[#5a8ca8] inline-block" />}
+                                  {hasOpenFuture && <span className="h-1 w-1 rounded-full bg-[#5a8ca8] inline-block" />}
+                                  {hasOpenPast && !hasClose && <span className="h-1 w-1 rounded-full bg-muted-foreground/40 inline-block" />}
                                   {hasClose && <span className="h-1 w-1 rounded-full bg-[#c63f60] inline-block" />}
                                 </span>
                               )}
-                              {(hasClose || hasOpen) && ((closePrograms?.length ?? 0) + (openPrograms?.length ?? 0)) > 1 && (
+                              {(hasClose || hasOpen) && totalCount > 0 && (
                                 <span className="absolute top-0.5 right-0.5 text-[8px] leading-none font-bold">
-                                  {(closePrograms?.length ?? 0) + (openPrograms?.length ?? 0)}
+                                  {totalCount}
                                 </span>
                               )}
                             </div>
