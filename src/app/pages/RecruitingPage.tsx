@@ -24,6 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { cn } from "../components/ui/utils";
 import { FirmIntelModal } from "../components/FirmIntelModal";
@@ -155,6 +156,7 @@ export default function RecruitingPage() {
   const [month, setMonth] = React.useState(new Date());
   const [deadlineMonth, setDeadlineMonth] = React.useState(new Date());
   const [briefingOpen, setBriefingOpen] = React.useState(false);
+  const [calDayDetail, setCalDayDetail] = React.useState<{ day: number; opens: Program[]; closes: Program[] } | null>(null);
 
   const today = React.useMemo(() => new Date(), []);
 
@@ -703,8 +705,14 @@ export default function RecruitingPage() {
                             <div
                               key={i}
                               title={titleLines.length ? titleLines.join("\n") : undefined}
+                              onClick={() => {
+                                if (day && (hasClose || hasOpen)) {
+                                  setCalDayDetail({ day, opens: openPrograms ?? [], closes: closePrograms ?? [] });
+                                }
+                              }}
                               className={cn(
-                                "h-8 rounded-md flex items-center justify-center border text-[11px] relative cursor-default",
+                                "h-8 rounded-md flex items-center justify-center border text-[11px] relative",
+                                (hasClose || hasOpen) ? "cursor-pointer hover:opacity-80" : "cursor-default",
                                 day === null && "border-transparent",
                                 hasClose && !hasOpen && "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold",
                                 hasOpenFuture && !hasClose && "bg-[#5a8ca8]/10 border-[#5a8ca8] text-[#5a8ca8] font-semibold",
@@ -734,6 +742,47 @@ export default function RecruitingPage() {
                       </div>
                     </CardContent>
                   </Card>
+
+                  {/* Day-detail dialog */}
+                  <Dialog open={!!calDayDetail} onOpenChange={(o) => { if (!o) setCalDayDetail(null); }}>
+                    <DialogContent className="max-w-sm">
+                      <DialogHeader>
+                        <DialogTitle className="text-sm">
+                          {calDayDetail && format(new Date(deadlineMonth.getFullYear(), deadlineMonth.getMonth(), calDayDetail.day), "MMMM d, yyyy")}
+                        </DialogTitle>
+                      </DialogHeader>
+                      {calDayDetail && (
+                        <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                          {calDayDetail.opens.length > 0 && (
+                            <div>
+                              <p className="text-[11px] font-semibold text-[#5a8ca8] mb-1.5 uppercase tracking-wide">Opens</p>
+                              <ul className="space-y-1.5">
+                                {calDayDetail.opens.map((p) => (
+                                  <li key={p.id} className="text-xs flex items-start gap-2">
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 border-[#5a8ca8] text-[#5a8ca8]">{p.type}</Badge>
+                                    <span><span className="font-medium">{p.firm}</span> — {p.role}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {calDayDetail.closes.length > 0 && (
+                            <div>
+                              <p className="text-[11px] font-semibold text-[#c63f60] mb-1.5 uppercase tracking-wide">Closes</p>
+                              <ul className="space-y-1.5">
+                                {calDayDetail.closes.map((p) => (
+                                  <li key={p.id} className="text-xs flex items-start gap-2">
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 border-[#c63f60] text-[#c63f60]">{p.type}</Badge>
+                                    <span><span className="font-medium">{p.firm}</span> — {p.role}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
 
                   <Card className="bg-white h-full flex flex-col">
                     <CardHeader className="pb-2">
