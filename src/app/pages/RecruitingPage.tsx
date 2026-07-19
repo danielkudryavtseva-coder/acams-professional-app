@@ -80,6 +80,25 @@ const TRACK_COLORS: Record<ProgramTrack, string> = {
 const STATUS_FILTERS = ["now", "opening", "closing"] as const;
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 
+/**
+ * May 15 – Aug 31: students have finished their year and are "incoming" to the next.
+ * Expand selected filters one step forward so e.g. a Freshman (Class of '30) also
+ * sees Sophomore programs during the summer recruiting window.
+ */
+const YEAR_SEQUENCE: ProgramClassYear[] = ["Freshman", "Sophomore", "Junior", "Senior"];
+
+function getEffectiveClassYears(selected: ProgramClassYear[], today: Date): ProgramClassYear[] {
+  const [m, d] = [today.getMonth() + 1, today.getDate()];
+  const inSummer = (m === 5 && d >= 15) || (m >= 6 && m <= 8);
+  if (!inSummer) return selected;
+  const expanded = new Set(selected);
+  for (const yr of selected) {
+    const next = YEAR_SEQUENCE[YEAR_SEQUENCE.indexOf(yr) + 1];
+    if (next) expanded.add(next);
+  }
+  return [...expanded];
+}
+
 function getProgramClassYears(p: Program): ProgramClassYear[] {
   if (p.classYears && p.classYears.length) return p.classYears;
   // Try to infer from role name keywords
@@ -231,7 +250,8 @@ export default function RecruitingPage() {
       if (p.category && !selectedCategories.includes(p.category)) return false;
       if (diversityOnly && !p.diversity) return false;
       const years = getProgramClassYears(p);
-      if (!years.some((y) => selectedTargetYears.includes(y))) return false;
+      const effectiveYears = getEffectiveClassYears(selectedTargetYears, today);
+      if (!years.some((y) => effectiveYears.includes(y))) return false;
       if (selectedStatusFilters.length === 0) return true;
       return selectedStatusFilters.some((s) => {
         if (s === "now") return programIsNowOpen(p, today);
@@ -383,6 +403,15 @@ export default function RecruitingPage() {
                   expanded={expandedFilters["Target Year"]}
                   onToggle={() => setExpandedFilters((p) => ({ ...p, "Target Year": !p["Target Year"] }))}
                 >
+                  {(() => {
+                    const [m, d] = [today.getMonth() + 1, today.getDate()];
+                    const inSummer = (m === 5 && d >= 15) || (m >= 6 && m <= 8);
+                    return inSummer ? (
+                      <p className="text-[10px] text-[#5a8ca8] bg-[#5a8ca8]/10 rounded px-2 py-1 mb-2">
+                        Summer window active — each year also shows programs for incoming students one year ahead.
+                      </p>
+                    ) : null;
+                  })()}
                   <div className="flex flex-wrap gap-1.5">
                     <button
                       type="button"
