@@ -30,7 +30,15 @@ import { cn } from "../components/ui/utils";
 import { FirmIntelModal } from "../components/FirmIntelModal";
 import { MOCK_PROGRAMS, type Program, type ProgramCategory, type ProgramClassYear, type ProgramTrack } from "../data/mockData";
 
-const TARGET_YEARS: ProgramClassYear[] = ["Freshman", "Sophomore", "Junior", "Senior"];
+const TARGET_YEARS: ProgramClassYear[] = ["Senior", "Junior", "Sophomore", "Freshman"];
+
+// Maps the internal class-year label to the graduation year shown in the UI.
+const GRAD_YEAR: Record<ProgramClassYear, string> = {
+  Senior:    "Class of '27",
+  Junior:    "Class of '28",
+  Sophomore: "Class of '29",
+  Freshman:  "Class of '30",
+};
 
 const TRACK_LABELS: Record<ProgramTrack, string> = {
   IB: "Investment Banking",
@@ -74,13 +82,22 @@ type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 function getProgramClassYears(p: Program): ProgramClassYear[] {
   if (p.classYears && p.classYears.length) return p.classYears;
-  const lower = p.role.toLowerCase();
+  // Try to infer from role name keywords
+  const lower = (p.role + " " + (p.programName ?? "")).toLowerCase();
   const inferred: ProgramClassYear[] = [];
   if (lower.includes("freshman")) inferred.push("Freshman");
   if (lower.includes("sophomore")) inferred.push("Sophomore");
   if (lower.includes("junior")) inferred.push("Junior");
-  if (lower.includes("senior")) inferred.push("Senior");
-  return inferred.length ? inferred : ["Junior"];
+  if (lower.includes("senior") || lower.includes("full-time") || lower.includes("full time")) inferred.push("Senior");
+  if (inferred.length) return inferred;
+  // Category-based inference
+  if (p.category === "FT") return ["Senior"];
+  if (p.category === "Sophomore") return ["Sophomore"];
+  if (p.category === "Freshman") return ["Freshman"];
+  if (p.category === "Insight" || p.category === "Discovery") return ["Freshman", "Sophomore"];
+  if (p.category === "Fellowship") return ["Junior", "Senior"];
+  // Default: SA programs target Juniors (Class of '28)
+  return ["Junior"];
 }
 
 /**
@@ -362,7 +379,7 @@ export default function RecruitingPage() {
                 </div>
 
                 <FilterGroup
-                  label="Target Year"
+                  label="Graduation Year"
                   expanded={expandedFilters["Target Year"]}
                   onToggle={() => setExpandedFilters((p) => ({ ...p, "Target Year": !p["Target Year"] }))}
                 >
@@ -392,7 +409,7 @@ export default function RecruitingPage() {
                               : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
                           )}
                         >
-                          {year}
+                          {GRAD_YEAR[year]}
                         </Badge>
                       </button>
                     ))}
@@ -1284,7 +1301,7 @@ function ProgramRow({
         )}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground mt-2">
           <span className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" /> {classYears.join(" / ")}
+            <Users className="h-3.5 w-3.5" /> {classYears.map((y) => GRAD_YEAR[y]).join(" / ")}
           </span>
           {program.location && (
             <span className="flex items-center gap-1">
