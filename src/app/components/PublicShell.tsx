@@ -7,9 +7,11 @@ import camsLogo from "../../assets/cams-logo.png";
 
 const PUBLIC_NAV = [
   { label: "Home", href: "/", end: true },
+  { label: "About", href: "/about", end: false },
+  { label: "Membership", href: "/membership", end: false },
+  { label: "Committees", href: "/committees", end: false },
   { label: "Portfolio", href: "/portfolio", end: false },
   { label: "News", href: "/news", end: false },
-  { label: "Roster", href: "/roster", end: false },
 ];
 
 const footerLinkClass =
@@ -116,13 +118,23 @@ export function PublicShell({ children }: PublicShellProps) {
             </h4>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
-                <Link to="/portfolio" className={footerLinkClass}>
-                  Portfolio
+                <Link to="/about" className={footerLinkClass}>
+                  About
                 </Link>
               </li>
               <li>
-                <Link to="/roster" className={footerLinkClass}>
-                  Roster
+                <Link to="/membership" className={footerLinkClass}>
+                  Membership
+                </Link>
+              </li>
+              <li>
+                <Link to="/committees" className={footerLinkClass}>
+                  Committees
+                </Link>
+              </li>
+              <li>
+                <Link to="/portfolio" className={footerLinkClass}>
+                  Portfolio
                 </Link>
               </li>
               <li>

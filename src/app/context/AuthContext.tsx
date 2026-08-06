@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { MOCK_MEMBERS, type FinanceTrack, type Member } from "../data/mockData";
-import { CRIMSON_EMAIL_DOMAIN, CURRENT_COHORT } from "../data/constants";
+import { CRIMSON_EMAIL_DOMAIN, CURRENT_COHORT, EXEC_PASSWORD } from "../data/constants";
 import { useMembers } from "./MembersContext";
 
 const SESSION_KEY = "cams_user";
@@ -15,7 +15,9 @@ async function hashPassword(password: string, salt: string): Promise<string> {
 }
 
 function saveSession(user: Member, remember: boolean) {
-  const json = JSON.stringify(user);
+  // Never persist the password hash — it belongs in the members store, not the session.
+  const { password: _stripped, ...safeUser } = user;
+  const json = JSON.stringify(safeUser);
   if (remember) {
     localStorage.setItem(SESSION_KEY, json);
     sessionStorage.removeItem(SESSION_KEY);
@@ -95,8 +97,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (user.password) {
       const hash = await hashPassword(password, email);
       if (user.password !== hash) return { success: false, error: "Incorrect password." };
+    } else {
+      // Seeded exec member (no stored hash) — must supply the exec password.
+      if (!EXEC_PASSWORD || password !== EXEC_PASSWORD) {
+        return { success: false, error: "Incorrect password." };
+      }
     }
-    // Seeded/demo members without a stored password hash bypass the check.
 
     rememberRef.current = rememberMe;
     setCurrentUser(user);
@@ -150,8 +156,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = (updates: Partial<Member>) => {
     if (!currentUser) return;
-    updateMember(currentUser.id, updates);
-    const updated = { ...currentUser, ...updates };
+    // Strip fields that must never be self-modified.
+    const { id: _id, role: _role, pnlTagged: _pnl, password: _pw, active: _active, ...safeUpdates } = updates;
+    updateMember(currentUser.id, safeUpdates);
+    const updated = { ...currentUser, ...safeUpdates };
     setCurrentUser(updated);
     saveSession(updated, rememberRef.current);
   };

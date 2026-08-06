@@ -41,11 +41,6 @@ export default function Login() {
     }
   };
 
-  const handleGuestLogin = async () => {
-    await login("dkwhitfield@crimson.ua.edu", "cams2026", rememberMe);
-    navigate("/dashboard");
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4">
       <Card className="w-full max-w-sm">
@@ -98,16 +93,6 @@ export default function Login() {
             <Link to="/register" className="text-primary hover:underline font-medium">
               Sign up
             </Link>
-          </div>
-          <div className="mt-2 text-center">
-            <Button
-              variant="link"
-              size="sm"
-              className="text-xs text-muted-foreground"
-              onClick={handleGuestLogin}
-            >
-              Continue as guest (demo exec account)
-            </Button>
           </div>
         </CardContent>
       </Card>

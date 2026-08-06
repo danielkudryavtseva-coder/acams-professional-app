@@ -18,7 +18,12 @@ import Profile from "./pages/Profile";
 import ComingSoon from "./pages/ComingSoon";
 import ApplyPage from "./pages/ApplyPage";
 
-// New pages — RosterPage and NewsPage are public-only
+// Public info pages
+import About from "./pages/About";
+import MembershipPage from "./pages/MembershipPage";
+import CommitteesPage from "./pages/CommitteesPage";
+
+// App pages
 import RosterPage from "./pages/RosterPage";
 import ConnectPage from "./pages/ConnectPage";
 import JobsPage from "./pages/JobsPage";
@@ -58,13 +63,15 @@ export function AppRoutes() {
       <Route path="/register" element={<Register />} />
       <Route path="/verify" element={<Verify />} />
 
-      {/* Public showcase routes — Landing / Portfolio / News / Roster visible to anyone */}
+      {/* Public showcase routes */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Landing />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/membership" element={<MembershipPage />} />
+        <Route path="/committees" element={<CommitteesPage />} />
         <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/news" element={<NewsPage />} />
         <Route path="/news/:postId" element={<NewsPostPage />} />
-        <Route path="/roster" element={<RosterPage />} />
         <Route path="/apply" element={<ApplyPage />} />
       </Route>
 
@@ -79,6 +86,7 @@ export function AppRoutes() {
           <Route path="profile" element={<Profile />} />
           <Route path="connect" element={<ConnectPage />} />
           <Route path="jobs" element={<JobsPage />} />
+          <Route path="roster" element={<RosterPage />} />
           <Route path="resources" element={<ResourcesPage />} />
           <Route path="events" element={<EventsPage />} />
           <Route path="claude-certified-architect" element={<ClaudeCertifiedArchitectPage />} />
@@ -99,6 +107,7 @@ export function AppRoutes() {
       </Route>
 
       {/* Legacy flat URL redirects */}
+      <Route path="/roster" element={<Navigate to="/dashboard/roster" replace />} />
       <Route path="/recruiting" element={<Navigate to="/dashboard/recruiting" replace />} />
       <Route path="/contacts" element={<Navigate to="/dashboard/contacts" replace />} />
       <Route path="/pipeline" element={<Navigate to="/dashboard/pipeline" replace />} />
