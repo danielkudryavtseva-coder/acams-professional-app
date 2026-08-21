@@ -72,23 +72,15 @@ export default function MembershipPage() {
         </p>
       </section>
 
-      {/* Stats + Find Us — kept compact so the map shows up front */}
+      {/* Stats — kept compact so the map shows up front */}
       <section className="max-w-5xl mx-auto w-full pt-6 pb-2 px-6">
-        <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-b border-border pb-4">
-          <div className="flex flex-wrap gap-x-8 gap-y-2">
-            {STATS.map(({ label, value }) => (
-              <div key={label} className="flex items-baseline gap-1.5">
-                <span className="text-xl font-bold text-[#c63f60]">{value}</span>
-                <span className="text-xs text-muted-foreground">{label}</span>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Culverhouse College of Business &middot; Tuscaloosa, AL &middot;{" "}
-            <a href="mailto:contact@cams.ua.edu" className="text-[#c63f60] hover:underline">
-              contact@cams.ua.edu
-            </a>
-          </p>
+        <div className="flex flex-wrap gap-x-8 gap-y-2 border-b border-border pb-4">
+          {STATS.map(({ label, value }) => (
+            <div key={label} className="flex items-baseline gap-1.5">
+              <span className="text-xl font-bold text-[#c63f60]">{value}</span>
+              <span className="text-xs text-muted-foreground">{label}</span>
+            </div>
+          ))}
         </div>
       </section>
 
