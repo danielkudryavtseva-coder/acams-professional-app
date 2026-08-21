@@ -1,8 +1,10 @@
 import * as React from "react";
 import {
+  fetchDividends,
   fetchHistory,
   fetchQuotes,
   RateLimitError,
+  type FmpDividendSeries,
   type FmpHistorySeries,
   type FmpQuote,
 } from "../lib/fmp";
@@ -24,6 +26,8 @@ export interface PortfolioLiveData {
   quotes: Record<string, FmpQuote>;
   /** Map of holding ticker -> historical series (sorted oldest -> newest). */
   history: Record<string, FmpHistorySeries>;
+  /** Map of holding ticker -> dividend payments over the trailing ~13 months. */
+  dividends: Record<string, FmpDividendSeries>;
   status: LiveStatus;
   lastUpdated: Date | null;
   error: string | null;
@@ -35,12 +39,16 @@ export interface PortfolioLiveData {
 // upstream so a 10-min cache is effectively transparent.
 const QUOTE_CACHE_TTL_MS = 10 * 60_000;
 const HISTORY_CACHE_TTL_MS = 6 * 60 * 60_000;
+// Dividend payments almost never change same-day, so this can outlive
+// even the price-history cache to keep the extra per-ticker call rare.
+const DIVIDEND_CACHE_TTL_MS = 24 * 60 * 60_000;
 // Auto-refresh slowest of the two TTLs so background ticks don't burn
 // the daily quota while the user is just leaving the tab open.
 const AUTO_REFRESH_INTERVAL_MS = QUOTE_CACHE_TTL_MS;
 
 const QUOTES_CACHE_KEY = "cams.portfolio.quotes.v2";
 const HISTORY_CACHE_KEY = "cams.portfolio.history.v2";
+const DIVIDENDS_CACHE_KEY = "cams.portfolio.dividends.v1";
 const RATE_LIMIT_KEY = "cams.portfolio.fmp.rateLimitedUntil";
 
 interface CacheEnvelope<T> {
@@ -117,6 +125,20 @@ function remapHistory(
   return out;
 }
 
+function remapDividends(
+  raw: FmpDividendSeries[],
+  reverse: Record<string, string>,
+): Record<string, FmpDividendSeries> {
+  const out: Record<string, FmpDividendSeries> = {};
+  for (const s of raw) {
+    const portfolioTicker = reverse[s.symbol?.toUpperCase()];
+    if (!portfolioTicker) continue;
+    const sorted = [...s.historical].sort((a, b) => a.date.localeCompare(b.date));
+    out[portfolioTicker] = { symbol: s.symbol, historical: sorted };
+  }
+  return out;
+}
+
 export function usePortfolioLiveData(): PortfolioLiveData {
   const reverseMap = React.useMemo(buildReverseMap, []);
   const tickers = React.useMemo(
@@ -134,12 +156,19 @@ export function usePortfolioLiveData(): PortfolioLiveData {
     () => readCache<Record<string, FmpHistorySeries>>(HISTORY_CACHE_KEY),
     [],
   );
+  const initialDividendsCache = React.useMemo(
+    () => readCache<Record<string, FmpDividendSeries>>(DIVIDENDS_CACHE_KEY),
+    [],
+  );
 
   const [quotes, setQuotes] = React.useState<Record<string, FmpQuote>>(
     () => initialQuotesCache?.data ?? {},
   );
   const [history, setHistory] = React.useState<Record<string, FmpHistorySeries>>(
     () => initialHistoryCache?.data ?? {},
+  );
+  const [dividends, setDividends] = React.useState<Record<string, FmpDividendSeries>>(
+    () => initialDividendsCache?.data ?? {},
   );
   const [status, setStatus] = React.useState<LiveStatus>("idle");
   const [lastUpdated, setLastUpdated] = React.useState<Date | null>(
@@ -174,14 +203,17 @@ export function usePortfolioLiveData(): PortfolioLiveData {
 
     const quotesEnvelope = readCache<Record<string, FmpQuote>>(QUOTES_CACHE_KEY);
     const historyEnvelope = readCache<Record<string, FmpHistorySeries>>(HISTORY_CACHE_KEY);
+    const dividendsEnvelope = readCache<Record<string, FmpDividendSeries>>(DIVIDENDS_CACHE_KEY);
     const quotesFresh = isFreshCache(quotesEnvelope, QUOTE_CACHE_TTL_MS);
     const historyFresh = isFreshCache(historyEnvelope, HISTORY_CACHE_TTL_MS);
+    const dividendsFresh = isFreshCache(dividendsEnvelope, DIVIDEND_CACHE_TTL_MS);
 
     if (quotesEnvelope) {
       setQuotes(quotesEnvelope.data);
       setLastUpdated(new Date(quotesEnvelope.ts));
     }
     if (historyEnvelope) setHistory(historyEnvelope.data);
+    if (dividendsEnvelope) setDividends(dividendsEnvelope.data);
 
     if (stillRateLimited) {
       setStatus("rate_limited");
@@ -193,8 +225,8 @@ export function usePortfolioLiveData(): PortfolioLiveData {
       };
     }
 
-    // If both caches are fresh, skip the network hit entirely.
-    if (quotesFresh && historyFresh) {
+    // If all caches are fresh, skip the network hit entirely.
+    if (quotesFresh && historyFresh && dividendsFresh) {
       setStatus("live");
       setError(null);
       return () => {
@@ -210,7 +242,10 @@ export function usePortfolioLiveData(): PortfolioLiveData {
       historyFresh
         ? Promise.resolve([] as FmpHistorySeries[])
         : fetchHistory(tickers, 365),
-    ]).then(([qRes, hRes]) => {
+      dividendsFresh
+        ? Promise.resolve([] as FmpDividendSeries[])
+        : fetchDividends(tickers, 400),
+    ]).then(([qRes, hRes, dRes]) => {
       if (cancelled) return;
 
       const rateLimitHit =
@@ -252,6 +287,14 @@ export function usePortfolioLiveData(): PortfolioLiveData {
         }
       } else if (historyFresh && historyEnvelope) {
         anyOk = true;
+      }
+
+      if (dRes.status === "fulfilled" && dRes.value.length > 0) {
+        const remapped = remapDividends(dRes.value, reverseMap);
+        if (Object.keys(remapped).length > 0) {
+          setDividends(remapped);
+          writeCache(DIVIDENDS_CACHE_KEY, remapped);
+        }
       }
 
       if (anyOk) {
@@ -335,5 +378,5 @@ export function usePortfolioLiveData(): PortfolioLiveData {
     };
   }, [tickers, reverseMap, rateLimitedUntil]);
 
-  return { quotes, history, status, lastUpdated, error, refresh };
+  return { quotes, history, dividends, status, lastUpdated, error, refresh };
 }

@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { sortNewsPosts, useNews } from "../context/NewsContext";
@@ -6,14 +6,6 @@ import {
   NewsFeaturedCard,
   NewsLatestListItem,
 } from "../components/NewsBlogLayout";
-import { LandingPortfolioMiniChart } from "../components/LandingPortfolioMiniChart";
-import { usePortfolioLiveData } from "../hooks/usePortfolioLiveData";
-import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
-import {
-  buildMonthlyPortfolioTrend,
-  sharpeAnnualizedFromMonthlyValues,
-  ytdStartFromHistory,
-} from "../lib/portfolioLiveSeries";
 import campbellWatts from "../../assets/execs/campbell-watts.jpg";
 import bradyBelden from "../../assets/execs/brady-belden.jpg";
 import chrisRinaldi from "../../assets/execs/chris-rinaldi.jpg";
@@ -108,29 +100,24 @@ const EXECUTIVES: Executive[] = [
   },
 ];
 
-interface StatCardProps {
-  label: string;
-  value: string;
-  sub?: string;
-}
-
-function StatCard({ label, value, sub }: StatCardProps) {
-  return (
-    <div className="rounded-lg border border-border/90 bg-card px-4 py-4 text-center shadow-soft ring-1 ring-border/35 transition-shadow duration-base ease-smooth hover:shadow-elevated md:px-5 md:py-4">
-      <div className="text-xs font-semibold uppercase tracking-wider text-crimson">
-        {label}
-      </div>
-      <div className="mt-1.5 font-display text-2xl font-semibold tabular md:text-3xl">
-        {value}
-      </div>
-      {sub && (
-        <div className="mt-1 text-xs leading-snug text-muted-foreground">
-          {sub}
-        </div>
-      )}
-    </div>
-  );
-}
+const PILLARS = [
+  {
+    title: "Investment Management",
+    body: "Members manage a real-money portfolio, conducting equity research and presenting investment pitches to the full committee each semester.",
+  },
+  {
+    title: "Recruiting Support",
+    body: "We host firm info sessions, mock interviews, and resume workshops — and provide direct introductions to CAMS alumni at top institutions.",
+  },
+  {
+    title: "Professional Development",
+    body: "Weekly meetings, guest speakers from Wall Street, and case competitions build the technical and soft skills firms actually look for.",
+  },
+  {
+    title: "Alumni Network",
+    body: "Our alumni are placed at Goldman Sachs, BlackRock, J.P. Morgan, KKR, and beyond. Active mentorship connects current members with those paths.",
+  },
+];
 
 interface ExecCardProps {
   name: string;
@@ -200,11 +187,6 @@ function ExecCard({ name, title, image, bio }: ExecCardProps) {
 
 const HERO_PARALLAX_MAX_PX = 24;
 const HERO_PARALLAX_MIN_PX = 8;
-
-function formatAumUsd(totalValue: number): string {
-  if (totalValue >= 1_000_000) return `$${(totalValue / 1_000_000).toFixed(2)}M`;
-  return `$${(totalValue / 1000).toFixed(1)}K`;
-}
 
 export default function Landing() {
   const heroSectionRef = useRef<HTMLElement>(null);
@@ -289,48 +271,6 @@ export default function Landing() {
   const landingFeatured = landingNews[0];
   const landingRest = landingNews.slice(1, 5);
 
-  const { quotes, history } = usePortfolioLiveData();
-  const {
-    liveHoldings,
-    bondValue,
-    fundValue,
-    totalValue,
-    totalReturnPct,
-  } = usePortfolioMarkToMarket(quotes);
-  const bondAndFundMarketValue = bondValue + fundValue;
-  const ytdStart = useMemo(
-    () => ytdStartFromHistory(liveHoldings, history),
-    [liveHoldings, history],
-  );
-  const ytdReturnFrac =
-    ytdStart != null && ytdStart > 0 ? (totalValue - ytdStart) / ytdStart : null;
-  const ytdPct = ytdReturnFrac != null ? ytdReturnFrac * 100 : null;
-  const ytdValueStr =
-    ytdPct != null
-      ? `${ytdPct >= 0 ? "+" : ""}${ytdPct.toFixed(2)}%`
-      : `${totalReturnPct >= 0 ? "+" : ""}${totalReturnPct.toFixed(2)}%`;
-  const ytdSub =
-    ytdPct != null
-      ? "Calendar YTD — same marks as portfolio"
-      : "All-time return (add FMP history for calendar YTD)";
-
-  const liveMonthly = useMemo(
-    () => buildMonthlyPortfolioTrend(liveHoldings, history, 12, bondAndFundMarketValue),
-    [liveHoldings, history, bondAndFundMarketValue],
-  );
-  const sharpe = useMemo(
-    () =>
-      liveMonthly.length > 0
-        ? sharpeAnnualizedFromMonthlyValues(liveMonthly.map((p) => p.value))
-        : null,
-    [liveMonthly],
-  );
-  const sharpeValueStr = sharpe != null ? sharpe.toFixed(1) : "—";
-  const sharpeSub =
-    sharpe != null
-      ? "From live monthly portfolio values (12m)"
-      : "Needs live price history (FMP)";
-
   return (
     <>
       {/* Hero — full-bleed photo under CAMS crimson veil + vignette for readable white copy */}
@@ -398,45 +338,40 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Portfolio Performance & Insights */}
-      <section className="border-y border-border/60 bg-paper py-12 md:py-14 dark:border-border dark:bg-card">
+      {/* Our Mission */}
+      <section className="border-y border-border/60 bg-paper py-16 dark:border-border dark:bg-card">
         <div className="mx-auto max-w-content px-6">
-          <h2 className="text-center font-display text-3xl font-semibold tracking-tight text-foreground">
-            Portfolio Performance &amp; Insights
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+              Our Mission
+            </h2>
+            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
+              CAMS prepares University of Alabama students for careers in
+              finance through hands-on investment management, structured
+              recruiting mentorship, and a strong professional network. We
+              believe the best way to learn finance is to do finance.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* What We Do */}
+      <section className="py-16">
+        <div className="mx-auto max-w-content px-6">
+          <h2 className="text-center font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+            What We Do
           </h2>
-          <p className="mt-2 text-center text-muted-foreground">
-            A snapshot of what CAMS is managing right now.
-          </p>
-          <div className="mt-6 flex flex-col items-center gap-6 md:gap-8">
-            <div className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
-              <StatCard
-                label="AUM"
-                value={formatAumUsd(totalValue)}
-                sub="Live mark-to-market (equities + FI + funds)"
-              />
-              <StatCard
-                label="YTD Return"
-                value={ytdValueStr}
-                sub={ytdSub}
-              />
-              <StatCard
-                label="Sharpe Ratio"
-                value={sharpeValueStr}
-                sub={sharpeSub}
-              />
-            </div>
-            <div className="w-full max-w-2xl">
-              <LandingPortfolioMiniChart />
-            </div>
-            <div className="text-center">
-              <Link
-                to="/portfolio"
-                className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium text-crimson underline-offset-4 transition-colors duration-base ease-smooth hover:underline"
-              >
-                View live portfolio details
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
+          <div className="mt-10 grid gap-8 sm:grid-cols-2">
+            {PILLARS.map(({ title, body }) => (
+              <div key={title}>
+                <h3 className="font-display text-base font-semibold text-foreground">
+                  {title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {body}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

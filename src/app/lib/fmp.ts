@@ -34,6 +34,16 @@ export interface FmpHistorySeries {
   historical: FmpHistoryPoint[];
 }
 
+export interface FmpDividendPoint {
+  date: string;
+  dividend: number;
+}
+
+export interface FmpDividendSeries {
+  symbol: string;
+  historical: FmpDividendPoint[];
+}
+
 /** Thrown when the API responds with HTTP 429 (daily/per-minute quota hit). */
 export class RateLimitError extends Error {
   constructor(message = "FMP rate limit reached") {
@@ -56,6 +66,13 @@ interface RawStableHistoryRow {
   date: string;
   close?: number;
   adjClose?: number;
+}
+
+interface RawStableDividendRow {
+  symbol: string;
+  date: string;
+  dividend?: number;
+  adjDividend?: number;
 }
 
 function getApiKey(): string {
@@ -218,4 +235,56 @@ export async function fetchHistory(
     if (r.status === "fulfilled") out.push(r.value);
   }
   return out;
+}
+
+/**
+ * Fetch dividend history per ticker, trimmed to the trailing `days` window
+ * (default 400 to comfortably cover a trailing-12-month sum).
+ *
+ * Unlike price history, a symbol with zero dividend payments is a normal
+ * result (most growth stocks never pay one) — that returns an empty
+ * `historical` array rather than an error.
+ *
+ * Throws `RateLimitError` on 429.
+ */
+export async function fetchDividends(
+  tickers: string[],
+  days = 400,
+): Promise<FmpDividendSeries[]> {
+  if (tickers.length === 0) return [];
+  const key = getApiKey();
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - days);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+
+  const settled = await pooledMap(
+    tickers,
+    async (sym) => {
+      const url = `${FMP_BASE}/dividends?symbol=${encodeURIComponent(sym)}&apikey=${encodeURIComponent(key)}`;
+      const raw = await fetchJson<RawStableDividendRow[]>(url);
+      const historical: FmpDividendPoint[] = [];
+      if (Array.isArray(raw)) {
+        for (const row of raw) {
+          if (!row || typeof row.date !== "string") continue;
+          if (row.date < cutoffStr) continue;
+          const dividend = typeof row.adjDividend === "number"
+            ? row.adjDividend
+            : typeof row.dividend === "number"
+              ? row.dividend
+              : null;
+          if (dividend == null) continue;
+          historical.push({ date: row.date, dividend });
+        }
+      }
+      return { symbol: sym, historical } satisfies FmpDividendSeries;
+    },
+    QUOTE_CONCURRENCY,
+  );
+  const dividendRl = firstRateLimit(settled);
+  if (dividendRl) throw dividendRl;
+  const dividendOut: FmpDividendSeries[] = [];
+  for (const r of settled) {
+    if (r.status === "fulfilled") dividendOut.push(r.value);
+  }
+  return dividendOut;
 }

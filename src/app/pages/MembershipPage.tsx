@@ -2,6 +2,14 @@ import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Image } from "lucide-react";
+import { PlacementsMap } from "../components/PlacementsMap";
+
+const STATS = [
+  { label: "Active Members", value: "30+" },
+  { label: "Committees", value: "4" },
+  { label: "Alumni Placed", value: "50+" },
+  { label: "Partner Firms", value: "20+" },
+];
 
 const BENEFITS = [
   {
@@ -62,6 +70,45 @@ export default function MembershipPage() {
         <p className="mt-3 text-lg text-white/80 max-w-xl mx-auto">
           What membership actually looks like — week to week, semester to semester.
         </p>
+      </section>
+
+      {/* Stats + Find Us */}
+      <section className="max-w-4xl mx-auto w-full py-16 px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+          {STATS.map(({ label, value }) => (
+            <div key={label}>
+              <div className="text-3xl font-bold text-[#c63f60]">{value}</div>
+              <div className="text-sm text-muted-foreground mt-1">{label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold">Find Us</h2>
+          <div className="mt-4 space-y-1 text-muted-foreground">
+            <p>Culverhouse College of Business</p>
+            <p>University of Alabama &middot; Tuscaloosa, AL 35487</p>
+            <p>
+              <a
+                href="mailto:contact@cams.ua.edu"
+                className="text-[#c63f60] hover:underline"
+              >
+                contact@cams.ua.edu
+              </a>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Placements map */}
+      <section className="max-w-5xl mx-auto w-full pb-16 px-6">
+        <h2 className="text-2xl font-bold">Where Our Alumni Landed</h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Placements pulled from the CAMS alumni rolodex.
+        </p>
+        <div className="mt-6">
+          <PlacementsMap />
+        </div>
       </section>
 
       {/* What membership looks like */}

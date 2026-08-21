@@ -19,7 +19,6 @@ import ComingSoon from "./pages/ComingSoon";
 import ApplyPage from "./pages/ApplyPage";
 
 // Public info pages
-import About from "./pages/About";
 import MembershipPage from "./pages/MembershipPage";
 import CommitteesPage from "./pages/CommitteesPage";
 
@@ -66,7 +65,6 @@ export function AppRoutes() {
       {/* Public showcase routes */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Landing />} />
-        <Route path="/about" element={<About />} />
         <Route path="/membership" element={<MembershipPage />} />
         <Route path="/committees" element={<CommitteesPage />} />
         <Route path="/portfolio" element={<Portfolio />} />
@@ -107,6 +105,7 @@ export function AppRoutes() {
       </Route>
 
       {/* Legacy flat URL redirects */}
+      <Route path="/about" element={<Navigate to="/membership" replace />} />
       <Route path="/roster" element={<Navigate to="/dashboard/roster" replace />} />
       <Route path="/recruiting" element={<Navigate to="/dashboard/recruiting" replace />} />
       <Route path="/contacts" element={<Navigate to="/dashboard/contacts" replace />} />

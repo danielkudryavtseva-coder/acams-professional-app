@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { User, Image } from "lucide-react";
 
 interface CommitteeInfo {
   name: "Investment" | "Recruiting" | "Operations" | "Marketing";
@@ -74,6 +75,42 @@ const COMMITTEES: CommitteeInfo[] = [
   },
 ];
 
+function CommitteeHeadPlaceholder() {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-border bg-muted/40 text-muted-foreground">
+        <User className="h-5 w-5 opacity-40" />
+      </div>
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Committee Head
+        </p>
+        <p className="text-sm text-muted-foreground">Name coming soon</p>
+      </div>
+    </div>
+  );
+}
+
+function HoldingsLogosPlaceholder() {
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+        Companies in Holdings
+      </p>
+      <div className="flex gap-2">
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="flex h-10 w-10 items-center justify-center rounded-md border-2 border-dashed border-border bg-muted/40 text-muted-foreground"
+          >
+            <Image className="h-4 w-4 opacity-40" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function CommitteesPage() {
   return (
     <div className="flex flex-col">
@@ -99,6 +136,7 @@ export default function CommitteesPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              <CommitteeHeadPlaceholder />
               <p className="text-sm leading-relaxed">{c.description}</p>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
@@ -113,6 +151,7 @@ export default function CommitteesPage() {
                   ))}
                 </ul>
               </div>
+              <HoldingsLogosPlaceholder />
             </CardContent>
           </Card>
         ))}

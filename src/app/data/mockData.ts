@@ -545,9 +545,7 @@ export const MOCK_PORTFOLIO_DECISIONS: PortfolioDecision[] = [
 ];
 
 export const MOCK_NEWS: NewsPost[] = [
-  { id: "n1", title: "Welcome, Spring 2026 Class!", body: "We are thrilled to welcome a strong new CAMS class.", category: "announcement", author: "CAMS Executive Board", publishedAt: "2026-01-15T12:00:00", pinned: true },
-  { id: "n2", title: "Portfolio Update — Q1 2026", body: "The student-managed portfolio returned +3.2% in Q1.", category: "portfolio", author: "Investment Committee", publishedAt: "2026-04-01T09:00:00", pinned: false },
-  { id: "n3", title: "Fed Holds Rates", body: "Hiring remains cautious but stable across finance.", category: "market", author: "Research Team", publishedAt: "2026-03-20T14:00:00", pinned: false },
+  { id: "n1", title: "Fall Update", body: "Placeholder fall semester update — replace with the real post.", category: "announcement", author: "CAMS Executive Board", publishedAt: "2026-08-21T12:00:00", pinned: true },
 ];
 
 export const MOCK_FIRM_CARDS: FirmCard[] = [

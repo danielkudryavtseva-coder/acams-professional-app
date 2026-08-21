@@ -7,7 +7,6 @@ import camsLogo from "../../assets/cams-logo.png";
 
 const PUBLIC_NAV = [
   { label: "Home", href: "/", end: true },
-  { label: "About", href: "/about", end: false },
   { label: "Membership", href: "/membership", end: false },
   { label: "Committees", href: "/committees", end: false },
   { label: "Portfolio", href: "/portfolio", end: false },
@@ -117,11 +116,6 @@ export function PublicShell({ children }: PublicShellProps) {
               Links
             </h4>
             <ul className="mt-4 space-y-2 text-sm">
-              <li>
-                <Link to="/about" className={footerLinkClass}>
-                  About
-                </Link>
-              </li>
               <li>
                 <Link to="/membership" className={footerLinkClass}>
                   Membership
