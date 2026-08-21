@@ -65,43 +65,35 @@ export default function MembershipPage() {
   return (
     <div className="flex flex-col">
       {/* Hero */}
-      <section className="bg-gradient-to-br from-[#7d2c45] to-[#c63f60] text-white py-20 px-6 text-center">
-        <h1 className="text-4xl font-bold tracking-tight">Life as a CAMS Member</h1>
-        <p className="mt-3 text-lg text-white/80 max-w-xl mx-auto">
+      <section className="bg-gradient-to-br from-[#7d2c45] to-[#c63f60] text-white py-10 px-6 text-center">
+        <h1 className="text-3xl font-bold tracking-tight">Life as a CAMS Member</h1>
+        <p className="mt-2 text-base text-white/80 max-w-xl mx-auto">
           What membership actually looks like — week to week, semester to semester.
         </p>
       </section>
 
-      {/* Stats + Find Us */}
-      <section className="max-w-4xl mx-auto w-full py-16 px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {STATS.map(({ label, value }) => (
-            <div key={label}>
-              <div className="text-3xl font-bold text-[#c63f60]">{value}</div>
-              <div className="text-sm text-muted-foreground mt-1">{label}</div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-12">
-          <h2 className="text-2xl font-bold">Find Us</h2>
-          <div className="mt-4 space-y-1 text-muted-foreground">
-            <p>Culverhouse College of Business</p>
-            <p>University of Alabama &middot; Tuscaloosa, AL 35487</p>
-            <p>
-              <a
-                href="mailto:contact@cams.ua.edu"
-                className="text-[#c63f60] hover:underline"
-              >
-                contact@cams.ua.edu
-              </a>
-            </p>
+      {/* Stats + Find Us — kept compact so the map shows up front */}
+      <section className="max-w-5xl mx-auto w-full pt-6 pb-2 px-6">
+        <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-3 border-b border-border pb-4">
+          <div className="flex flex-wrap gap-x-8 gap-y-2">
+            {STATS.map(({ label, value }) => (
+              <div key={label} className="flex items-baseline gap-1.5">
+                <span className="text-xl font-bold text-[#c63f60]">{value}</span>
+                <span className="text-xs text-muted-foreground">{label}</span>
+              </div>
+            ))}
           </div>
+          <p className="text-xs text-muted-foreground">
+            Culverhouse College of Business &middot; Tuscaloosa, AL &middot;{" "}
+            <a href="mailto:contact@cams.ua.edu" className="text-[#c63f60] hover:underline">
+              contact@cams.ua.edu
+            </a>
+          </p>
         </div>
       </section>
 
       {/* Placements map */}
-      <section className="max-w-5xl mx-auto w-full pb-16 px-6">
+      <section className="max-w-5xl mx-auto w-full pt-6 pb-16 px-6">
         <h2 className="text-2xl font-bold">Where Our Alumni Landed</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Placements pulled from the CAMS alumni rolodex.
