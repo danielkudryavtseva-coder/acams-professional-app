@@ -77,3 +77,58 @@ export function logoUrlForFirm(firm: string): string | null {
   if (!domain) return null;
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
 }
+
+/**
+ * Most-prestigious-first ordering for the Placements map overview (hedge
+ * funds / asset managers, then bulge-bracket + elite-boutique banks, then
+ * Big 4 / consulting, everything else after). Firms not listed here sort
+ * after every ranked firm, by headcount.
+ */
+const PRESTIGE_ORDER: string[] = [
+  "Point72",
+  "BlackRock",
+  "Fidelity Investments",
+  "Polen Capital",
+  "Cresset Capital",
+  "Fisher Investments",
+  "Goldman Sachs",
+  "J.P. Morgan",
+  "JP Morgan",
+  "Morgan Stanley",
+  "Deutsche Bank",
+  "Citi",
+  "UBS",
+  "Merrill Lynch",
+  "Mizuho",
+  "Wells Fargo",
+  "Piper Sandler",
+  "Leerink Partners",
+  "JMP Securities",
+  "Raymond James",
+  "Kroll",
+  "Boston Consulting Group",
+  "Texas Capital",
+  "Charles Schwab",
+  "Capital One",
+  "Northern Trust",
+  "TD Ameritrade",
+  "PNC",
+  "Regions",
+  "Regions Bank",
+  "KPMG",
+  "PwC",
+  "EY",
+  "Deloitte",
+  "RSM",
+  "Crowe",
+  "FORVIS",
+  "Plante Moran",
+  "Protiviti",
+  "Armanino LLP",
+  "Capgemini",
+];
+
+export function prestigeRank(firm: string): number {
+  const idx = PRESTIGE_ORDER.indexOf(firm.trim());
+  return idx === -1 ? PRESTIGE_ORDER.length : idx;
+}

@@ -2,7 +2,7 @@ import * as React from "react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MOCK_ALUMNI } from "../data/mockData";
-import { logoUrlForFirm } from "../data/companyLogos";
+import { logoUrlForFirm, prestigeRank } from "../data/companyLogos";
 import pinImage from "../../assets/map/pin.png";
 
 const CARTO_LIGHT_STYLE: maplibregl.StyleSpecification = {
@@ -79,7 +79,10 @@ function buildCityClusters(): CityCluster[] {
 
 function sortCompanies(companies: Company[]): Company[] {
   return [...companies].sort((a, b) => {
-    // Recognizable (logo'd) firms surface first, then by headcount.
+    // Most-prestigious firms first (hedge funds, bulge bracket, Big 4, ...),
+    // then recognizable (logo'd) firms, then by headcount.
+    const rankDiff = prestigeRank(a.firm) - prestigeRank(b.firm);
+    if (rankDiff !== 0) return rankDiff;
     if (!!a.logo !== !!b.logo) return a.logo ? -1 : 1;
     if (b.count !== a.count) return b.count - a.count;
     return a.firm.localeCompare(b.firm);
@@ -136,6 +139,41 @@ function CompanyTile({ firm, count, logo }: Company) {
           <p className="text-[10px] text-muted-foreground">{count} alumni</p>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Plain logo-wall tile — no card, no chrome, matches a clean recruiting-page grid look. */
+function LogoTile({ firm, logo }: Company) {
+  const [errored, setErrored] = React.useState(false);
+  const initials = firm
+    .split(/\s+/)
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+  const showLogo = !!logo && !errored;
+
+  return (
+    <div
+      className="flex flex-col items-center justify-center gap-1.5 px-1 py-2 text-center"
+      title={firm}
+    >
+      <div className="flex h-9 w-full items-center justify-center">
+        {showLogo ? (
+          <img
+            src={logo!}
+            alt={firm}
+            loading="lazy"
+            onError={() => setErrored(true)}
+            className="max-h-9 max-w-full object-contain"
+          />
+        ) : (
+          <span className="text-xs font-semibold text-[#7a142e]">{initials}</span>
+        )}
+      </div>
+      <p className="line-clamp-2 text-[10px] leading-tight text-muted-foreground">{firm}</p>
     </div>
   );
 }
@@ -275,12 +313,12 @@ export function PlacementsMap() {
         <aside className="w-full shrink-0 border-t border-border bg-paper p-4 dark:bg-card sm:h-[480px] md:w-64 md:border-l md:border-t-0">
           {!zoomedIn ? (
             <div className="cams-panel-fade">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Top placements
               </p>
-              <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1 sm:max-h-[400px] md:max-h-[340px]">
+              <div className="grid max-h-[280px] grid-cols-3 gap-x-1 gap-y-1 overflow-y-auto pr-1 sm:max-h-[420px] sm:grid-cols-4 md:max-h-[360px] md:grid-cols-2">
                 {topCompanies.map((c) => (
-                  <CompanyTile key={c.firm} {...c} />
+                  <LogoTile key={c.firm} {...c} />
                 ))}
               </div>
             </div>
