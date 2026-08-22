@@ -10,7 +10,7 @@
   --paper: #f7f7f8;
 
   --font-sans: "Inter", "DM Sans", system-ui, sans-serif;
-  --font-display: "Source Serif Pro", Georgia, "Times New Roman", serif;
+  --font-display: "degular-mono", "Source Serif Pro", Georgia, "Times New Roman", serif;
 
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 64px;

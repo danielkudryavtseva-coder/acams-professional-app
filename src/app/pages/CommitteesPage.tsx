@@ -111,6 +111,43 @@ function HoldingsLogosPlaceholder() {
   );
 }
 
+/** Live open positions currently tagged to this committee (from portfolio decisions). */
+const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; domain: string }[]> = {
+  Investment: [
+    { ticker: "AAPL", name: "Apple Inc.", domain: "apple.com" },
+    { ticker: "VRTX", name: "Vertex Pharmaceuticals", domain: "vrtx.com" },
+  ],
+};
+
+function HoldingsLogos({ committee }: { committee: string }) {
+  const holdings = COMMITTEE_HOLDINGS[committee];
+  if (!holdings || holdings.length === 0) {
+    return <HoldingsLogosPlaceholder />;
+  }
+  return (
+    <div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+        Companies in Holdings
+      </p>
+      <div className="flex gap-2">
+        {holdings.map((h) => (
+          <div
+            key={h.ticker}
+            title={h.name}
+            className="flex h-10 w-10 items-center justify-center rounded-md border border-border bg-white p-1.5 dark:bg-card"
+          >
+            <img
+              src={`https://www.google.com/s2/favicons?domain=${h.domain}&sz=64`}
+              alt={h.name}
+              className="h-full w-full object-contain"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function CommitteesPage() {
   return (
     <div className="flex flex-col">
@@ -151,7 +188,7 @@ export default function CommitteesPage() {
                   ))}
                 </ul>
               </div>
-              <HoldingsLogosPlaceholder />
+              <HoldingsLogos committee={c.name} />
             </CardContent>
           </Card>
         ))}
