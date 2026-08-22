@@ -339,8 +339,8 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Mission & What We Do — condensed; collapsed accordion on mobile, always open on desktop */}
-      <section className="border-y border-border/60 bg-paper py-6 dark:border-border dark:bg-card md:py-10">
+      {/* Mission & What We Do — condensed; collapsed accordion on mobile, always open (but compact) on desktop */}
+      <section className="border-y border-border/60 bg-paper py-4 dark:border-border dark:bg-card md:py-5">
         <div className="mx-auto max-w-content px-6">
           <button
             type="button"
@@ -348,7 +348,7 @@ export default function Landing() {
             aria-expanded={missionOpen}
             className="flex w-full items-center justify-between gap-3 md:pointer-events-none md:justify-center"
           >
-            <h2 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-2xl">
+            <h2 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-base">
               Mission &amp; What We Do
             </h2>
             <ChevronDown
@@ -362,16 +362,16 @@ export default function Landing() {
             }`}
           >
             <div className="min-h-0">
-              <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground md:mt-4 md:text-base">
+              <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground md:mt-2 md:max-w-3xl md:text-xs">
                 CAMS prepares University of Alabama students for careers in
                 finance through hands-on investment management, structured
                 recruiting mentorship, and a strong professional network.
               </p>
-              <div className="mt-5 grid gap-x-6 gap-y-3 sm:grid-cols-2 md:mt-6">
+              <div className="mt-5 grid gap-x-6 gap-y-3 sm:grid-cols-2 md:mt-3 md:grid-cols-4 md:gap-x-5">
                 {PILLARS.map(({ title, body }) => (
                   <div key={title} className="flex gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-crimson" />
-                    <p className="text-sm leading-snug text-muted-foreground">
+                    <p className="text-sm leading-snug text-muted-foreground md:text-xs">
                       <span className="font-semibold text-foreground">{title}.</span> {body}
                     </p>
                   </div>
