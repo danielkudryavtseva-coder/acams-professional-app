@@ -14,7 +14,7 @@ import {
 } from "../data/mockData";
 import { useAuth } from "./AuthContext";
 
-export const NEWS_STORAGE_KEY = "cams.newsPosts.v1";
+export const NEWS_STORAGE_KEY = "cams.newsPosts.v2";
 
 function loadJsonPosts(): NewsPost[] | null {
   try {

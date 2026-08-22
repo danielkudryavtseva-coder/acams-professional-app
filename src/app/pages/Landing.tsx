@@ -191,6 +191,7 @@ const HERO_PARALLAX_MIN_PX = 8;
 export default function Landing() {
   const heroSectionRef = useRef<HTMLElement>(null);
   const heroBackgroundImgRef = useRef<HTMLImageElement>(null);
+  const [missionOpen, setMissionOpen] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -338,40 +339,45 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Our Mission */}
-      <section className="border-y border-border/60 bg-paper py-16 dark:border-border dark:bg-card">
+      {/* Mission & What We Do — condensed; collapsed accordion on mobile, always open on desktop */}
+      <section className="border-y border-border/60 bg-paper py-6 dark:border-border dark:bg-card md:py-10">
         <div className="mx-auto max-w-content px-6">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-              Our Mission
+          <button
+            type="button"
+            onClick={() => setMissionOpen((v) => !v)}
+            aria-expanded={missionOpen}
+            className="flex w-full items-center justify-between gap-3 md:pointer-events-none md:justify-center"
+          >
+            <h2 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-2xl">
+              Mission &amp; What We Do
             </h2>
-            <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-              CAMS prepares University of Alabama students for careers in
-              finance through hands-on investment management, structured
-              recruiting mentorship, and a strong professional network. We
-              believe the best way to learn finance is to do finance.
-            </p>
-          </div>
-        </div>
-      </section>
+            <ChevronDown
+              className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-base ease-smooth md:hidden ${missionOpen ? "rotate-180" : ""}`}
+            />
+          </button>
 
-      {/* What We Do */}
-      <section className="py-16">
-        <div className="mx-auto max-w-content px-6">
-          <h2 className="text-center font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
-            What We Do
-          </h2>
-          <div className="mt-10 grid gap-8 sm:grid-cols-2">
-            {PILLARS.map(({ title, body }) => (
-              <div key={title}>
-                <h3 className="font-display text-base font-semibold text-foreground">
-                  {title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  {body}
-                </p>
+          <div
+            className={`grid overflow-hidden transition-all duration-base ease-smooth md:!grid-rows-[1fr] md:!opacity-100 ${
+              missionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <div className="min-h-0">
+              <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground md:mt-4 md:text-base">
+                CAMS prepares University of Alabama students for careers in
+                finance through hands-on investment management, structured
+                recruiting mentorship, and a strong professional network.
+              </p>
+              <div className="mt-5 grid gap-x-6 gap-y-3 sm:grid-cols-2 md:mt-6">
+                {PILLARS.map(({ title, body }) => (
+                  <div key={title} className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-crimson" />
+                    <p className="text-sm leading-snug text-muted-foreground">
+                      <span className="font-semibold text-foreground">{title}.</span> {body}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
