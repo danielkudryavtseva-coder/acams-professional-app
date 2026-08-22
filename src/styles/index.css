@@ -15,8 +15,18 @@
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: var(--font-sans);
+    font-variation-settings: "wght" 400, "wdth" 100;
     text-rendering: optimizeLegibility;
     font-feature-settings: "kern" 1, "liga" 1;
+  }
+
+  /* brillante-vf is a variable font — explicit font-variation-settings on
+     body overrides the automatic font-weight -> "wght" axis mapping, so
+     bold contexts need their own explicit "wght" 700 to actually render bold. */
+  h1, h2, h3, h4, h5, h6,
+  strong, b,
+  .font-bold, .font-semibold {
+    font-variation-settings: "wght" 700, "wdth" 100;
   }
 
   /* Keyboard focus for unstyled / marketing links (buttons use ring utilities) */
