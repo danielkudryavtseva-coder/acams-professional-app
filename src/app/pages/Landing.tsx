@@ -1,6 +1,7 @@
 import { useMemo, useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import { APPLY_URL } from "../components/PublicShell";
 import { sortNewsPosts, useNews } from "../context/NewsContext";
 import {
   NewsFeaturedCard,
@@ -329,18 +330,20 @@ export default function Landing() {
             >
               Explore Our Portfolio
             </Link>
-            <Link
-              to="/register"
+            <a
+              href={APPLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center justify-center rounded-md border border-white/80 bg-white/5 px-5 py-3 text-sm font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson"
             >
-              Learn About Membership
-            </Link>
+              Apply
+            </a>
           </div>
         </div>
       </section>
 
       {/* Mission & What We Do — condensed; collapsed accordion on mobile, always open (but compact) on desktop */}
-      <section className="border-y border-border/60 bg-paper py-4 dark:border-border dark:bg-card md:py-5">
+      <section className="border-y border-border/60 bg-paper py-6 dark:border-border dark:bg-card md:py-8">
         <div className="mx-auto max-w-content px-6">
           <button
             type="button"
@@ -348,7 +351,7 @@ export default function Landing() {
             aria-expanded={missionOpen}
             className="flex w-full items-center justify-between gap-3 md:pointer-events-none md:justify-center"
           >
-            <h2 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-base">
+            <h2 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
               Mission &amp; What We Do
             </h2>
             <ChevronDown
@@ -362,16 +365,16 @@ export default function Landing() {
             }`}
           >
             <div className="min-h-0">
-              <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground md:mt-2 md:max-w-3xl md:text-xs">
+              <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground md:mt-3 md:max-w-3xl md:text-base">
                 CAMS prepares University of Alabama students for careers in
                 finance through hands-on investment management, structured
                 recruiting mentorship, and a strong professional network.
               </p>
-              <div className="mt-5 grid gap-x-6 gap-y-3 sm:grid-cols-2 md:mt-3 md:grid-cols-4 md:gap-x-5">
+              <div className="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2 md:mt-6 md:grid-cols-4 md:gap-x-6">
                 {PILLARS.map(({ title, body }) => (
                   <div key={title} className="flex gap-2">
                     <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-crimson" />
-                    <p className="text-sm leading-snug text-muted-foreground md:text-xs">
+                    <p className="text-sm leading-snug text-muted-foreground">
                       <span className="font-semibold text-foreground">{title}.</span> {body}
                     </p>
                   </div>

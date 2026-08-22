@@ -5,7 +5,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "./ui/utils";
 import camsLogo from "../../assets/cams-logo.png";
 
-const APPLY_URL =
+export const APPLY_URL =
   "https://bama365-my.sharepoint.com/:f:/r/personal/fhalderdice_crimson_ua_edu/Documents/CAMS%20Fall%202026%20Recruitment/Capstone%20Asset%20Management%20Society%20Fall%202026%20Applic?d=w5fa666acc8264f2eab734cd67830e98b&csf=1&web=1&e=S8mKHk";
 
 const PUBLIC_NAV = [
