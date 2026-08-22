@@ -3,6 +3,7 @@ import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { MOCK_ALUMNI } from "../data/mockData";
 import { logoUrlForFirm } from "../data/companyLogos";
+import pinImage from "../../assets/map/pin.png";
 
 const CARTO_LIGHT_STYLE: maplibregl.StyleSpecification = {
   version: 8,
@@ -95,21 +96,9 @@ function mergeCompanies(clusters: CityCluster[]): Company[] {
   return sortCompanies(Array.from(merged.values()));
 }
 
-/** Teardrop pin width in px, scaled by alumni count; height follows the 24:34 SVG aspect ratio. */
-function pinWidth(count: number): number {
-  return Math.round(Math.min(56, 24 + count * 3));
-}
-
-/** Classic map-pin teardrop: crimson bulb, white ring, red center dot. Tip = exact coordinate. */
-function pinSvg(width: number, height: number): string {
-  return `
-    <svg width="${width}" height="${height}" viewBox="0 0 24 34" xmlns="http://www.w3.org/2000/svg">
-      <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 22 12 22s12-13 12-22c0-6.6-5.4-12-12-12z"
-            fill="var(--crimson, #a3123c)" stroke="white" stroke-width="1.5" />
-      <circle cx="12" cy="12" r="6.5" fill="white" />
-      <circle cx="12" cy="12" r="3.4" fill="#e11d3c" />
-    </svg>
-  `;
+/** Square pin image size in px, scaled by alumni count. */
+function pinSize(count: number): number {
+  return Math.round(Math.min(52, 26 + count * 3));
 }
 
 function CompanyTile({ firm, count, logo }: Company) {
@@ -191,18 +180,30 @@ export function PlacementsMap() {
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
     for (const cluster of clusters) {
-      const width = pinWidth(cluster.alumniCount);
-      const height = Math.round(width * (34 / 24));
+      const size = pinSize(cluster.alumniCount);
+
+      // MapLibre applies its own positioning transform (translate) directly
+      // to the marker's root element — never set `transform` on `el` itself
+      // or it clobbers that positioning. Hover scaling goes on this inner
+      // `img` instead, which MapLibre never touches.
       const el = document.createElement("div");
-      el.innerHTML = pinSvg(width, height);
       el.style.cursor = "pointer";
-      el.style.transition = "transform 120ms ease-out";
-      el.style.transformOrigin = "bottom center";
+      const img = document.createElement("img");
+      img.src = pinImage;
+      img.alt = "";
+      img.style.width = `${size}px`;
+      img.style.height = `${size}px`;
+      img.style.display = "block";
+      img.style.transition = "transform 120ms ease-out";
+      img.style.transformOrigin = "bottom center";
+      img.style.filter = "drop-shadow(0 2px 3px rgba(0,0,0,0.35))";
+      el.appendChild(img);
+
       el.addEventListener("mouseenter", () => {
-        el.style.transform = "scale(1.12)";
+        img.style.transform = "scale(1.15)";
       });
       el.addEventListener("mouseleave", () => {
-        el.style.transform = "scale(1)";
+        img.style.transform = "scale(1)";
       });
       el.addEventListener("click", () => {
         map.flyTo({

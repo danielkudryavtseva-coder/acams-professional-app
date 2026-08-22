@@ -5,6 +5,7 @@
 import alumniRolodexData from "./alumniRolodexData.json";
 import type { Tag } from "./tags";
 import { DEFAULT_TAG_CATALOG } from "./tags";
+import fallCampusCover from "../../assets/news/fall-campus-2026.avif";
 
 /** Frozen tag rows for pitch/decision records (mirrors `freezeTagSnapshot` output). */
 function snapshotTags(tagIds: string[]): Tag[] {
@@ -398,6 +399,8 @@ export interface NewsPost {
   author: string;
   publishedAt: string;
   pinned: boolean;
+  /** Optional real cover photo. Falls back to a placeholder image when omitted. */
+  coverImage?: string;
 }
 
 export interface WeeklyCheckin {
@@ -545,7 +548,20 @@ export const MOCK_PORTFOLIO_DECISIONS: PortfolioDecision[] = [
 ];
 
 export const MOCK_NEWS: NewsPost[] = [
-  { id: "n1", title: "Fall Update", body: "Placeholder fall semester update — replace with the real post.", category: "announcement", author: "CAMS Executive Board", publishedAt: "2026-08-21T12:00:00", pinned: true },
+  {
+    id: "n1",
+    title: "Incoming - Fall 2026",
+    body:
+      "Welcome to The University of Alabama CAMS FALL 2026\n\n" +
+      "Applications open Monday, August 24th at 8:00 AM and close September 11th.\n\n" +
+      "Find us on the Quad on Wednesday, August 26th.\n\n" +
+      "Looking forward to meeting you all.",
+    category: "announcement",
+    author: "CAMS Executive Board",
+    publishedAt: "2026-08-21T12:00:00",
+    pinned: true,
+    coverImage: fallCampusCover,
+  },
 ];
 
 export const MOCK_FIRM_CARDS: FirmCard[] = [

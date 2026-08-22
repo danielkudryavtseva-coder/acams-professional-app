@@ -7,7 +7,7 @@ import { getNewsExcerpt } from "../context/NewsContext";
 import {
   estimateReadMinutes,
   formatNewsShortDate,
-  getNewsCoverSrc,
+  resolveNewsCover,
 } from "../lib/newsDisplay";
 import { cn } from "./ui/utils";
 
@@ -45,7 +45,7 @@ export function NewsFeaturedCard({ post }: { post: NewsPost }) {
   return (
     <article className="group relative isolate min-h-[14rem] overflow-hidden rounded-[1.25rem] shadow-soft ring-1 ring-border/40 md:min-h-[18rem] md:rounded-3xl">
       <img
-        src={getNewsCoverSrc(post.id, 1200, 750)}
+        src={resolveNewsCover(post, 1200, 750)}
         alt=""
         className="absolute inset-0 h-full w-full object-cover transition-transform duration-base ease-smooth group-hover:scale-[1.02]"
         loading="lazy"
@@ -95,7 +95,7 @@ export function NewsLatestListItem({ post }: { post: NewsPost }) {
         className="flex gap-3 rounded-[1.25rem] p-2 pr-3 transition-colors duration-base ease-smooth hover:bg-muted/70 dark:hover:bg-muted/20"
       >
         <img
-          src={getNewsCoverSrc(`${post.id}-list`, 200, 200)}
+          src={resolveNewsCover(post, 200, 200)}
           alt=""
           className="h-[4.25rem] w-[4.25rem] shrink-0 rounded-2xl object-cover shadow-xs ring-1 ring-border/30"
           loading="lazy"
@@ -209,7 +209,7 @@ export function NewsArticleExcerptCard({ post }: { post: NewsPost }) {
     <article className="flex h-full flex-col overflow-hidden rounded-[1.25rem] bg-muted/50 shadow-xs ring-1 ring-border/35 dark:bg-muted/25 md:rounded-3xl">
       <Link to={`/news/${post.id}`} className="block shrink-0">
         <img
-          src={getNewsCoverSrc(`${post.id}-founders`, 640, 360)}
+          src={resolveNewsCover(post, 640, 360)}
           alt=""
           className="aspect-[16/10] w-full object-cover"
           loading="lazy"
