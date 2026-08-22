@@ -5,6 +5,9 @@ import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "./ui/utils";
 import camsLogo from "../../assets/cams-logo.png";
 
+const APPLY_URL =
+  "https://bama365-my.sharepoint.com/:f:/r/personal/fhalderdice_crimson_ua_edu/Documents/CAMS%20Fall%202026%20Recruitment/Capstone%20Asset%20Management%20Society%20Fall%202026%20Applic?d=w5fa666acc8264f2eab734cd67830e98b&csf=1&web=1&e=S8mKHk";
+
 const PUBLIC_NAV = [
   { label: "Home", href: "/", end: true },
   { label: "Membership", href: "/membership", end: false },
@@ -65,10 +68,14 @@ export function PublicShell({ children }: PublicShellProps) {
               <Link to="/login">Log in</Link>
             </Button>
             <Button size="sm" className="hidden md:inline-flex shadow-soft" asChild>
-              <Link to="/register">Join CAMS</Link>
+              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
+                Apply
+              </a>
             </Button>
             <Button size="sm" className="md:hidden shadow-soft" asChild>
-              <Link to="/register">Get Started</Link>
+              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
+                Apply
+              </a>
             </Button>
           </div>
         </div>
