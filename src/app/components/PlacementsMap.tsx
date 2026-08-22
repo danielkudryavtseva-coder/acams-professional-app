@@ -23,8 +23,11 @@ const CARTO_LIGHT_STYLE: maplibregl.StyleSpecification = {
   layers: [{ id: "carto-base", type: "raster", source: "carto-light" }],
 };
 
-/** Below this zoom level the side panel stays in its "zoom in" prompt state. */
-const ZOOM_REVEAL_THRESHOLD = 6.5;
+/** Below this zoom level the side panel shows the top companies overview instead of a per-city breakdown. */
+const ZOOM_REVEAL_THRESHOLD = 4.2;
+
+/** How many firms to show in the always-visible top-companies overview. */
+const TOP_COMPANIES_COUNT = 20;
 
 interface Company {
   firm: string;
@@ -243,6 +246,8 @@ export function PlacementsMap() {
       setVisibleCompanies(mergeCompanies(inView));
     };
 
+    updatePanel();
+
     map.on("moveend", updatePanel);
     map.on("zoomend", updatePanel);
 
@@ -258,6 +263,10 @@ export function PlacementsMap() {
   const placedCount = MOCK_ALUMNI.filter(
     (a) => Number.isFinite(a.mapLat) && Number.isFinite(a.mapLng),
   ).length;
+  const topCompanies = React.useMemo(
+    () => mergeCompanies(buildCityClusters()).slice(0, TOP_COMPANIES_COUNT),
+    [],
+  );
 
   return (
     <div className="overflow-hidden rounded-xl border border-border shadow-sm">
@@ -265,9 +274,16 @@ export function PlacementsMap() {
         <div ref={containerRef} className="h-[420px] w-full sm:h-[480px] md:flex-1" />
         <aside className="w-full shrink-0 border-t border-border bg-paper p-4 dark:bg-card sm:h-[480px] md:w-64 md:border-l md:border-t-0">
           {!zoomedIn ? (
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              Zoom in on the map to see which firms CAMS alumni landed at in that area.
-            </p>
+            <div className="cams-panel-fade">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Top placements
+              </p>
+              <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1 sm:max-h-[400px] md:max-h-[340px]">
+                {topCompanies.map((c) => (
+                  <CompanyTile key={c.firm} {...c} />
+                ))}
+              </div>
+            </div>
           ) : visibleCompanies.length === 0 ? (
             <p className="text-xs leading-relaxed text-muted-foreground">
               No tracked placements in this view yet — pan toward a pin.
