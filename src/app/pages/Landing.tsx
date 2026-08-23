@@ -2,6 +2,7 @@ import { useMemo, useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { APPLY_URL } from "../components/PublicShell";
+import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
 import { sortNewsPosts, useNews } from "../context/NewsContext";
 import {
   NewsFeaturedCard,
@@ -193,6 +194,7 @@ export default function Landing() {
   const heroSectionRef = useRef<HTMLElement>(null);
   const heroBackgroundImgRef = useRef<HTMLImageElement>(null);
   const [missionOpen, setMissionOpen] = useState(false);
+  const { totalValue } = usePortfolioMarkToMarket({});
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -358,6 +360,15 @@ export default function Landing() {
               className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-base ease-smooth md:hidden ${missionOpen ? "rotate-180" : ""}`}
             />
           </button>
+
+          {totalValue > 0 && (
+            <p className="mt-1 text-center text-xs font-medium text-muted-foreground md:mt-1.5">
+              Total AUM:{" "}
+              <span className="font-semibold text-crimson">
+                ${totalValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              </span>
+            </p>
+          )}
 
           <div
             className={`grid overflow-hidden transition-all duration-base ease-smooth md:!grid-rows-[1fr] md:!opacity-100 ${
