@@ -194,6 +194,7 @@ export default function Landing() {
   const heroSectionRef = useRef<HTMLElement>(null);
   const heroBackgroundImgRef = useRef<HTMLImageElement>(null);
   const [missionOpen, setMissionOpen] = useState(false);
+  const [heroDescOpen, setHeroDescOpen] = useState(false);
   const { totalValue } = usePortfolioMarkToMarket({});
 
   useEffect(() => {
@@ -304,7 +305,7 @@ export default function Landing() {
           aria-hidden
         />
         <svg
-          className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.12]"
+          className="pointer-events-none absolute inset-0 hidden h-full w-full opacity-[0.12] sm:block"
           viewBox="0 0 1200 400"
           preserveAspectRatio="none"
           aria-hidden
@@ -320,11 +321,30 @@ export default function Landing() {
           <h1 className="max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] md:text-6xl">
             Capstone Asset Management Society
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white [text-shadow:0_1px_22px_rgba(0,0,0,0.55)] md:text-xl">
-            Cultivating future leaders in finance through real-world asset
-            management, investment research, and recruiting support at The
-            University of Alabama.
-          </p>
+          <button
+            type="button"
+            onClick={() => setHeroDescOpen((v) => !v)}
+            aria-expanded={heroDescOpen}
+            className="mt-4 flex items-center gap-1.5 text-sm font-medium text-white/90 sm:hidden"
+          >
+            {heroDescOpen ? "Hide details" : "Learn more"}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-base ease-smooth ${heroDescOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          <div
+            className={`grid overflow-hidden transition-all duration-base ease-smooth sm:!grid-rows-[1fr] sm:!opacity-100 ${
+              heroDescOpen ? "mt-2 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <div className="min-h-0">
+              <p className="max-w-2xl text-lg leading-relaxed text-white [text-shadow:0_1px_22px_rgba(0,0,0,0.55)] sm:mt-5 md:text-xl">
+                Cultivating future leaders in finance through real-world asset
+                management, investment research, and recruiting support at The
+                University of Alabama.
+              </p>
+            </div>
+          </div>
           <div className="mt-8 flex flex-wrap gap-3">
             {/* Mobile: single big Apply button */}
             <a
