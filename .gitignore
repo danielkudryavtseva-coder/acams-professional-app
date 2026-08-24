@@ -39,3 +39,4 @@ playwright-report
 *.njsproj
 *.sln
 *.sw?
+.gstack/

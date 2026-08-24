@@ -11,6 +11,7 @@ import type { AlumniProfile } from "../data/mockData";
 import { TRACK_COLORS } from "../data/constants";
 
 const AlumniRolodexGraph = React.lazy(() => import("../components/AlumniRolodexGraph"));
+const AlumniMap = React.lazy(() => import("../components/AlumniMap"));
 
 export default function ConnectPage() {
   const { posts } = useNews();
@@ -41,6 +42,7 @@ export default function ConnectPage() {
       <Tabs defaultValue="rolodex">
         <TabsList>
           <TabsTrigger value="rolodex">Alumni Rolodex</TabsTrigger>
+          <TabsTrigger value="map">Map</TabsTrigger>
           <TabsTrigger value="community">Community</TabsTrigger>
         </TabsList>
         <TabsContent value="rolodex" className="mt-4 space-y-0">
@@ -163,6 +165,23 @@ export default function ConnectPage() {
                 </React.Suspense>
               </div>
             </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="map" className="mt-4">
+          <div style={{ height: "min(78vh, 800px)", minHeight: 480 }}>
+            <React.Suspense
+              fallback={
+                <div className="flex h-full w-full items-center justify-center rounded-lg border border-[#2e3348] bg-[#0b0d15] text-sm text-slate-400">
+                  Loading alumni map…
+                </div>
+              }
+            >
+              <AlumniMap
+                alumni={MOCK_ALUMNI}
+                focusRequest={graphFocusRequest}
+                onSelect={(a) => setActiveAlumniId(a.id)}
+              />
+            </React.Suspense>
           </div>
         </TabsContent>
         <TabsContent value="community">

@@ -13,8 +13,23 @@ export interface EmailTemplate {
 
 export const EMAIL_TEMPLATES: EmailTemplate[] = [
   {
+    id: "cold-direct",
+    name: "Cold Outreach — Direct (Dan's template)",
+    subject: "Alabama Student — 10 Minutes",
+    category: "cold_outreach",
+    tags: ["cold", "direct", "all-firms"],
+    body: `Hi {{first_name}},
+
+I'll be direct. I've been building my recruiting list around a small group of firms and {{firm_name}} is one of them. {{firm_hook}}
+
+I'm a sophomore at Alabama, selected as 1 of 3 freshman (out of 750 applicants) for our Asset Management Society, interning with Cresset Capital this summer. I'd love 10 minutes. Happy to share my resume beforehand and keep the conversation focused.
+
+Roll Tide,
+Dan.`,
+  },
+  {
     id: "cold-ib-analyst",
-    name: "Cold Outreach - IB Analyst",
+    name: "Cold Outreach - IB Analyst (generic)",
     subject: "Interest in {{firm_name}} — {{your_school}} Student",
     category: "cold_outreach",
     tags: ["investment banking", "analyst", "cold"],

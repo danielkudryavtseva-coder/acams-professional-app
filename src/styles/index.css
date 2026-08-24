@@ -72,4 +72,71 @@
   .tabular {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Alumni network map (MapLibre) — dark high-tech popup styling */
+  .alumni-popup-wrap .maplibregl-popup-content {
+    background: #141826;
+    border: 1px solid #2e3348;
+    border-radius: 10px;
+    padding: 10px 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .alumni-popup-wrap .maplibregl-popup-tip {
+    border-top-color: #141826 !important;
+    border-bottom-color: #141826 !important;
+  }
+
+  .alumni-popup-wrap .maplibregl-popup-close-button {
+    color: #94a3b8;
+  }
+
+  .alumni-popup-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .alumni-popup-name {
+    color: #f1f5f9;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .alumni-popup-year {
+    color: #94a3b8;
+    font-size: 10px;
+  }
+
+  .alumni-popup-role {
+    color: #cbd5e1;
+    font-size: 11px;
+    margin-top: 2px;
+  }
+
+  .alumni-popup-city {
+    color: #94a3b8;
+    font-size: 10px;
+    margin-top: 1px;
+  }
+
+  .alumni-popup-track {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.02em;
+  }
+
+  .maplibregl-ctrl-attrib {
+    background: rgba(20, 24, 38, 0.7) !important;
+  }
+
+  .maplibregl-ctrl-attrib a {
+    color: #94a3b8 !important;
+  }
 }
