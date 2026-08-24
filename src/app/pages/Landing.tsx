@@ -13,6 +13,10 @@ import cadeAndrews from "../../assets/execs/cade-andrews.jpg";
 import alexWylie from "../../assets/execs/alex-wylie.png";
 import lukeLacke from "../../assets/execs/luke-lacke.png";
 import fordAlderice from "../../assets/execs/ford-alderice.png";
+import matthewWorthington from "../../assets/execs/matthew-worthington.png";
+import williamHessler from "../../assets/execs/william-hessler.png";
+import mattRochford from "../../assets/execs/matt-rochford.png";
+import lucyPetrus from "../../assets/execs/lucy-petrus.png";
 import landingHero from "../../assets/landing-hero-mansion.jpg";
 
 interface Executive {
@@ -36,10 +40,12 @@ const EXECUTIVES: Executive[] = [
   {
     name: "Matthew Worthington",
     title: "Portfolio Manager",
+    image: matthewWorthington,
   },
   {
     name: "William Hessler",
     title: "Director of New Member Education",
+    image: williamHessler,
   },
   {
     name: "Ford Alderice",
@@ -49,6 +55,7 @@ const EXECUTIVES: Executive[] = [
   {
     name: "Matt Rochford",
     title: "Co-Director of Media Development",
+    image: mattRochford,
   },
   {
     name: "Brady Belden",
@@ -63,6 +70,7 @@ const EXECUTIVES: Executive[] = [
   {
     name: "Lucy Petrus",
     title: "Director of Media",
+    image: lucyPetrus,
   },
 ];
 
