@@ -9,8 +9,6 @@ interface CommitteeInfo {
   tagline: string;
   description: string;
   activities: string[];
-  color: string;
-  border: string;
 }
 
 const COMMITTEES: CommitteeInfo[] = [
@@ -26,8 +24,6 @@ const COMMITTEES: CommitteeInfo[] = [
       "Industry trend and competitive landscape research",
       "Valuation modeling (DCF, comps, LBO)",
     ],
-    color: "bg-cyan-50 dark:bg-cyan-950/30",
-    border: "border-cyan-200 dark:border-cyan-800",
   },
   {
     name: "Contrarian",
@@ -41,8 +37,6 @@ const COMMITTEES: CommitteeInfo[] = [
       "Post-mortems on positions that underperformed",
       "Macro and market-sentiment tracking",
     ],
-    color: "bg-rose-50 dark:bg-rose-950/30",
-    border: "border-rose-200 dark:border-rose-800",
   },
   {
     name: "Financials",
@@ -56,8 +50,6 @@ const COMMITTEES: CommitteeInfo[] = [
       "Sector-specific investment pitches",
       "Regulatory and capital markets tracking",
     ],
-    color: "bg-blue-50 dark:bg-blue-950/30",
-    border: "border-blue-200 dark:border-blue-800",
   },
   {
     name: "Consumer",
@@ -71,8 +63,6 @@ const COMMITTEES: CommitteeInfo[] = [
       "Sector-specific investment pitches",
       "Channel checks and product research",
     ],
-    color: "bg-amber-50 dark:bg-amber-950/30",
-    border: "border-amber-200 dark:border-amber-800",
   },
   {
     name: "Healthcare",
@@ -86,8 +76,6 @@ const COMMITTEES: CommitteeInfo[] = [
       "Reimbursement and regulatory research",
       "Valuation modeling (DCF, comps, LBO)",
     ],
-    color: "bg-green-50 dark:bg-green-950/30",
-    border: "border-green-200 dark:border-green-800",
   },
   {
     name: "Industrials & Energy",
@@ -101,8 +89,6 @@ const COMMITTEES: CommitteeInfo[] = [
       "Supply chain and capacity utilization research",
       "Valuation modeling (DCF, comps, LBO)",
     ],
-    color: "bg-purple-50 dark:bg-purple-950/30",
-    border: "border-purple-200 dark:border-purple-800",
   },
 ];
 
@@ -214,25 +200,24 @@ export default function CommitteesPage() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <section className="border-b bg-card py-14 px-6 text-center">
-        <h1 className="text-5xl font-bold tracking-tight md:text-6xl">Our Committees</h1>
+      <section className="bg-gradient-to-br from-[#7d2c45] to-[#c63f60] px-6 py-10 text-center text-white">
+        <h1 className="text-3xl font-bold tracking-tight">Our Committees</h1>
+        <p className="mx-auto mt-2 max-w-xl text-base text-white/80">
+          Sector coverage teams that research, pitch, and manage the CAMS portfolio.
+        </p>
       </section>
 
       {/* Committee cards */}
-      <section className="max-w-5xl mx-auto w-full py-14 px-6 space-y-8">
+      <section className="max-w-5xl mx-auto w-full py-14 px-6 space-y-6">
         {COMMITTEES.map((c) => (
-          <Card key={c.name} className={`${c.color} ${c.border} border`}>
+          <Card key={c.name} className="bg-card">
             <CardHeader className="pb-3">
-              <div className="flex items-start justify-between flex-wrap gap-2">
-                <div>
-                  <CardTitle className="text-xl">{c.name} Committee</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-0.5">{c.tagline}</p>
-                </div>
-              </div>
+              <CardTitle className="text-xl">{c.name} Committee</CardTitle>
+              <p className="text-sm text-muted-foreground mt-0.5">{c.tagline}</p>
             </CardHeader>
             <CardContent className="space-y-4">
               <CommitteeHeadPlaceholder />
-              <p className="text-sm leading-relaxed">{c.description}</p>
+              <p className="text-sm leading-relaxed text-muted-foreground">{c.description}</p>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                   Key Activities
@@ -240,7 +225,7 @@ export default function CommitteesPage() {
                 <ul className="space-y-1">
                   {c.activities.map((a) => (
                     <li key={a} className="text-sm flex items-start gap-2">
-                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-[#c63f60] shrink-0" />
+                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-crimson shrink-0" />
                       {a}
                     </li>
                   ))}
