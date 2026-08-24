@@ -280,7 +280,7 @@ export default function Landing() {
       {/* Hero — full-bleed photo under CAMS crimson veil + vignette for readable white copy */}
       <section
         ref={heroSectionRef}
-        className="relative isolate min-h-[20rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:min-h-[24rem] md:min-h-[28rem]"
+        className="relative isolate min-h-[26rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:min-h-[32rem] md:min-h-[38rem]"
       >
         <div className="absolute inset-0">
           <img
@@ -291,7 +291,7 @@ export default function Landing() {
             height={900}
             decoding="async"
             fetchPriority="high"
-            className="h-full w-full object-cover object-[center_48%]"
+            className="h-full w-full object-cover object-[center_22%]"
             aria-hidden
           />
         </div>
@@ -362,7 +362,7 @@ export default function Landing() {
           </button>
 
           {totalValue > 0 && (
-            <p className="mt-1 text-center text-base font-medium text-muted-foreground md:mt-1.5 md:text-lg">
+            <p className="mt-1 text-center text-[2rem] font-medium text-muted-foreground md:mt-1.5 md:text-[2.25rem]">
               Total AUM:{" "}
               <span className="font-semibold text-crimson">
                 ${totalValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
