@@ -276,36 +276,38 @@ export default function Landing() {
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.42)_0%,transparent_38%,transparent_72%,rgba(0,0,0,0.28)_100%)] md:bg-[linear-gradient(to_right,rgba(0,0,0,0.38)_0%,transparent_55%)]"
           aria-hidden
         />
-        <div className="absolute inset-0 z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-[102px] pt-[102px] text-center sm:items-start sm:justify-center sm:py-24 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
-          <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold uppercase leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
-            <span className="block sm:inline">Capstone Asset</span>{" "}
-            <span className="block sm:inline">Management Society</span>
-          </h1>
-          <button
-            type="button"
-            onClick={() => setHeroDescOpen((v) => !v)}
-            aria-expanded={heroDescOpen}
-            className="mt-4 flex items-center gap-1.5 text-sm font-medium text-white/90 sm:hidden"
-          >
-            {heroDescOpen ? "Hide details" : "Learn more"}
-            <ChevronDown
-              className={`h-4 w-4 transition-transform duration-base ease-smooth ${heroDescOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-          <div
-            className={`grid overflow-hidden transition-all duration-base ease-smooth sm:!grid-rows-[1fr] sm:!opacity-100 ${
-              heroDescOpen ? "mt-2 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
-            }`}
-          >
-            <div className="min-h-0">
-              <p className="max-w-2xl text-lg leading-relaxed text-white [text-shadow:0_1px_22px_rgba(0,0,0,0.55)] sm:mt-5 md:text-xl">
-                Cultivating future leaders in finance through real-world asset
-                management, investment research, and recruiting support at The
-                University of Alabama.
-              </p>
+        <div className="absolute inset-0 z-10 mx-auto flex max-w-content flex-col items-center justify-between px-6 pb-[82px] pt-[82px] text-center sm:items-start sm:justify-center sm:py-24 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
+          <div className="flex flex-col items-center sm:items-start">
+            <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold uppercase leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
+              <span className="block sm:inline">Capstone Asset</span>{" "}
+              <span className="block sm:inline">Management Society</span>
+            </h1>
+            <button
+              type="button"
+              onClick={() => setHeroDescOpen((v) => !v)}
+              aria-expanded={heroDescOpen}
+              className="mt-4 flex items-center gap-1.5 text-sm font-medium text-white/90 sm:hidden"
+            >
+              {heroDescOpen ? "Hide details" : "Learn more"}
+              <ChevronDown
+                className={`h-4 w-4 transition-transform duration-base ease-smooth ${heroDescOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            <div
+              className={`grid overflow-hidden transition-all duration-base ease-smooth sm:!grid-rows-[1fr] sm:!opacity-100 ${
+                heroDescOpen ? "mt-2 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+              }`}
+            >
+              <div className="min-h-0">
+                <p className="max-w-2xl text-lg leading-relaxed text-white [text-shadow:0_1px_22px_rgba(0,0,0,0.55)] sm:mt-5 md:text-xl">
+                  Cultivating future leaders in finance through real-world asset
+                  management, investment research, and recruiting support at The
+                  University of Alabama.
+                </p>
+              </div>
             </div>
           </div>
-          <div className="mt-14 flex w-full flex-wrap justify-center gap-3 sm:mt-8 sm:w-auto sm:justify-start">
+          <div className="flex w-full flex-wrap justify-center gap-3 sm:mt-8 sm:w-auto sm:justify-start">
             {/* Mobile: single big pill Apply button */}
             <a
               href={APPLY_URL}
