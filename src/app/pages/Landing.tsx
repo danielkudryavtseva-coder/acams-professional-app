@@ -8,97 +8,61 @@ import {
   NewsFeaturedCard,
   NewsLatestListItem,
 } from "../components/NewsBlogLayout";
-import campbellWatts from "../../assets/execs/campbell-watts.jpg";
 import bradyBelden from "../../assets/execs/brady-belden.jpg";
-import chrisRinaldi from "../../assets/execs/chris-rinaldi.jpg";
-import corbinPurdum from "../../assets/execs/corbin-purdum.jpg";
-import jakeKroner from "../../assets/execs/jake-kroner.jpg";
-import ceciliaCordell from "../../assets/execs/cecilia-cordell.jpg";
 import cadeAndrews from "../../assets/execs/cade-andrews.jpg";
-import quinnRinke from "../../assets/execs/quinn-rinke.png";
+import alexWylie from "../../assets/execs/alex-wylie.png";
+import lukeLacke from "../../assets/execs/luke-lacke.png";
+import fordAlderice from "../../assets/execs/ford-alderice.png";
 import landingHero from "../../assets/landing-hero-mansion.jpg";
 
 interface Executive {
   name: string;
   title: string;
-  bio: string;
-  image: string;
+  bio?: string;
+  image?: string;
 }
 
 const EXECUTIVES: Executive[] = [
   {
-    name: "Campbell Watts",
+    name: "Alex Wylie",
     title: "President",
-    image: campbellWatts,
-    bio:
-      "Senior from Marietta, GA studying Management Information Systems in the Accelerated Master's Program. " +
-      "Spent this past summer as a Consulting Intern for 84.51° in Cincinnati, OH. " +
-      "Outside of school, Campbell works at the Rec Center on campus and plays basketball with friends.",
+    image: alexWylie,
+  },
+  {
+    name: "Luke Lacke",
+    title: "Vice President",
+    image: lukeLacke,
+  },
+  {
+    name: "Matthew Worthington",
+    title: "Portfolio Manager",
+  },
+  {
+    name: "William Hessler",
+    title: "Director of New Member Education",
+  },
+  {
+    name: "Ford Alderice",
+    title: "Director of Recruitment",
+    image: fordAlderice,
+  },
+  {
+    name: "Matt Rochford",
+    title: "Co-Director of Media Development",
   },
   {
     name: "Brady Belden",
-    title: "Vice President",
+    title: "Co-Director of Media Development",
     image: bradyBelden,
-    bio:
-      "Sophomore from San Antonio, TX studying Finance and Economics with a minor in Value Investing. " +
-      "Spent this past summer as an Investment Banking intern for Young American Capital in Mamaroneck, NY. " +
-      "Outside of school, Brady enjoys weightlifting, bass fishing, and sports card collecting/trading.",
-  },
-  {
-    name: "Chris Rinaldi",
-    title: "Portfolio Manager",
-    image: chrisRinaldi,
-    bio:
-      "Senior from Denver, CO studying Finance and Accounting with a minor in Value Investing. " +
-      "Will be interning this summer with J.P. Morgan in the firm's Asset Management segment in Columbus. " +
-      "Member of the UA M&A Group, Alpha Kappa Lambda, and Bama Catholic; concurrently a TMT analyst at Young America Capital. " +
-      "In his free time, Chris enjoys producing music, fishing, and golfing.",
-  },
-  {
-    name: "Corbin Purdum",
-    title: "Director of New Member Education",
-    image: corbinPurdum,
-    bio:
-      "Senior from Littleton, CO studying Finance and Accounting. " +
-      "After graduation, Corbin plans to pursue a career in investment management. " +
-      "Involved in Sigma Phi Epsilon and Campus Outreach ministry; in his free time he trains in Brazilian Jiu-Jitsu and plays the drums.",
-  },
-  {
-    name: "Jake Kroner",
-    title: "Director of Recruitment",
-    image: jakeKroner,
-    bio:
-      "Junior from Chicago, IL majoring in Finance and Accounting with a minor in Value Investing. " +
-      "Last summer, Jake interned with Timber Hill Group in Chicago as a Private Equity Real Estate Analyst. " +
-      "Member of Sigma Phi Epsilon, M&A Group, and served in the Interfraternity Council. In his free time, Jake enjoys golf and python hunting.",
-  },
-  {
-    name: "Cecilia Cordell",
-    title: "Co-Director of Member Development",
-    image: ceciliaCordell,
-    bio:
-      "Senior from Atlanta, GA studying Finance, Economics, and Math, on the AMP track for a Master's in Quantitative Economics. " +
-      "Completed an internship with JP Morgan Equity Research in NYC and is joining full-time upon graduation. " +
-      "Involved with the Faculty Scholars Program, Manderson Specialized Masters Association, and serves as a Research Ambassador. " +
-      "In her free time, Cecilia enjoys baking and playing instruments.",
   },
   {
     name: "Cade Andrews",
-    title: "Co-Director of Member Development",
+    title: "Co-Director of Media Development",
     image: cadeAndrews,
-    bio:
-      "Junior from Scottsdale, AZ studying Finance and Economics. " +
-      "This upcoming summer, he will be interning as an Investment Analyst at Hood River Capital Management in West Palm Beach. " +
-      "Member of Pi Kappa Alpha; enjoys running, lifting, reading, and cooking in his free time.",
   },
   {
-    name: "Quinn Rinke",
+    name: "Lucy Petrus",
     title: "Director of Media",
-    image: quinnRinke,
-    bio:
-      "Junior from Cleveland, OH studying Finance and Economics with double minors in Value Investing and Liberal Arts. " +
-      "Spent her summer as a Finance Intern for MRP Solutions in Plattsburgh, NY. " +
-      "VP of Finance for Delta Sigma Pi and a member of Women Talk Wealth. In her free time, Quinn enjoys reading and playing piano.",
   },
 ];
 
