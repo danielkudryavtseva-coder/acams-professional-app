@@ -3,6 +3,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Image } from "lucide-react";
 import { PlacementsMap } from "../components/PlacementsMap";
+import { APPLY_URL } from "../components/PublicShell";
 
 const STATS = [
   { label: "Active Members", value: "30+" },
@@ -164,7 +165,9 @@ export default function MembershipPage() {
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Button asChild>
-            <Link to="/apply">Start Your Application</Link>
+            <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
+              Start Your Application
+            </a>
           </Button>
           <Button variant="outline" asChild>
             <Link to="/committees">View Committees</Link>

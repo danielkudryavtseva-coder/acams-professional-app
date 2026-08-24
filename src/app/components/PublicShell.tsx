@@ -5,6 +5,9 @@ import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "./ui/utils";
 import camsLogo from "../../assets/cams-logo.png";
 
+export const APPLY_URL =
+  "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=jnIAKtDwtECk6M5DPz-8p-dm6BAHXZ5FpC2yR0M_VpJUNktCRjRJRDRFVk9ZVkFNT0tUSjdPN1FTUC4u";
+
 const PUBLIC_NAV = [
   { label: "Home", href: "/", end: true },
   { label: "Membership", href: "/membership", end: false },
@@ -64,10 +67,14 @@ export function PublicShell({ children }: PublicShellProps) {
               <Link to="/login">Log in</Link>
             </Button>
             <Button size="sm" className="hidden md:inline-flex shadow-soft" asChild>
-              <Link to="/apply">Apply</Link>
+              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
+                Apply
+              </a>
             </Button>
             <Button size="sm" className="md:hidden shadow-soft" asChild>
-              <Link to="/apply">Apply</Link>
+              <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
+                Apply
+              </a>
             </Button>
           </div>
         </div>
@@ -154,9 +161,14 @@ export function PublicShell({ children }: PublicShellProps) {
                 </Link>
               </li>
               <li>
-                <Link to="/apply" className={footerLinkClass}>
+                <a
+                  href={APPLY_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={footerLinkClass}
+                >
                   Apply
-                </Link>
+                </a>
               </li>
             </ul>
           </div>

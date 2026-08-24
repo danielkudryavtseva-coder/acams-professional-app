@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { User, Image } from "lucide-react";
+import { APPLY_URL } from "../components/PublicShell";
 
 interface CommitteeInfo {
   name: "Investment" | "Recruiting" | "Operations" | "Marketing";
@@ -202,7 +203,9 @@ export default function CommitteesPage() {
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <Button asChild>
-            <Link to="/apply">Apply to CAMS</Link>
+            <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
+              Apply to CAMS
+            </a>
           </Button>
           <Button variant="outline" asChild>
             <Link to="/membership">Learn More</Link>

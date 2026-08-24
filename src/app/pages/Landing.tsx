@@ -1,6 +1,7 @@
 import { useMemo, useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import { APPLY_URL } from "../components/PublicShell";
 import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
 import { sortNewsPosts, useNews } from "../context/NewsContext";
 import {
@@ -316,7 +317,7 @@ export default function Landing() {
             points="0,300 100,260 200,280 300,210 400,230 500,170 600,200 700,140 800,180 900,110 1000,150 1100,80 1200,120"
           />
         </svg>
-        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-5 pt-28 text-center sm:items-start sm:justify-center sm:pb-16 sm:pt-32 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
+        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-3 pt-28 text-center sm:items-start sm:justify-center sm:pb-16 sm:pt-32 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
           <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
             <span className="block sm:inline">Capstone Asset</span>{" "}
             <span className="block sm:inline">Management Society</span>
@@ -347,12 +348,14 @@ export default function Landing() {
           </div>
           <div className="mt-14 flex w-full flex-wrap justify-center gap-3 sm:mt-8 sm:w-auto sm:justify-start">
             {/* Mobile: single big pill Apply button */}
-            <Link
-              to="/apply"
+            <a
+              href={APPLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-4 text-base font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:hidden"
             >
               Apply
-            </Link>
+            </a>
 
             {/* Desktop/tablet: both CTAs */}
             <Link
@@ -361,12 +364,14 @@ export default function Landing() {
             >
               Explore Our Portfolio
             </Link>
-            <Link
-              to="/apply"
+            <a
+              href={APPLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="hidden items-center justify-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
             >
               Apply
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -520,12 +525,14 @@ export default function Landing() {
               exec tools.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link
-                to="/apply"
+              <a
+                href={APPLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-md bg-crimson px-5 py-3 text-sm font-semibold text-white shadow-soft transition-[background-color,box-shadow] duration-base ease-smooth hover:bg-crimson-dark hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
               >
                 Apply
-              </Link>
+              </a>
               <Link
                 to="/login"
                 className="inline-flex items-center justify-center rounded-md border border-border bg-background px-5 py-3 text-sm font-semibold shadow-xs transition-[background-color,box-shadow,border-color] duration-base ease-smooth hover:border-border hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
