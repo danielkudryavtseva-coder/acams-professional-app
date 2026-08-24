@@ -317,7 +317,7 @@ export default function Landing() {
             points="0,300 100,260 200,280 300,210 400,230 500,170 600,200 700,140 800,180 900,110 1000,150 1100,80 1200,120"
           />
         </svg>
-        <div className="relative z-10 mx-auto flex max-w-content flex-col justify-end px-6 pb-14 pt-28 sm:justify-center sm:pb-20 sm:pt-20 md:min-h-[28rem] md:py-24 lg:py-32">
+        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-14 pt-28 text-center sm:items-start sm:justify-center sm:pb-20 sm:pt-20 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
           <h1 className="max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] md:text-6xl">
             Capstone Asset Management Society
           </h1>
@@ -345,13 +345,13 @@ export default function Landing() {
               </p>
             </div>
           </div>
-          <div className="mt-8 flex flex-wrap gap-3">
-            {/* Mobile: single big Apply button */}
+          <div className="mt-8 flex w-full flex-wrap justify-center gap-3 sm:w-auto sm:justify-start">
+            {/* Mobile: single big pill Apply button */}
             <a
               href={APPLY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center rounded-md bg-white px-5 py-4 text-base font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:hidden"
+              className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-4 text-base font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:hidden"
             >
               Apply
             </a>
