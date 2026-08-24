@@ -16,7 +16,7 @@ import jakeKroner from "../../assets/execs/jake-kroner.jpg";
 import ceciliaCordell from "../../assets/execs/cecilia-cordell.jpg";
 import cadeAndrews from "../../assets/execs/cade-andrews.jpg";
 import quinnRinke from "../../assets/execs/quinn-rinke.png";
-import landingHero from "../../assets/landing-hero.png";
+import landingHero from "../../assets/landing-hero-mansion.jpg";
 
 interface Executive {
   name: string;
@@ -291,7 +291,7 @@ export default function Landing() {
             height={900}
             decoding="async"
             fetchPriority="high"
-            className="h-full w-full object-cover object-[center_55%]"
+            className="h-full w-full object-cover object-[center_40%]"
             aria-hidden
           />
         </div>
