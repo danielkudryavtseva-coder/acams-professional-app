@@ -5,6 +5,7 @@
 import alumniRolodexData from "./alumniRolodexData.json";
 import type { Tag } from "./tags";
 import { DEFAULT_TAG_CATALOG } from "./tags";
+import fallCampusCover from "../../assets/news/fall-campus-2026.avif";
 
 /** Frozen tag rows for pitch/decision records (mirrors `freezeTagSnapshot` output). */
 function snapshotTags(tagIds: string[]): Tag[] {
@@ -170,8 +171,28 @@ export const MOCK_CONTACTS: Contact[] = [
  * RecruitingPage, etc.) keep working with no import changes.
  */
 import { RECRUITING_PROGRAMS } from "./recruitingPrograms";
+import { adaptInternships } from "./internshipAdapter";
 
-export const MOCK_PROGRAMS: Program[] = RECRUITING_PROGRAMS;
+// Merge the curated recruiting calendar with the 522-entry internship dataset.
+// Deduplicate by firm+role so no program appears twice.
+// Auto-close any program whose published deadline has passed, regardless of rolling flag.
+function mergePrograms(): Program[] {
+  const seen = new Set<string>();
+  const result: Program[] = [];
+  const today = new Date().toISOString().split("T")[0];
+  for (const p of [...RECRUITING_PROGRAMS, ...adaptInternships()]) {
+    const key = `${p.firm.toLowerCase()}|${p.role.toLowerCase()}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      const status: Program["status"] =
+        p.status === "open" && p.deadline && p.deadline < today ? "closed" : p.status;
+      result.push({ ...p, status });
+    }
+  }
+  return result;
+}
+
+export const MOCK_PROGRAMS: Program[] = mergePrograms();
 
 export const MOCK_STOCK_HOLDINGS: StockHolding[] = [
   { ticker: "AAPL", name: "Apple Inc.", shares: 50, avgCost: 155.0, currentPrice: 189.3, sector: "Technology", marketCap: "large" },
@@ -243,6 +264,9 @@ export interface Member {
   linkedin: string;
   role: MemberRole;
   gpa?: string;
+  location?: string;
+  major?: string;
+  password?: string;
   /** Optional profile photo URL. When omitted, the roster shows initials. */
   avatarUrl?: string;
   pnlTagged: boolean;
@@ -375,6 +399,8 @@ export interface NewsPost {
   author: string;
   publishedAt: string;
   pinned: boolean;
+  /** Optional real cover photo. Falls back to a placeholder image when omitted. */
+  coverImage?: string;
 }
 
 export interface WeeklyCheckin {
@@ -415,12 +441,11 @@ export interface Notification {
   sentBy: string;
 }
 
+// Only exec accounts are seeded here — they are required for the isExec privilege check
+// in AuthContext. Regular members are created via registration and persisted in localStorage.
 export const MOCK_MEMBERS: Member[] = [
   { id: "m1", firstName: "Drew", lastName: "Whitfield", email: "dkwhitfield@crimson.ua.edu", phone: "205-555-0101", classYear: "Junior", graduationYear: 2027, committee: "Investment", interests: ["IB", "PE"], personalStatement: "Passionate about leveraged buyouts and capital structure optimization.", resumeFilename: "whitfield_resume.pdf", linkedin: "linkedin.com/in/drewwhitfield", role: "exec", gpa: "3.91", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 12, pitchesSubmitted: 3, coffeeChatsCompleted: 5, offers: 2 },
-  { id: "m2", firstName: "Jordan", lastName: "Hayes", email: "jhayes@crimson.ua.edu", phone: "205-555-0102", classYear: "Junior", graduationYear: 2027, committee: "Recruiting", interests: ["VC", "Consulting"], personalStatement: "Interested in early-stage venture and strategic advisory work.", resumeFilename: "hayes_resume.pdf", linkedin: "linkedin.com/in/jordanhayes", role: "member", gpa: "3.75", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 8, pitchesSubmitted: 2, coffeeChatsCompleted: 3, offers: 1 },
-  { id: "m3", firstName: "Priya", lastName: "Sharma", email: "psharma@crimson.ua.edu", phone: "205-555-0103", classYear: "Sophomore", graduationYear: 2028, committee: "Investment", interests: ["ER", "AM"], personalStatement: "Equity research enthusiast with a focus on healthcare and biotech.", resumeFilename: "sharma_resume.pdf", linkedin: "linkedin.com/in/priyasharma", role: "member", gpa: "3.88", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 6, pitchesSubmitted: 2, coffeeChatsCompleted: 2, offers: 1 },
   { id: "m4", firstName: "Marcus", lastName: "Davis", email: "mdavis@crimson.ua.edu", phone: "205-555-0104", classYear: "Senior", graduationYear: 2026, committee: "Operations", interests: ["IB", "Consulting"], personalStatement: "Focused on M&A and strategic advisory.", resumeFilename: "davis_resume.pdf", linkedin: "linkedin.com/in/marcusdavis", role: "exec", gpa: "3.62", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 15, pitchesSubmitted: 4, coffeeChatsCompleted: 7, offers: 3 },
-  { id: "m5", firstName: "Chloe", lastName: "Park", email: "cpark@crimson.ua.edu", phone: "205-555-0105", classYear: "Junior", graduationYear: 2027, committee: "Marketing", interests: ["PE", "VC"], personalStatement: "Growth equity focus.", resumeFilename: null, linkedin: "linkedin.com/in/chloepark", role: "member", gpa: "3.55", pnlTagged: true, pnlReason: "3 consecutive mandatory event misses + no pitches submitted Q1", active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 2, pitchesSubmitted: 0, coffeeChatsCompleted: 1, offers: 0 },
 ];
 
 /** Sourced from CAMS Alumni Rolodex spreadsheet; regenerate via `py -3 scripts/generate_alumni_rolodex.py`. */
@@ -433,14 +458,7 @@ export const MOCK_EVENTS: ClubEvent[] = [
   { id: "e4", title: "Investment Pitch — Q1", description: "Committee pitch presentations.", date: "2026-03-10T17:00:00", location: "Bidgood Hall 130", mandatory: true },
 ];
 
-export const MOCK_ATTENDANCE: AttendanceRecord[] = [
-  { memberId: "m1", eventId: "e1", rsvp: "confirmed", attended: true },
-  { memberId: "m1", eventId: "e2", rsvp: "confirmed", attended: true },
-  { memberId: "m1", eventId: "e4", rsvp: "confirmed", attended: true },
-  { memberId: "m5", eventId: "e1", rsvp: "denied", attended: false, missReason: "Personal" },
-  { memberId: "m5", eventId: "e2", rsvp: "denied", attended: false, missReason: "Travel" },
-  { memberId: "m5", eventId: "e4", rsvp: "pending", attended: false },
-];
+export const MOCK_ATTENDANCE: AttendanceRecord[] = [];
 
 export const MOCK_JOB_POSTINGS: JobPosting[] = [
   { id: "j1", firm: "Goldman Sachs", role: "Summer Analyst — IBD", track: "IB", deadline: "2026-09-01", applicationLink: "https://goldmansachs.com/careers", alumniReferralId: "alum-033", description: "10-week IBD program.", postedBy: "cams" },
@@ -530,9 +548,20 @@ export const MOCK_PORTFOLIO_DECISIONS: PortfolioDecision[] = [
 ];
 
 export const MOCK_NEWS: NewsPost[] = [
-  { id: "n1", title: "Welcome, Spring 2026 Class!", body: "We are thrilled to welcome a strong new CAMS class.", category: "announcement", author: "CAMS Executive Board", publishedAt: "2026-01-15T12:00:00", pinned: true },
-  { id: "n2", title: "Portfolio Update — Q1 2026", body: "The student-managed portfolio returned +3.2% in Q1.", category: "portfolio", author: "Investment Committee", publishedAt: "2026-04-01T09:00:00", pinned: false },
-  { id: "n3", title: "Fed Holds Rates", body: "Hiring remains cautious but stable across finance.", category: "market", author: "Research Team", publishedAt: "2026-03-20T14:00:00", pinned: false },
+  {
+    id: "n1",
+    title: "Incoming - Fall 2026",
+    body:
+      "Welcome to The University of Alabama CAMS FALL 2026\n\n" +
+      "Applications open Monday, August 24th at 8:00 AM and close September 11th.\n\n" +
+      "Find us on the Quad on Wednesday, August 26th.\n\n" +
+      "Looking forward to meeting you all.",
+    category: "announcement",
+    author: "CAMS Executive Board",
+    publishedAt: "2026-08-21T12:00:00",
+    pinned: true,
+    coverImage: fallCampusCover,
+  },
 ];
 
 export const MOCK_FIRM_CARDS: FirmCard[] = [

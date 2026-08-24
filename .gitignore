@@ -40,3 +40,4 @@ playwright-report
 *.sln
 *.sw?
 .gstack/
+.vercel

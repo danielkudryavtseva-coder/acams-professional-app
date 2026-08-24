@@ -1,19 +1,13 @@
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
+import { APPLY_URL } from "../components/PublicShell";
+import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
 import { sortNewsPosts, useNews } from "../context/NewsContext";
 import {
   NewsFeaturedCard,
   NewsLatestListItem,
 } from "../components/NewsBlogLayout";
-import { LandingPortfolioMiniChart } from "../components/LandingPortfolioMiniChart";
-import { usePortfolioLiveData } from "../hooks/usePortfolioLiveData";
-import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
-import {
-  buildMonthlyPortfolioTrend,
-  sharpeAnnualizedFromMonthlyValues,
-  ytdStartFromHistory,
-} from "../lib/portfolioLiveSeries";
 import campbellWatts from "../../assets/execs/campbell-watts.jpg";
 import bradyBelden from "../../assets/execs/brady-belden.jpg";
 import chrisRinaldi from "../../assets/execs/chris-rinaldi.jpg";
@@ -22,7 +16,7 @@ import jakeKroner from "../../assets/execs/jake-kroner.jpg";
 import ceciliaCordell from "../../assets/execs/cecilia-cordell.jpg";
 import cadeAndrews from "../../assets/execs/cade-andrews.jpg";
 import quinnRinke from "../../assets/execs/quinn-rinke.png";
-import landingHero from "../../assets/landing-hero.png";
+import landingHero from "../../assets/landing-hero-mansion.jpg";
 
 interface Executive {
   name: string;
@@ -108,29 +102,24 @@ const EXECUTIVES: Executive[] = [
   },
 ];
 
-interface StatCardProps {
-  label: string;
-  value: string;
-  sub?: string;
-}
-
-function StatCard({ label, value, sub }: StatCardProps) {
-  return (
-    <div className="rounded-lg border border-border/90 bg-card px-4 py-4 text-center shadow-soft ring-1 ring-border/35 transition-shadow duration-base ease-smooth hover:shadow-elevated md:px-5 md:py-4">
-      <div className="text-xs font-semibold uppercase tracking-wider text-crimson">
-        {label}
-      </div>
-      <div className="mt-1.5 font-display text-2xl font-semibold tabular md:text-3xl">
-        {value}
-      </div>
-      {sub && (
-        <div className="mt-1 text-xs leading-snug text-muted-foreground">
-          {sub}
-        </div>
-      )}
-    </div>
-  );
-}
+const PILLARS = [
+  {
+    title: "Investment Management",
+    body: "Members manage a real-money portfolio, conducting equity research and presenting investment pitches to the full committee each semester.",
+  },
+  {
+    title: "Recruiting Support",
+    body: "We host firm info sessions, mock interviews, and resume workshops — and provide direct introductions to CAMS alumni at top institutions.",
+  },
+  {
+    title: "Professional Development",
+    body: "Weekly meetings, guest speakers from Wall Street, and case competitions build the technical and soft skills firms actually look for.",
+  },
+  {
+    title: "Alumni Network",
+    body: "Our alumni are placed at Goldman Sachs, BlackRock, J.P. Morgan, KKR, and beyond. Active mentorship connects current members with those paths.",
+  },
+];
 
 interface ExecCardProps {
   name: string;
@@ -201,14 +190,12 @@ function ExecCard({ name, title, image, bio }: ExecCardProps) {
 const HERO_PARALLAX_MAX_PX = 24;
 const HERO_PARALLAX_MIN_PX = 8;
 
-function formatAumUsd(totalValue: number): string {
-  if (totalValue >= 1_000_000) return `$${(totalValue / 1_000_000).toFixed(2)}M`;
-  return `$${(totalValue / 1000).toFixed(1)}K`;
-}
-
 export default function Landing() {
   const heroSectionRef = useRef<HTMLElement>(null);
   const heroBackgroundImgRef = useRef<HTMLImageElement>(null);
+  const [missionOpen, setMissionOpen] = useState(false);
+  const [heroDescOpen, setHeroDescOpen] = useState(false);
+  const { totalValue } = usePortfolioMarkToMarket({});
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -289,54 +276,12 @@ export default function Landing() {
   const landingFeatured = landingNews[0];
   const landingRest = landingNews.slice(1, 5);
 
-  const { quotes, history } = usePortfolioLiveData();
-  const {
-    liveHoldings,
-    bondValue,
-    fundValue,
-    totalValue,
-    totalReturnPct,
-  } = usePortfolioMarkToMarket(quotes);
-  const bondAndFundMarketValue = bondValue + fundValue;
-  const ytdStart = useMemo(
-    () => ytdStartFromHistory(liveHoldings, history),
-    [liveHoldings, history],
-  );
-  const ytdReturnFrac =
-    ytdStart != null && ytdStart > 0 ? (totalValue - ytdStart) / ytdStart : null;
-  const ytdPct = ytdReturnFrac != null ? ytdReturnFrac * 100 : null;
-  const ytdValueStr =
-    ytdPct != null
-      ? `${ytdPct >= 0 ? "+" : ""}${ytdPct.toFixed(2)}%`
-      : `${totalReturnPct >= 0 ? "+" : ""}${totalReturnPct.toFixed(2)}%`;
-  const ytdSub =
-    ytdPct != null
-      ? "Calendar YTD — same marks as portfolio"
-      : "All-time return (add FMP history for calendar YTD)";
-
-  const liveMonthly = useMemo(
-    () => buildMonthlyPortfolioTrend(liveHoldings, history, 12, bondAndFundMarketValue),
-    [liveHoldings, history, bondAndFundMarketValue],
-  );
-  const sharpe = useMemo(
-    () =>
-      liveMonthly.length > 0
-        ? sharpeAnnualizedFromMonthlyValues(liveMonthly.map((p) => p.value))
-        : null,
-    [liveMonthly],
-  );
-  const sharpeValueStr = sharpe != null ? sharpe.toFixed(1) : "—";
-  const sharpeSub =
-    sharpe != null
-      ? "From live monthly portfolio values (12m)"
-      : "Needs live price history (FMP)";
-
   return (
     <>
       {/* Hero — full-bleed photo under CAMS crimson veil + vignette for readable white copy */}
       <section
         ref={heroSectionRef}
-        className="relative isolate min-h-[20rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:min-h-[24rem] md:min-h-[28rem]"
+        className="relative isolate min-h-[22rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:min-h-[32rem] md:min-h-[38rem]"
       >
         <div className="absolute inset-0">
           <img
@@ -347,7 +292,7 @@ export default function Landing() {
             height={900}
             decoding="async"
             fetchPriority="high"
-            className="h-full w-full object-cover object-[center_48%]"
+            className="h-full w-full object-cover object-[center_40%]"
             aria-hidden
           />
         </div>
@@ -360,7 +305,7 @@ export default function Landing() {
           aria-hidden
         />
         <svg
-          className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.12]"
+          className="pointer-events-none absolute inset-0 hidden h-full w-full opacity-[0.12] sm:block"
           viewBox="0 0 1200 400"
           preserveAspectRatio="none"
           aria-hidden
@@ -372,77 +317,127 @@ export default function Landing() {
             points="0,300 100,260 200,280 300,210 400,230 500,170 600,200 700,140 800,180 900,110 1000,150 1100,80 1200,120"
           />
         </svg>
-        <div className="relative z-10 mx-auto flex max-w-content flex-col justify-end px-6 pb-14 pt-28 sm:justify-center sm:pb-20 sm:pt-20 md:min-h-[28rem] md:py-24 lg:py-32">
-          <h1 className="max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] md:text-6xl">
-            Capstone Asset Management Society
+        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-3 pt-16 text-center sm:items-start sm:justify-center sm:pb-16 sm:pt-32 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
+          <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
+            <span className="block sm:inline">Capstone Asset</span>{" "}
+            <span className="block sm:inline">Management Society</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white [text-shadow:0_1px_22px_rgba(0,0,0,0.55)] md:text-xl">
-            Cultivating future leaders in finance through real-world asset
-            management, investment research, and recruiting support at The
-            University of Alabama.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setHeroDescOpen((v) => !v)}
+            aria-expanded={heroDescOpen}
+            className="mt-4 flex items-center gap-1.5 text-sm font-medium text-white/90 sm:hidden"
+          >
+            {heroDescOpen ? "Hide details" : "Learn more"}
+            <ChevronDown
+              className={`h-4 w-4 transition-transform duration-base ease-smooth ${heroDescOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+          <div
+            className={`grid overflow-hidden transition-all duration-base ease-smooth sm:!grid-rows-[1fr] sm:!opacity-100 ${
+              heroDescOpen ? "mt-2 grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <div className="min-h-0">
+              <p className="max-w-2xl text-lg leading-relaxed text-white [text-shadow:0_1px_22px_rgba(0,0,0,0.55)] sm:mt-5 md:text-xl">
+                Cultivating future leaders in finance through real-world asset
+                management, investment research, and recruiting support at The
+                University of Alabama.
+              </p>
+            </div>
+          </div>
+          <div className="mt-14 flex w-full flex-wrap justify-center gap-3 sm:mt-8 sm:w-auto sm:justify-start">
+            {/* Mobile: single big pill Apply button */}
+            <a
+              href={APPLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-4 text-base font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:hidden"
+            >
+              Apply
+            </a>
+
+            {/* Desktop/tablet: both CTAs */}
             <Link
               to="/portfolio"
-              className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson"
+              className="hidden items-center justify-center rounded-md border border-white/80 bg-white/5 px-5 py-3 text-sm font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
             >
               Explore Our Portfolio
             </Link>
-            <Link
-              to="/register"
-              className="inline-flex items-center justify-center rounded-md border border-white/80 bg-white/5 px-5 py-3 text-sm font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson"
+            <a
+              href={APPLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden items-center justify-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
             >
-              Learn About Membership
-            </Link>
+              Apply
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Portfolio Performance & Insights */}
-      <section className="border-y border-border/60 bg-paper py-12 md:py-14 dark:border-border dark:bg-card">
+      {/* Mission & What We Do — condensed; collapsed accordion on mobile, always open (but compact) on desktop */}
+      <section className="border-y border-border/60 bg-paper pb-4 pt-6 dark:border-border dark:bg-card md:py-8">
         <div className="mx-auto max-w-content px-6">
-          <h2 className="text-center font-display text-3xl font-semibold tracking-tight text-foreground">
-            Portfolio Performance &amp; Insights
-          </h2>
-          <p className="mt-2 text-center text-muted-foreground">
-            A snapshot of what CAMS is managing right now.
-          </p>
-          <div className="mt-6 flex flex-col items-center gap-6 md:gap-8">
-            <div className="mx-auto grid w-full max-w-3xl grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
-              <StatCard
-                label="AUM"
-                value={formatAumUsd(totalValue)}
-                sub="Live mark-to-market (equities + FI + funds)"
-              />
-              <StatCard
-                label="YTD Return"
-                value={ytdValueStr}
-                sub={ytdSub}
-              />
-              <StatCard
-                label="Sharpe Ratio"
-                value={sharpeValueStr}
-                sub={sharpeSub}
-              />
-            </div>
-            <div className="w-full max-w-2xl">
-              <LandingPortfolioMiniChart />
-            </div>
-            <div className="text-center">
-              <Link
-                to="/portfolio"
-                className="inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium text-crimson underline-offset-4 transition-colors duration-base ease-smooth hover:underline"
-              >
-                View live portfolio details
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+          <button
+            type="button"
+            onClick={() => setMissionOpen((v) => !v)}
+            aria-expanded={missionOpen}
+            className="flex w-full items-center justify-center gap-3 md:pointer-events-none"
+          >
+            <h2 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
+              Mission &amp; What We Do
+            </h2>
+            <ChevronDown
+              className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-base ease-smooth md:hidden ${missionOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {totalValue > 0 && (
+            <p className="mt-1 text-center text-[2rem] font-medium text-muted-foreground md:mt-1.5 md:text-[2.25rem]">
+              Total AUM:{" "}
+              <span className="font-semibold text-crimson">
+                ${totalValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              </span>
+            </p>
+          )}
+
+          <div
+            className={`grid overflow-hidden transition-all duration-base ease-smooth md:!grid-rows-[1fr] md:!opacity-100 ${
+              missionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <div className="min-h-0">
+              <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground md:mt-3 md:max-w-3xl md:text-base">
+                The Capstone Asset Management Society (CAMS) is a student-led
+                organization dedicated to helping members grow their
+                knowledge of investing and prepare for successful careers in
+                finance. We offer a multitude of resources to assist
+                committed and eager students in learning the principles of
+                value investing and market analysis. CAMS is open to all
+                students, regardless of grade level or prior experience, and
+                is focused on helping members secure internships and careers
+                in the financial services industry through networking
+                opportunities, member education seminars, and career
+                development workshops.
+              </p>
+              <div className="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2 md:mt-6 md:grid-cols-4 md:gap-x-6">
+                {PILLARS.map(({ title, body }) => (
+                  <div key={title} className="flex gap-2">
+                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-crimson" />
+                    <p className="text-sm leading-snug text-muted-foreground">
+                      <span className="font-semibold text-foreground">{title}.</span> {body}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Meet the Executives */}
-      <section className="py-16 md:py-20">
+      <section className="pb-16 pt-8 md:py-20">
         <div className="mx-auto max-w-content px-6">
           <h2 className="text-center font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
             Meet the <span className="text-crimson">Executives</span>
@@ -530,12 +525,14 @@ export default function Landing() {
               exec tools.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <Link
-                to="/apply"
+              <a
+                href={APPLY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center justify-center rounded-md bg-crimson px-5 py-3 text-sm font-semibold text-white shadow-soft transition-[background-color,box-shadow] duration-base ease-smooth hover:bg-crimson-dark hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
               >
                 Apply
-              </Link>
+              </a>
               <Link
                 to="/login"
                 className="inline-flex items-center justify-center rounded-md border border-border bg-background px-5 py-3 text-sm font-semibold shadow-xs transition-[background-color,box-shadow,border-color] duration-base ease-smooth hover:border-border hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"

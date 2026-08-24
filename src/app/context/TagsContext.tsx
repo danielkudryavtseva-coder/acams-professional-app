@@ -13,7 +13,7 @@ import {
   getPendingForMember,
   rejectAssignment as rejectAssignmentPure,
 } from "../lib/tags";
-import type { Member } from "../data/mockData";
+import { MOCK_MEMBERS, type Member } from "../data/mockData";
 import { useMembers } from "./MembersContext";
 import { useAuth } from "./AuthContext";
 
@@ -95,7 +95,10 @@ export function TagsProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<TagsContextValue>(() => {
     const requireExec = (id: string): Member => {
       const exec = members.find((m) => m.id === id);
-      if (!exec || exec.role !== "exec") {
+      // Always verify against the immutable bundle roster, not the mutable localStorage store.
+      // This prevents a DevTools role-escalation attack on the mutable members array.
+      const canonical = MOCK_MEMBERS.find((m) => m.id === id);
+      if (!exec || canonical?.role !== "exec") {
         throw new Error("Exec role required for this action.");
       }
       return exec;

@@ -1,4 +1,4 @@
-# CAMS — Career & Application Management System
+# CAMS — Capstone Asset Management Society
 
 Vite + React + TypeScript app for finance students to track recruiting,
 manage contacts, monitor a managed portfolio, and connect with alumni.

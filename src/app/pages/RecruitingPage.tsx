@@ -19,17 +19,26 @@ import {
   TrendingDown,
   Users,
 } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { cn } from "../components/ui/utils";
 import { FirmIntelModal } from "../components/FirmIntelModal";
 import { MOCK_PROGRAMS, type Program, type ProgramCategory, type ProgramClassYear, type ProgramTrack } from "../data/mockData";
 
-const TARGET_YEARS: ProgramClassYear[] = ["Freshman", "Sophomore", "Junior", "Senior"];
+const TARGET_YEARS: ProgramClassYear[] = ["Senior", "Junior", "Sophomore", "Freshman"];
+
+// Maps the internal class-year label to the graduation year shown in the UI.
+const GRAD_YEAR: Record<ProgramClassYear, string> = {
+  Senior:    "Class of '27",
+  Junior:    "Class of '28",
+  Sophomore: "Class of '29",
+  Freshman:  "Class of '30",
+};
 
 const TRACK_LABELS: Record<ProgramTrack, string> = {
   IB: "Investment Banking",
@@ -71,22 +80,62 @@ const TRACK_COLORS: Record<ProgramTrack, string> = {
 const STATUS_FILTERS = ["now", "opening", "closing"] as const;
 type StatusFilter = (typeof STATUS_FILTERS)[number];
 
+/**
+ * May 15 – Aug 31: students have finished their year and are "incoming" to the next.
+ * Expand selected filters one step forward so e.g. a Freshman (Class of '30) also
+ * sees Sophomore programs during the summer recruiting window.
+ */
+const YEAR_SEQUENCE: ProgramClassYear[] = ["Freshman", "Sophomore", "Junior", "Senior"];
+
+function getEffectiveClassYears(selected: ProgramClassYear[], today: Date): ProgramClassYear[] {
+  const [m, d] = [today.getMonth() + 1, today.getDate()];
+  const inSummer = (m === 5 && d >= 15) || (m >= 6 && m <= 8);
+  if (!inSummer) return selected;
+  const expanded = new Set(selected);
+  for (const yr of selected) {
+    const next = YEAR_SEQUENCE[YEAR_SEQUENCE.indexOf(yr) + 1];
+    if (next) expanded.add(next);
+  }
+  return [...expanded];
+}
+
 function getProgramClassYears(p: Program): ProgramClassYear[] {
   if (p.classYears && p.classYears.length) return p.classYears;
-  // Fall back to parsing the role text for legacy entries.
-  const lower = p.role.toLowerCase();
+  // Try to infer from role name keywords
+  const lower = (p.role + " " + (p.programName ?? "")).toLowerCase();
   const inferred: ProgramClassYear[] = [];
   if (lower.includes("freshman")) inferred.push("Freshman");
   if (lower.includes("sophomore")) inferred.push("Sophomore");
   if (lower.includes("junior")) inferred.push("Junior");
-  if (lower.includes("senior")) inferred.push("Senior");
-  return inferred.length ? inferred : ["Junior"];
+  if (lower.includes("senior") || lower.includes("full-time") || lower.includes("full time")) inferred.push("Senior");
+  if (inferred.length) return inferred;
+  // Category-based inference
+  if (p.category === "FT") return ["Senior"];
+  if (p.category === "Sophomore") return ["Sophomore"];
+  if (p.category === "Freshman") return ["Freshman"];
+  if (p.category === "Insight" || p.category === "Discovery") return ["Freshman", "Sophomore"];
+  if (p.category === "Fellowship") return ["Junior", "Senior"];
+  // Default: SA programs target Juniors (Class of '28)
+  return ["Junior"];
+}
+
+/**
+ * Parse an ISO date string as local noon to avoid UTC-midnight timezone drift.
+ * e.g. "2026-06-09" → June 9 12:00 local (not June 8 19:00 in UTC-5).
+ * Non-ISO strings fall through to the browser's native parser.
+ */
+function parseLocalDate(iso: string): Date {
+  const parts = iso.split("T")[0].split("-").map(Number);
+  if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
+    return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
+  }
+  return new Date(iso);
 }
 
 function programIsNowOpen(p: Program, today: Date): boolean {
   if (p.status === "closed") return false;
-  const open = p.openDate ? new Date(p.openDate) : null;
-  const close = p.deadline ? new Date(p.deadline) : null;
+  const open = p.openDate ? parseLocalDate(p.openDate) : null;
+  const close = p.deadline ? parseLocalDate(p.deadline) : null;
   if (open && open > today) return false;
   if (close && close < today && !p.rolling) return false;
   return p.status === "open" || p.status === "applied" || p.status === "interviewing";
@@ -94,14 +143,15 @@ function programIsNowOpen(p: Program, today: Date): boolean {
 
 function programIsOpeningSoon(p: Program, today: Date): boolean {
   if (!p.openDate) return false;
-  const open = new Date(p.openDate);
+  const open = parseLocalDate(p.openDate);
+  if (isNaN(open.getTime())) return false;
   const days = (open.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
   return days > 0 && days <= 60;
 }
 
 function programIsClosingSoon(p: Program, today: Date): boolean {
   if (!p.deadline) return false;
-  const close = new Date(p.deadline);
+  const close = parseLocalDate(p.deadline);
   if (close < today) return false;
   const days = (close.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
   return days <= 14;
@@ -109,8 +159,8 @@ function programIsClosingSoon(p: Program, today: Date): boolean {
 
 function formatDateShort(iso?: string): string {
   if (!iso) return "TBD";
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
+  const d = parseLocalDate(iso);
+  if (isNaN(d.getTime())) return iso;
   return format(d, "MMM d, yyyy");
 }
 
@@ -118,7 +168,7 @@ export default function RecruitingPage() {
   const [search, setSearch] = React.useState("");
   const [filtersOpen, setFiltersOpen] = React.useState(true);
   const [selectedTargetYears, setSelectedTargetYears] = React.useState<ProgramClassYear[]>([...TARGET_YEARS]);
-  const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<StatusFilter[]>(["now"]);
+  const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<StatusFilter[]>([]);
   const [selectedTracks, setSelectedTracks] = React.useState<ProgramTrack[]>(
     Object.keys(TRACK_LABELS) as ProgramTrack[],
   );
@@ -127,9 +177,9 @@ export default function RecruitingPage() {
   );
   const [diversityOnly, setDiversityOnly] = React.useState(false);
   const [expandedFilters, setExpandedFilters] = React.useState<Record<string, boolean>>({
-    "Target Year": false,
-    Sectors: false,
-    "Opportunity Type": false,
+    "Target Year": true,
+    Sectors: true,
+    "Opportunity Type": true,
     Firms: false,
     Other: false,
   });
@@ -142,42 +192,11 @@ export default function RecruitingPage() {
   const [month, setMonth] = React.useState(new Date());
   const [deadlineMonth, setDeadlineMonth] = React.useState(new Date());
   const [briefingOpen, setBriefingOpen] = React.useState(false);
+  const [calDayDetail, setCalDayDetail] = React.useState<{ day: number; opens: Program[]; closes: Program[] } | null>(null);
 
   const today = React.useMemo(() => new Date(), []);
 
-  const deadlineCalendar = React.useMemo(() => {
-    const start = startOfMonth(deadlineMonth);
-    const daysInMonth = endOfMonth(deadlineMonth).getDate();
-    const offset = start.getDay();
-    const cells = Array.from({ length: 42 }).map((_, idx) => {
-      const day = idx - offset + 1;
-      return day > 0 && day <= daysInMonth ? day : null;
-    });
-    const byDay = new Map<number, Program[]>();
-    const y = deadlineMonth.getFullYear();
-    const m = deadlineMonth.getMonth();
-    for (const p of MOCK_PROGRAMS) {
-      if (!p.deadline) continue;
-      const d = new Date(p.deadline);
-      if (d.getFullYear() !== y || d.getMonth() !== m) continue;
-      const day = d.getDate();
-      const arr = byDay.get(day) ?? [];
-      arr.push(p);
-      byDay.set(day, arr);
-    }
-    return { cells, byDay };
-  }, [deadlineMonth]);
-
-  const deadlineCount = React.useMemo(() => {
-    let total = 0;
-    for (const arr of deadlineCalendar.byDay.values()) total += arr.length;
-    return total;
-  }, [deadlineCalendar]);
-
-  const isCurrentMonth =
-    deadlineMonth.getFullYear() === today.getFullYear() && deadlineMonth.getMonth() === today.getMonth();
-
-  // Sector distribution derived from the dataset itself (not a hardcoded array).
+  // Sector distribution derived from the dataset itself.
   const sectorData = React.useMemo(() => {
     const counts = new Map<ProgramTrack, number>();
     for (const p of MOCK_PROGRAMS) counts.set(p.type, (counts.get(p.type) ?? 0) + 1);
@@ -193,20 +212,28 @@ export default function RecruitingPage() {
       .sort((a, b) => b.value - a.value);
   }, []);
 
-  // Deadline timeline: bucket the next 8 weeks of deadlines.
+  // Opening + closing timeline: bucket the next 8 weeks of open dates and deadlines.
   const deadlineBars = React.useMemo(() => {
-    const buckets: { week: string; count: number; date: Date }[] = [];
+    const buckets: { week: string; opening: number; closing: number; date: Date }[] = [];
     for (let i = 0; i < 8; i++) {
       const weekStart = addDays(today, i * 7);
-      buckets.push({ week: format(weekStart, "MMM d"), count: 0, date: weekStart });
+      buckets.push({ week: format(weekStart, "MMM d"), opening: 0, closing: 0, date: weekStart });
     }
     for (const p of MOCK_PROGRAMS) {
-      if (!p.deadline) continue;
-      const d = new Date(p.deadline);
-      const days = Math.floor((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-      if (days < 0 || days >= 56) continue;
-      const idx = Math.floor(days / 7);
-      buckets[idx].count += 1;
+      if (p.deadline) {
+        const d = parseLocalDate(p.deadline);
+        if (!isNaN(d.getTime())) {
+          const days = Math.floor((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          if (days >= 0 && days < 56) buckets[Math.floor(days / 7)].closing += 1;
+        }
+      }
+      if (p.openDate) {
+        const d = parseLocalDate(p.openDate);
+        if (!isNaN(d.getTime())) {
+          const days = Math.floor((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+          if (days >= 0 && days < 56) buckets[Math.floor(days / 7)].opening += 1;
+        }
+      }
     }
     return buckets;
   }, [today]);
@@ -223,7 +250,8 @@ export default function RecruitingPage() {
       if (p.category && !selectedCategories.includes(p.category)) return false;
       if (diversityOnly && !p.diversity) return false;
       const years = getProgramClassYears(p);
-      if (!years.some((y) => selectedTargetYears.includes(y))) return false;
+      const effectiveYears = getEffectiveClassYears(selectedTargetYears, today);
+      if (!years.some((y) => effectiveYears.includes(y))) return false;
       if (selectedStatusFilters.length === 0) return true;
       return selectedStatusFilters.some((s) => {
         if (s === "now") return programIsNowOpen(p, today);
@@ -243,17 +271,64 @@ export default function RecruitingPage() {
     today,
   ]);
 
-  // Sort programs: now-open first, then by closest deadline.
+  // Sort: now-open first, then by closest deadline.
   const sortedPrograms = React.useMemo(() => {
     return [...filteredPrograms].sort((a, b) => {
       const aOpen = programIsNowOpen(a, today) ? 0 : 1;
       const bOpen = programIsNowOpen(b, today) ? 0 : 1;
       if (aOpen !== bOpen) return aOpen - bOpen;
-      const aD = a.deadline ? new Date(a.deadline).getTime() : Number.MAX_SAFE_INTEGER;
-      const bD = b.deadline ? new Date(b.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+      const aD = a.deadline ? parseLocalDate(a.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+      const bD = b.deadline ? parseLocalDate(b.deadline).getTime() : Number.MAX_SAFE_INTEGER;
       return aD - bD;
     });
   }, [filteredPrograms, today]);
+
+  // Deadline + opening mini-calendar — uses filteredPrograms so it respects active filters.
+  const deadlineCalendar = React.useMemo(() => {
+    const start = startOfMonth(deadlineMonth);
+    const daysInMonth = endOfMonth(deadlineMonth).getDate();
+    const offset = start.getDay();
+    const cells = Array.from({ length: 42 }).map((_, idx) => {
+      const day = idx - offset + 1;
+      return day > 0 && day <= daysInMonth ? day : null;
+    });
+    const byDay = new Map<number, Program[]>();
+    const byOpenDay = new Map<number, Program[]>();
+    const y = deadlineMonth.getFullYear();
+    const m = deadlineMonth.getMonth();
+    for (const p of filteredPrograms) {
+      if (p.deadline) {
+        const d = parseLocalDate(p.deadline);
+        if (!isNaN(d.getTime()) && d.getFullYear() === y && d.getMonth() === m) {
+          const day = d.getDate();
+          const arr = byDay.get(day) ?? [];
+          arr.push(p);
+          byDay.set(day, arr);
+        }
+      }
+      if (p.openDate) {
+        const d = parseLocalDate(p.openDate);
+        if (!isNaN(d.getTime()) && d.getFullYear() === y && d.getMonth() === m) {
+          const day = d.getDate();
+          const arr = byOpenDay.get(day) ?? [];
+          arr.push(p);
+          byOpenDay.set(day, arr);
+        }
+      }
+    }
+    return { cells, byDay, byOpenDay };
+  }, [deadlineMonth, filteredPrograms]);
+
+  const deadlineCount = React.useMemo(() => {
+    let closing = 0;
+    let opening = 0;
+    for (const arr of deadlineCalendar.byDay.values()) closing += arr.length;
+    for (const arr of deadlineCalendar.byOpenDay.values()) opening += arr.length;
+    return { closing, opening, total: closing + opening };
+  }, [deadlineCalendar]);
+
+  const isCurrentMonth =
+    deadlineMonth.getFullYear() === today.getFullYear() && deadlineMonth.getMonth() === today.getMonth();
 
   const calendarCells = React.useMemo(() => {
     const start = startOfMonth(month);
@@ -286,7 +361,7 @@ export default function RecruitingPage() {
     setSelectedStatusFilters((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
 
   return (
-    <div className="p-6 max-w-[1400px] mx-auto bg-[#e1e7f74d] min-h-screen">
+    <div className="p-4 w-full bg-[#e1e7f74d] min-h-screen">
       <Tabs defaultValue="programs" className="space-y-4">
         <TabsList>
           <TabsTrigger value="programs">Programs</TabsTrigger>
@@ -294,7 +369,7 @@ export default function RecruitingPage() {
         </TabsList>
 
         <TabsContent value="programs" className="space-y-4">
-          <div className={cn("grid grid-cols-1 gap-4", filtersOpen ? "xl:grid-cols-[300px_1fr]" : "xl:grid-cols-1")}>
+          <div className={cn("grid grid-cols-1 gap-4", filtersOpen ? "xl:grid-cols-[280px_1fr]" : "xl:grid-cols-1")}>
             {filtersOpen && (
               <div className="space-y-4">
               <aside className="bg-white border rounded-xl p-4 h-fit space-y-4">
@@ -324,11 +399,27 @@ export default function RecruitingPage() {
                 </div>
 
                 <FilterGroup
-                  label="Target Year"
+                  label="Graduation Year"
                   expanded={expandedFilters["Target Year"]}
                   onToggle={() => setExpandedFilters((p) => ({ ...p, "Target Year": !p["Target Year"] }))}
                 >
+                  {(() => {
+                    const [m, d] = [today.getMonth() + 1, today.getDate()];
+                    const inSummer = (m === 5 && d >= 15) || (m >= 6 && m <= 8);
+                    return inSummer ? (
+                      <p className="text-[10px] text-[#5a8ca8] bg-[#5a8ca8]/10 rounded px-2 py-1 mb-2">
+                        Summer window active — each year also shows programs for incoming students one year ahead.
+                      </p>
+                    ) : null;
+                  })()}
                   <div className="flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTargetYears([...TARGET_YEARS])}
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                    >
+                      All
+                    </button>
                     {TARGET_YEARS.map((year) => (
                       <button
                         key={year}
@@ -347,7 +438,7 @@ export default function RecruitingPage() {
                               : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
                           )}
                         >
-                          {year}
+                          {GRAD_YEAR[year]}
                         </Badge>
                       </button>
                     ))}
@@ -359,9 +450,25 @@ export default function RecruitingPage() {
                   expanded={expandedFilters.Sectors}
                   onToggle={() => setExpandedFilters((p) => ({ ...p, Sectors: !p.Sectors }))}
                 >
+                  <div className="flex gap-2 mb-2">
+                    <button
+                      type="button"
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                      onClick={() => setSelectedTracks(Object.keys(TRACK_LABELS) as ProgramTrack[])}
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                      onClick={() => setSelectedTracks([])}
+                    >
+                      None
+                    </button>
+                  </div>
                   <div className="space-y-1.5">
                     {(Object.keys(TRACK_LABELS) as ProgramTrack[]).map((t) => (
-                      <label key={t} className="flex items-center gap-2 text-sm">
+                      <label key={t} className="flex items-center gap-2 text-sm cursor-pointer">
                         <input
                           type="checkbox"
                           checked={selectedTracks.includes(t)}
@@ -369,7 +476,7 @@ export default function RecruitingPage() {
                           className="accent-[#c63f60]"
                         />
                         <span
-                          className="inline-block h-2 w-2 rounded-full"
+                          className="inline-block h-2 w-2 rounded-full flex-shrink-0"
                           style={{ backgroundColor: TRACK_COLORS[t] }}
                         />
                         <span className="flex-1">{TRACK_LABELS[t]}</span>
@@ -383,12 +490,28 @@ export default function RecruitingPage() {
                   expanded={expandedFilters["Opportunity Type"]}
                   onToggle={() => setExpandedFilters((p) => ({ ...p, "Opportunity Type": !p["Opportunity Type"] }))}
                 >
+                  <div className="flex gap-2 mb-2">
+                    <button
+                      type="button"
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                      onClick={() => setSelectedCategories(Object.keys(CATEGORY_LABELS) as ProgramCategory[])}
+                    >
+                      All
+                    </button>
+                    <button
+                      type="button"
+                      className="text-[10px] text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+                      onClick={() => setSelectedCategories([])}
+                    >
+                      None
+                    </button>
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {(Object.keys(CATEGORY_LABELS) as ProgramCategory[]).map((c) => (
                       <button key={c} type="button" onClick={() => toggleCategory(c)}>
                         <Badge
                           className={cn(
-                            "hover:bg-[#c63f60]",
+                            "hover:bg-[#c63f60] cursor-pointer",
                             selectedCategories.includes(c)
                               ? "bg-[#c63f60] text-white"
                               : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
@@ -406,7 +529,7 @@ export default function RecruitingPage() {
                   expanded={expandedFilters.Other}
                   onToggle={() => setExpandedFilters((p) => ({ ...p, Other: !p.Other }))}
                 >
-                  <label className="flex items-center gap-2 text-sm">
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
                     <input
                       type="checkbox"
                       checked={diversityOnly}
@@ -445,7 +568,7 @@ export default function RecruitingPage() {
                   </div>
                   <div className="space-y-1 max-h-56 overflow-y-auto">
                     {allFirms.map((f) => (
-                      <label key={f} className="flex items-center gap-2 text-sm">
+                      <label key={f} className="flex items-center gap-2 text-sm cursor-pointer">
                         <input
                           type="checkbox"
                           checked={selectedFirms.includes(f)}
@@ -467,7 +590,7 @@ export default function RecruitingPage() {
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-4 min-w-0">
               {!filtersOpen && (
                 <Button
                   type="button"
@@ -506,36 +629,11 @@ export default function RecruitingPage() {
               </div>
 
               <div className="bg-white border rounded-xl p-4 space-y-4">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm text-muted-foreground">Quick Target Year</span>
-                  {TARGET_YEARS.map((year) => (
-                    <button
-                      key={year}
-                      type="button"
-                      onClick={() =>
-                        setSelectedTargetYears((prev) =>
-                          prev.includes(year) ? prev.filter((y) => y !== year) : [...prev, year],
-                        )
-                      }
-                    >
-                      <Badge
-                        className={cn(
-                          "hover:bg-[#c63f60]",
-                          selectedTargetYears.includes(year)
-                            ? "bg-[#c63f60] text-white"
-                            : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
-                        )}
-                      >
-                        {year}
-                      </Badge>
-                    </button>
-                  ))}
-                </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-                  <Card className="bg-white h-full">
+                  <Card className="bg-white h-full flex flex-col">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">Sector Distribution</CardTitle>
+                      <p className="text-[11px] text-muted-foreground mt-1">{MOCK_PROGRAMS.length} programs across {sectorData.length} sectors</p>
                     </CardHeader>
                     <CardContent className="pt-0">
                       <ResponsiveContainer width="100%" height={190}>
@@ -563,7 +661,7 @@ export default function RecruitingPage() {
                       <div className="space-y-1.5 mt-2 max-h-32 overflow-y-auto">
                         {sectorData.map((s) => (
                           <div key={s.name} className="flex items-center gap-2 text-xs">
-                            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: s.fill }} />
+                            <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: s.fill }} />
                             <span className="text-muted-foreground flex-1 truncate">{s.name}</span>
                             <span className="font-medium tabular-nums">
                               {s.count} · {s.value.toFixed(0)}%
@@ -606,9 +704,9 @@ export default function RecruitingPage() {
                       </div>
                       <div className="flex items-center justify-between mt-1">
                         <p className="text-[11px] text-muted-foreground">
-                          {deadlineCount === 0
-                            ? "No deadlines this month"
-                            : `${deadlineCount} deadline${deadlineCount === 1 ? "" : "s"}`}
+                          {deadlineCount.total === 0
+                            ? "No events this month"
+                            : `${deadlineCount.opening} opening · ${deadlineCount.closing} closing (filtered)`}
                         </p>
                         {!isCurrentMonth && (
                           <button
@@ -624,35 +722,64 @@ export default function RecruitingPage() {
                     <CardContent className="pt-0 flex-1">
                       <div className="grid grid-cols-7 gap-1 text-center text-xs w-full">
                         {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                          <div key={`dow-${i}`} className="text-muted-foreground py-1">
+                          <div key={`dow-${i}`} className="text-muted-foreground py-1 font-medium">
                             {d}
                           </div>
                         ))}
+                        <div className="col-span-7 flex items-center gap-3 pb-1 pt-0.5 text-[10px] text-muted-foreground flex-wrap">
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#5a8ca8] inline-block" /> Opens</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#c63f60] inline-block" /> Closes</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#7d2c45] inline-block" /> Both</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-muted-foreground/40 inline-block" /> Past open</span>
+                        </div>
                         {deadlineCalendar.cells.map((day, i) => {
-                          const dayPrograms = day ? deadlineCalendar.byDay.get(day) : undefined;
-                          const marked = !!dayPrograms?.length;
+                          const closePrograms = day ? deadlineCalendar.byDay.get(day) : undefined;
+                          const openPrograms = day ? deadlineCalendar.byOpenDay.get(day) : undefined;
+                          const hasClose = !!closePrograms?.length;
+                          const hasOpen = !!openPrograms?.length;
                           const isToday = day != null && isCurrentMonth && day === today.getDate();
+                          // Past open dates (open date already passed) rendered in muted grey
+                          const isPastDay = day != null && isCurrentMonth && day < today.getDate();
+                          const hasOpenPast = hasOpen && isPastDay;
+                          const hasOpenFuture = hasOpen && !isPastDay;
+                          const totalCount = (closePrograms?.length ?? 0) + (openPrograms?.length ?? 0);
+                          const titleLines = [
+                            ...(openPrograms ?? []).map((p) => `↑ Opens: ${p.firm} — ${p.role}`),
+                            ...(closePrograms ?? []).map((p) => `✕ Closes: ${p.firm} — ${p.role}`),
+                          ];
                           return (
                             <div
                               key={i}
-                              title={
-                                marked
-                                  ? dayPrograms!.map((p) => `${p.firm} - ${p.role}`).join("\n")
-                                  : undefined
-                              }
+                              title={titleLines.length ? titleLines.join("\n") : undefined}
+                              onClick={() => {
+                                if (day && (hasClose || hasOpen)) {
+                                  setCalDayDetail({ day, opens: openPrograms ?? [], closes: closePrograms ?? [] });
+                                }
+                              }}
                               className={cn(
                                 "h-8 rounded-md flex items-center justify-center border text-[11px] relative",
-                                marked
-                                  ? "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-medium"
-                                  : "border-border",
-                                isToday && !marked && "border-[#c63f60]/60",
+                                (hasClose || hasOpen) ? "cursor-pointer hover:opacity-80" : "cursor-default",
+                                day === null && "border-transparent",
+                                hasClose && !hasOpen && "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold",
+                                hasOpenFuture && !hasClose && "bg-[#5a8ca8]/10 border-[#5a8ca8] text-[#5a8ca8] font-semibold",
+                                hasOpenFuture && hasClose && "bg-[#7d2c45]/10 border-[#7d2c45] text-[#7d2c45] font-semibold",
+                                hasOpenPast && !hasClose && "bg-muted/60 border-muted-foreground/30 text-muted-foreground font-semibold",
+                                hasOpenPast && hasClose && "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold",
+                                !hasClose && !hasOpen && day !== null && "border-border",
                                 isToday && "ring-1 ring-[#c63f60]",
                               )}
                             >
                               {day ?? ""}
-                              {marked && dayPrograms!.length > 1 && (
-                                <span className="absolute top-0.5 right-1 text-[8px] leading-none">
-                                  {dayPrograms!.length}
+                              {(hasClose || hasOpen) && (
+                                <span className="absolute bottom-0.5 left-0 right-0 flex justify-center gap-0.5">
+                                  {hasOpenFuture && <span className="h-1 w-1 rounded-full bg-[#5a8ca8] inline-block" />}
+                                  {hasOpenPast && !hasClose && <span className="h-1 w-1 rounded-full bg-muted-foreground/40 inline-block" />}
+                                  {hasClose && <span className="h-1 w-1 rounded-full bg-[#c63f60] inline-block" />}
+                                </span>
+                              )}
+                              {(hasClose || hasOpen) && totalCount > 0 && (
+                                <span className="absolute top-0.5 right-0.5 text-[8px] leading-none font-bold">
+                                  {totalCount}
                                 </span>
                               )}
                             </div>
@@ -662,19 +789,63 @@ export default function RecruitingPage() {
                     </CardContent>
                   </Card>
 
+                  {/* Day-detail dialog */}
+                  <Dialog open={!!calDayDetail} onOpenChange={(o) => { if (!o) setCalDayDetail(null); }}>
+                    <DialogContent className="max-w-sm">
+                      <DialogHeader>
+                        <DialogTitle className="text-sm">
+                          {calDayDetail && format(new Date(deadlineMonth.getFullYear(), deadlineMonth.getMonth(), calDayDetail.day), "MMMM d, yyyy")}
+                        </DialogTitle>
+                      </DialogHeader>
+                      {calDayDetail && (
+                        <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                          {calDayDetail.opens.length > 0 && (
+                            <div>
+                              <p className="text-[11px] font-semibold text-[#5a8ca8] mb-1.5 uppercase tracking-wide">Opens</p>
+                              <ul className="space-y-1.5">
+                                {calDayDetail.opens.map((p) => (
+                                  <li key={p.id} className="text-xs flex items-start gap-2">
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 border-[#5a8ca8] text-[#5a8ca8]">{p.type}</Badge>
+                                    <span><span className="font-medium">{p.firm}</span> — {p.role}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                          {calDayDetail.closes.length > 0 && (
+                            <div>
+                              <p className="text-[11px] font-semibold text-[#c63f60] mb-1.5 uppercase tracking-wide">Closes</p>
+                              <ul className="space-y-1.5">
+                                {calDayDetail.closes.map((p) => (
+                                  <li key={p.id} className="text-xs flex items-start gap-2">
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 border-[#c63f60] text-[#c63f60]">{p.type}</Badge>
+                                    <span><span className="font-medium">{p.firm}</span> — {p.role}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </DialogContent>
+                  </Dialog>
+
                   <Card className="bg-white h-full flex flex-col">
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-sm">Deadline Timeline (Next 8 weeks)</CardTitle>
+                      <CardTitle className="text-sm">Opening & Closing Timeline (Next 8 weeks)</CardTitle>
+                      <p className="text-[11px] text-muted-foreground mt-1">Programs opening and closing by calendar week</p>
                     </CardHeader>
                     <CardContent className="pt-0 flex-1">
                       <div className="h-full min-h-[260px]">
                         <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={deadlineBars}>
+                          <BarChart data={deadlineBars} barCategoryGap="20%">
                             <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
                             <XAxis dataKey="week" tick={{ fontSize: 10 }} />
                             <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
                             <Tooltip />
-                            <Bar dataKey="count" fill="#c63f60" radius={[4, 4, 0, 0]} />
+                            <Legend wrapperStyle={{ fontSize: 10 }} />
+                            <Bar dataKey="opening" name="Opening" fill="#5a8ca8" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="closing" name="Closing" fill="#c63f60" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
@@ -693,6 +864,14 @@ export default function RecruitingPage() {
                     </span>
                   </h3>
                   <div className="flex gap-2 flex-wrap">
+                    <Button
+                      variant={selectedStatusFilters.length === 0 ? "default" : "outline"}
+                      size="sm"
+                      className={selectedStatusFilters.length === 0 ? "bg-[#2f2e2e] hover:bg-[#2f2e2e]" : ""}
+                      onClick={() => setSelectedStatusFilters([])}
+                    >
+                      All Programs
+                    </Button>
                     <Button
                       variant={selectedStatusFilters.includes("now") ? "default" : "outline"}
                       size="sm"
@@ -742,15 +921,20 @@ export default function RecruitingPage() {
         <TabsContent value="calendar">
           <Card className="bg-white">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Recruiting Calendar</CardTitle>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <CardTitle>Recruiting Calendar</CardTitle>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Showing deadlines for {filteredPrograms.length} filtered programs
+                  </p>
+                </div>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={() => setMonth((m) => addMonths(m, -1))}>
-                    Prev
+                    <ChevronLeft className="h-3.5 w-3.5" />
                   </Button>
-                  <Badge variant="outline">{format(month, "MMMM yyyy")}</Badge>
+                  <Badge variant="outline" className="px-3 text-sm font-medium">{format(month, "MMMM yyyy")}</Badge>
                   <Button variant="outline" size="sm" onClick={() => setMonth((m) => addMonths(m, 1))}>
-                    Next
+                    <ChevronRight className="h-3.5 w-3.5" />
                   </Button>
                 </div>
               </div>
@@ -758,15 +942,16 @@ export default function RecruitingPage() {
             <CardContent>
               <div className="grid grid-cols-7 gap-2 text-center text-sm">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                  <div key={d} className="font-medium text-muted-foreground">
+                  <div key={d} className="font-semibold text-muted-foreground pb-1">
                     {d}
                   </div>
                 ))}
                 {calendarCells.map((day, idx) => {
                   const matches = day
-                    ? MOCK_PROGRAMS.filter((p) => {
+                    ? filteredPrograms.filter((p) => {
                         if (!p.deadline) return false;
-                        const d = new Date(p.deadline);
+                        const d = parseLocalDate(p.deadline);
+                        if (isNaN(d.getTime())) return false;
                         return (
                           d.getFullYear() === month.getFullYear() &&
                           d.getMonth() === month.getMonth() &&
@@ -774,23 +959,33 @@ export default function RecruitingPage() {
                         );
                       })
                     : [];
+                  const isToday =
+                    day != null &&
+                    month.getFullYear() === today.getFullYear() &&
+                    month.getMonth() === today.getMonth() &&
+                    day === today.getDate();
                   return (
                     <div
                       key={idx}
-                      className="h-20 border rounded p-1 text-left text-xs overflow-hidden"
+                      className={cn(
+                        "min-h-[88px] border rounded-lg p-1.5 text-left text-xs overflow-hidden",
+                        day === null && "border-transparent bg-transparent",
+                        matches.length > 0 && "border-[#c63f60]/40 bg-[#c63f60]/5",
+                        isToday && "ring-2 ring-[#c63f60]",
+                      )}
                       title={matches.map((p) => `${p.firm} – ${p.role}`).join("\n") || undefined}
                     >
-                      <div className="font-medium">{day ?? ""}</div>
-                      {matches.slice(0, 2).map((p) => (
+                      <div className={cn("font-semibold mb-0.5", isToday && "text-[#c63f60]")}>{day ?? ""}</div>
+                      {matches.slice(0, 3).map((p) => (
                         <div
                           key={p.id}
-                          className="mt-0.5 truncate text-[10px] text-[#c63f60]"
+                          className="truncate text-[10px] text-[#c63f60] leading-snug"
                         >
                           {p.firm}
                         </div>
                       ))}
-                      {matches.length > 2 && (
-                        <div className="text-[10px] text-muted-foreground">+{matches.length - 2} more</div>
+                      {matches.length > 3 && (
+                        <div className="text-[10px] text-muted-foreground">+{matches.length - 3} more</div>
                       )}
                     </div>
                   );
@@ -820,10 +1015,10 @@ function FilterGroup({
     <div>
       <button
         type="button"
-        className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+        className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground w-full"
         onClick={onToggle}
       >
-        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", !expanded && "-rotate-90")} />
+        <ChevronDown className={cn("h-3.5 w-3.5 transition-transform flex-shrink-0", !expanded && "-rotate-90")} />
         {label}
       </button>
       {expanded && <div className="mt-2">{children}</div>}
@@ -1107,6 +1302,11 @@ function ProgramRow({
               Diversity
             </Badge>
           )}
+          {isOpen && !closingSoon && (
+            <Badge className="bg-emerald-600 text-white gap-1">
+              <Sparkles className="h-3 w-3" /> Open
+            </Badge>
+          )}
           {closingSoon && (
             <Badge className="bg-[#c63f60] text-white gap-1">
               <CircleAlert className="h-3 w-3" />
@@ -1130,7 +1330,7 @@ function ProgramRow({
         )}
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground mt-2">
           <span className="flex items-center gap-1">
-            <Users className="h-3.5 w-3.5" /> {classYears.join(" / ")}
+            <Users className="h-3.5 w-3.5" /> {classYears.map((y) => GRAD_YEAR[y]).join(" / ")}
           </span>
           {program.location && (
             <span className="flex items-center gap-1">

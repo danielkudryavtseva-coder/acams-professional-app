@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, GitBranch, TrendingUp, Briefcase,
   ChevronRight, Lock, Handshake, BookOpen,
   Calendar, ClipboardList, BarChart2, Wrench,
-  BriefcaseBusiness, LogOut, Award, Trophy, PenLine,
+  BriefcaseBusiness, LogOut, Award, Trophy, PenLine, UserSquare2,
 } from "lucide-react";
 import { cn } from "./ui/utils";
 import { ThemeToggle } from "./ThemeToggle";
@@ -30,6 +30,7 @@ interface NavItemConfig {
 }
 
 const COMMUNITY_NAV: NavItemConfig[] = [
+  { label: "Roster", href: "/dashboard/roster", icon: UserSquare2 },
   { label: "Connect", href: "/dashboard/connect", icon: Handshake },
   { label: "Scoreboard", href: "/dashboard/scoreboard", icon: Trophy },
   { label: "Jobs", href: "/dashboard/jobs", icon: BriefcaseBusiness },

@@ -209,7 +209,7 @@ function formatRelative(d: Date | null): string {
 }
 
 export default function Portfolio() {
-  const { quotes, history, status, lastUpdated, error, refresh } = usePortfolioLiveData();
+  const { quotes, history, dividends, status, lastUpdated, error, refresh } = usePortfolioLiveData();
   const {
     liveHoldings: holdings,
     equityValue,
@@ -222,7 +222,8 @@ export default function Portfolio() {
     totalGain,
     totalCost,
     totalReturnPct,
-  } = usePortfolioMarkToMarket(quotes);
+    totalAnnualDividendIncome,
+  } = usePortfolioMarkToMarket(quotes, dividends);
   const { members } = useMembers();
   const membersById = React.useMemo(
     () => new Map(members.map((m) => [m.id, m])),
@@ -447,6 +448,12 @@ export default function Portfolio() {
           trend={Number(totalReturn) >= 0 ? "up" : "down"}
           trendValue="All-time"
         />
+        <DashboardCell
+          title="Dividend Income (TTM)"
+          value={`$${totalAnnualDividendIncome.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+          icon={<DollarSign className="h-4 w-4" />}
+          description="Trailing 12mo, per-holding from FMP — not folded into AUM"
+        />
       </div>
 
       <Card className="bg-white">
@@ -588,6 +595,7 @@ export default function Portfolio() {
                     <TableHead>Avg Cost</TableHead>
                     <TableHead>Current</TableHead>
                     <TableHead>Value</TableHead>
+                    <TableHead>Div (TTM)</TableHead>
                     <TableHead>Return</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -615,6 +623,11 @@ export default function Portfolio() {
                         <TableCell className="text-sm">${holding.currentPrice.toFixed(2)}</TableCell>
                         <TableCell className="text-sm font-medium">
                           ${value.toLocaleString("en-US", { minimumFractionDigits: 0 })}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {holding.annualDividendIncome > 0
+                            ? `$${holding.annualDividendIncome.toLocaleString()}`
+                            : "—"}
                         </TableCell>
                         <TableCell>
                           <span className={cn("inline-flex items-center gap-1 text-sm font-medium", isPositive ? "text-green-600" : "text-red-600")}>

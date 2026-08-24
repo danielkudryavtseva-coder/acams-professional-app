@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { Checkbox } from "../components/ui/checkbox";
 import { useAuth } from "../context/AuthContext";
 import camsLogo from "../../assets/cams-logo.png";
 
@@ -15,7 +16,7 @@ const loginSchema = z.object({
     (v) => v.endsWith("@crimson.ua.edu"),
     { message: "Must be a @crimson.ua.edu email address" }
   ),
-  password: z.string().min(1, "Class password is required"),
+  password: z.string().min(1, "Password is required"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -24,6 +25,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(true);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -31,17 +33,12 @@ export default function Login() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setServerError(null);
-    const result = await login(data.email, data.password);
+    const result = await login(data.email, data.password, rememberMe);
     if (result.success) {
       navigate("/dashboard");
     } else {
       setServerError(result.error ?? "Login failed");
     }
-  };
-
-  const handleGuestLogin = async () => {
-    await login("dkwhitfield@crimson.ua.edu", "cams2026");
-    navigate("/dashboard");
   };
 
   return (
@@ -65,14 +62,24 @@ export default function Login() {
               {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">Class Password</Label>
+              <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Class password"
+                placeholder="Your password"
                 {...register("password")}
               />
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="rememberMe"
+                checked={rememberMe}
+                onCheckedChange={(v) => setRememberMe(v === true)}
+              />
+              <Label htmlFor="rememberMe" className="text-sm font-normal cursor-pointer">
+                Keep me logged in
+              </Label>
             </div>
             {serverError && (
               <p className="text-xs text-destructive text-center">{serverError}</p>
@@ -86,16 +93,6 @@ export default function Login() {
             <Link to="/register" className="text-primary hover:underline font-medium">
               Sign up
             </Link>
-          </div>
-          <div className="mt-2 text-center">
-            <Button
-              variant="link"
-              size="sm"
-              className="text-xs text-muted-foreground"
-              onClick={handleGuestLogin}
-            >
-              Continue as guest (demo exec account)
-            </Button>
           </div>
         </CardContent>
       </Card>

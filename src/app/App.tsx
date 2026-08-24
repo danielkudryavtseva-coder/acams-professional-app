@@ -10,30 +10,33 @@ import { TagsProvider } from "./context/TagsContext";
 import { NewsProvider } from "./context/NewsContext";
 import { AppRoutes } from "./routes";
 import { Toaster } from "./components/ui/sonner";
+import { SmoothScroll } from "./components/SmoothScroll";
 
 export default function App() {
   return (
     <BrowserRouter>
-      <MembersProvider>
-        <AuthProvider>
-          <ThemeProvider>
-            <NewsProvider>
-              <EventsProvider>
-                <ConnectProvider>
-                  <CheckinProvider>
-                    <PipelineProvider>
-                      <TagsProvider>
-                        <AppRoutes />
-                        <Toaster />
-                      </TagsProvider>
-                    </PipelineProvider>
-                  </CheckinProvider>
-                </ConnectProvider>
-              </EventsProvider>
-            </NewsProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </MembersProvider>
+      <SmoothScroll>
+        <MembersProvider>
+          <AuthProvider>
+            <ThemeProvider>
+              <NewsProvider>
+                <EventsProvider>
+                  <ConnectProvider>
+                    <CheckinProvider>
+                      <PipelineProvider>
+                        <TagsProvider>
+                          <AppRoutes />
+                          <Toaster />
+                        </TagsProvider>
+                      </PipelineProvider>
+                    </CheckinProvider>
+                  </ConnectProvider>
+                </EventsProvider>
+              </NewsProvider>
+            </ThemeProvider>
+          </AuthProvider>
+        </MembersProvider>
+      </SmoothScroll>
     </BrowserRouter>
   );
 }

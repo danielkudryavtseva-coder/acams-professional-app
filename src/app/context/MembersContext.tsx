@@ -15,9 +15,9 @@ const MembersContext = createContext<MembersContextValue | null>(null);
 
 export function MembersProvider({ children }: { children: React.ReactNode }) {
   const [members, setMembers] = useState<Member[]>(() => {
-    try { const v = localStorage.getItem("cams_members"); return v ? JSON.parse(v) : MOCK_MEMBERS; } catch { return MOCK_MEMBERS; }
+    try { const v = localStorage.getItem("cams_members.v2"); return v ? JSON.parse(v) : MOCK_MEMBERS; } catch { return MOCK_MEMBERS; }
   });
-  const save = (next: Member[]) => { setMembers(next); localStorage.setItem("cams_members", JSON.stringify(next)); };
+  const save = (next: Member[]) => { setMembers(next); localStorage.setItem("cams_members.v2", JSON.stringify(next)); };
   const updateMember = (id: string, updates: Partial<Member>) => save(members.map((m) => (m.id === id ? { ...m, ...updates } : m)));
   const setPnlTag = (memberId: string, tagged: boolean, reason?: string) => save(members.map((m) => (m.id === memberId ? { ...m, pnlTagged: tagged, pnlReason: reason } : m)));
   const addMember = (member: Member) => save([...members, member]);

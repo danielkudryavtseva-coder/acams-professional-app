@@ -51,6 +51,9 @@ function profileDataFromMember(user: Member): ProfileData {
     graduationYear: String(user.graduationYear),
     bio: user.personalStatement || DEFAULT_PROFILE.bio,
     targetRoles: (user.interests?.length ? user.interests : DEFAULT_PROFILE.targetRoles) as string[],
+    location: user.location || DEFAULT_PROFILE.location,
+    major: user.major || DEFAULT_PROFILE.major,
+    gpa: user.gpa || DEFAULT_PROFILE.gpa,
   };
 }
 
@@ -82,6 +85,9 @@ export default function Profile() {
         linkedin: draft.linkedin,
         personalStatement: draft.bio,
         interests: draft.targetRoles as never,
+        location: draft.location,
+        major: draft.major,
+        gpa: draft.gpa,
       });
     }
     setIsEditing(false);

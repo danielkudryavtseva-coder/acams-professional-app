@@ -4,7 +4,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { sortNewsPosts, useNews } from "../context/NewsContext";
 import { NewsArticleExcerptCard, NewsCategoryPill } from "../components/NewsBlogLayout";
-import { estimateReadMinutes, formatNewsShortDate } from "../lib/newsDisplay";
+import { estimateReadMinutes, formatNewsShortDate, resolveNewsCover } from "../lib/newsDisplay";
 
 export default function NewsPostPage() {
   const { postId } = useParams<{ postId: string }>();
@@ -42,7 +42,13 @@ export default function NewsPostPage() {
           <Link to="/news">&larr; Back to news</Link>
         </Button>
         <article className="max-w-3xl">
-          <div className="flex flex-wrap items-center gap-2">
+          <img
+            src={resolveNewsCover(post, 1200, 675)}
+            alt=""
+            className="aspect-[16/9] w-full rounded-2xl object-cover shadow-soft ring-1 ring-border/40"
+            loading="lazy"
+          />
+          <div className="mt-6 flex flex-wrap items-center gap-2">
             {post.pinned && <Badge>Pinned</Badge>}
             <NewsCategoryPill category={post.category} variant="light" />
             <span className="text-sm text-muted-foreground">

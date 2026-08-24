@@ -34,57 +34,54 @@ interface PipelineContextValue {
 
 const PipelineContext = React.createContext<PipelineContextValue | undefined>(undefined);
 
-const INITIAL_CONTACTS: PipelineContact[] = [
-  {
-    id: "1",
-    name: "Alex Chen",
-    firm: "Goldman Sachs",
-    role: "Investment Banking Analyst",
-    stage: "networking",
-    priority: "high",
-    addedAt: new Date().toISOString(),
-    email: "achen@gs.com",
-  },
-  {
-    id: "2",
-    name: "Sarah Park",
-    firm: "Blackstone",
-    role: "Private Equity Associate",
-    stage: "phone_screen",
-    priority: "high",
-    addedAt: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    name: "Marcus Johnson",
-    firm: "KKR",
-    role: "PE Analyst",
-    stage: "applied",
-    priority: "medium",
-    addedAt: new Date().toISOString(),
-  },
-];
+const PIPELINE_KEY = "cams.pipeline.v1";
+
+function loadPipeline(): PipelineContact[] {
+  try {
+    const v = localStorage.getItem(PIPELINE_KEY);
+    if (!v) return [];
+    const parsed = JSON.parse(v);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+}
+
+function savePipeline(contacts: PipelineContact[]) {
+  try { localStorage.setItem(PIPELINE_KEY, JSON.stringify(contacts)); } catch {}
+}
 
 export function PipelineProvider({ children }: { children: React.ReactNode }) {
-  const [contacts, setContacts] = React.useState<PipelineContact[]>(INITIAL_CONTACTS);
+  const [contacts, setContacts] = React.useState<PipelineContact[]>(loadPipeline);
 
   const addContact = React.useCallback((contact: Omit<PipelineContact, "id" | "addedAt">) => {
-    setContacts((prev) => [
-      ...prev,
-      { ...contact, id: crypto.randomUUID(), addedAt: new Date().toISOString() },
-    ]);
+    setContacts((prev) => {
+      const next = [...prev, { ...contact, id: crypto.randomUUID(), addedAt: new Date().toISOString() }];
+      savePipeline(next);
+      return next;
+    });
   }, []);
 
   const updateContact = React.useCallback((id: string, updates: Partial<PipelineContact>) => {
-    setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+    setContacts((prev) => {
+      const next = prev.map((c) => (c.id === id ? { ...c, ...updates } : c));
+      savePipeline(next);
+      return next;
+    });
   }, []);
 
   const removeContact = React.useCallback((id: string) => {
-    setContacts((prev) => prev.filter((c) => c.id !== id));
+    setContacts((prev) => {
+      const next = prev.filter((c) => c.id !== id);
+      savePipeline(next);
+      return next;
+    });
   }, []);
 
   const moveStage = React.useCallback((id: string, stage: PipelineStage) => {
-    setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, stage } : c)));
+    setContacts((prev) => {
+      const next = prev.map((c) => (c.id === id ? { ...c, stage } : c));
+      savePipeline(next);
+      return next;
+    });
   }, []);
 
   return (

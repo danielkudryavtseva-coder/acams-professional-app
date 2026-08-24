@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../co
 import { Badge } from "../components/ui/badge";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { MOCK_PROGRAMS } from "../data/mockData";
+import { usePipeline } from "../context/PipelineContext";
 import {
   PORTFOLIO_BONDS,
   PORTFOLIO_HOLDINGS,
@@ -38,11 +39,30 @@ export default function DashboardHome() {
   const { posts } = useNews();
   const { events, attendance } = useEvents();
   const { hasCheckedInThisWeek } = useCheckin();
+  const { contacts: pipelineContacts } = usePipeline();
   const [checkinOpen, setCheckinOpen] = React.useState(false);
-  const upcomingDeadlines = MOCK_PROGRAMS
-    .filter((p) => p.deadline && p.status === "open")
-    .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
-    .slice(0, 4);
+
+  const openPrograms = React.useMemo(
+    () => MOCK_PROGRAMS.filter((p) => p.status === "open"),
+    [],
+  );
+  const upcomingDeadlines = React.useMemo(
+    () =>
+      openPrograms
+        .filter((p) => p.deadline)
+        .sort((a, b) => new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime())
+        .slice(0, 4),
+    [openPrograms],
+  );
+  const activePipeline = pipelineContacts.filter(
+    (c) => c.stage !== "rejected" && c.stage !== "accepted",
+  );
+  const offerStageCount = pipelineContacts.filter((c) => c.stage === "offer").length;
+  const soonDeadlines = openPrograms.filter((p) => {
+    if (!p.deadline) return false;
+    const diff = new Date(p.deadline).getTime() - Date.now();
+    return diff > 0 && diff < 14 * 24 * 3600 * 1000;
+  }).length;
 
   // Live portfolio data: shared source of truth with the full /portfolio page.
   const { quotes, history, status } = usePortfolioLiveData();
@@ -110,22 +130,21 @@ export default function DashboardHome() {
         />
         <DashboardCell
           title="Active Pipeline"
-          value="5"
+          value={String(activePipeline.length)}
           icon={<Activity className="h-4 w-4" />}
-          trendValue="+1 coffee chat"
+          trendValue={offerStageCount > 0 ? `${offerStageCount} at offer stage` : "no offers yet"}
         />
         <DashboardCell
-          title="Network"
-          value="142"
+          title="Contacts Tracked"
+          value={String(pipelineContacts.length)}
           icon={<Users className="h-4 w-4" />}
-          trend="up"
-          trendValue="+8 contacts"
+          trendValue="your pipeline"
         />
         <DashboardCell
           title="Programs Open"
-          value="47"
+          value={String(openPrograms.length)}
           icon={<Calendar className="h-4 w-4" />}
-          trendValue="12 deadlines soon"
+          trendValue={`${soonDeadlines} deadlines in 14 days`}
         />
       </div>
 
@@ -229,21 +248,21 @@ export default function DashboardHome() {
             <Card className="bg-white">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">Deal Pipeline</p>
-                <p className="text-xs text-muted-foreground mt-1">6 contacts tracked · 1 offer stage</p>
+                <p className="text-xs text-muted-foreground mt-1">{activePipeline.length} active · {offerStageCount} offer stage</p>
                 <button className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1">Manage Pipeline <ArrowUpRight className="h-3.5 w-3.5" /></button>
               </CardContent>
             </Card>
             <Card className="bg-white">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">CRM & Contacts</p>
-                <p className="text-xs text-muted-foreground mt-1">142 contacts · import CSV/Excel</p>
+                <p className="text-xs text-muted-foreground mt-1">{pipelineContacts.length} contacts tracked</p>
                 <button className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1">View Network <ArrowUpRight className="h-3.5 w-3.5" /></button>
               </CardContent>
             </Card>
             <Card className="bg-white">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">Recruiting Portal</p>
-                <p className="text-xs text-muted-foreground mt-1">47 programs open · 12 deadlines soon</p>
+                <p className="text-xs text-muted-foreground mt-1">{openPrograms.length} programs open · {soonDeadlines} deadlines soon</p>
                 <button className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1">Browse Programs <ArrowUpRight className="h-3.5 w-3.5" /></button>
               </CardContent>
             </Card>
