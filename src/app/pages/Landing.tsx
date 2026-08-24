@@ -317,10 +317,10 @@ export default function Landing() {
             points="0,300 100,260 200,280 300,210 400,230 500,170 600,200 700,140 800,180 900,110 1000,150 1100,80 1200,120"
           />
         </svg>
-        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-14 pt-28 text-center sm:items-start sm:justify-center sm:pb-20 sm:pt-20 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
+        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-14 pt-28 text-center sm:justify-center sm:pb-20 sm:pt-20 md:min-h-[28rem] md:py-24 lg:py-32">
           <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
             <span className="block sm:inline">Capstone Asset</span>{" "}
-            <span className="block pl-8 sm:inline sm:pl-0">Management Society</span>
+            <span className="block sm:inline">Management Society</span>
           </h1>
           <button
             type="button"
@@ -346,7 +346,7 @@ export default function Landing() {
               </p>
             </div>
           </div>
-          <div className="mt-14 flex w-full flex-wrap justify-center gap-3 sm:mt-8 sm:w-auto sm:justify-start">
+          <div className="mt-14 flex w-full flex-wrap justify-center gap-3 sm:mt-8 sm:w-auto">
             {/* Mobile: single big pill Apply button */}
             <a
               href={APPLY_URL}
