@@ -279,8 +279,8 @@ export default function Landing() {
         <div className="absolute inset-0 z-10 mx-auto flex max-w-content flex-col items-center justify-between px-6 pb-[82px] pt-[82px] text-center sm:items-start sm:justify-center sm:py-24 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
           <div className="flex flex-col items-center sm:items-start">
             <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold uppercase leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
-              <span className="block sm:inline">Capstone Asset</span>{" "}
-              <span className="block sm:inline">Management Society</span>
+              <span className="block">Capstone Asset</span>
+              <span className="block pl-8 sm:pl-16">Management Society</span>
             </h1>
             <button
               type="button"
