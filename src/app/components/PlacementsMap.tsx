@@ -308,9 +308,9 @@ export function PlacementsMap() {
 
   return (
     <div className="overflow-hidden rounded-xl border border-border shadow-sm">
-      <div className="flex flex-col md:flex-row">
+      <div className="flex flex-col-reverse md:flex-row">
         <div ref={containerRef} className="h-[420px] w-full sm:h-[480px] md:flex-1" />
-        <aside className="w-full shrink-0 border-t border-border bg-paper p-4 dark:bg-card sm:h-[480px] md:w-64 md:border-l md:border-t-0">
+        <aside className="w-full shrink-0 border-b border-border bg-paper p-4 dark:bg-card sm:h-[480px] md:w-64 md:border-b-0 md:border-l">
           {!zoomedIn ? (
             <div className="cams-panel-fade">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
