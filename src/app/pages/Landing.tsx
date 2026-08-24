@@ -277,7 +277,7 @@ export default function Landing() {
           aria-hidden
         />
         <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-3 pt-16 text-center sm:items-start sm:justify-center sm:py-24 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
-          <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
+          <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold uppercase leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
             <span className="block sm:inline">Capstone Asset</span>{" "}
             <span className="block sm:inline">Management Society</span>
           </h1>

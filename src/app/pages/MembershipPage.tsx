@@ -5,13 +5,6 @@ import { Image } from "lucide-react";
 import { PlacementsMap } from "../components/PlacementsMap";
 import { APPLY_URL } from "../components/PublicShell";
 
-const STATS = [
-  { label: "Active Members", value: "30+" },
-  { label: "Committees", value: "4" },
-  { label: "Alumni Placed", value: "50+" },
-  { label: "Partner Firms", value: "20+" },
-];
-
 const BENEFITS = [
   {
     title: "Real Portfolio Management",
@@ -73,20 +66,8 @@ export default function MembershipPage() {
         </p>
       </section>
 
-      {/* Stats — kept compact so the map shows up front */}
-      <section className="max-w-5xl mx-auto w-full pt-6 pb-2 px-6">
-        <div className="flex flex-wrap gap-x-8 gap-y-2 border-b border-border pb-4">
-          {STATS.map(({ label, value }) => (
-            <div key={label} className="flex items-baseline gap-1.5">
-              <span className="text-xl font-bold text-[#c63f60]">{value}</span>
-              <span className="text-xs text-muted-foreground">{label}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Placements map */}
-      <section className="max-w-5xl mx-auto w-full pt-6 pb-16 px-6">
+      <section className="max-w-5xl mx-auto w-full pt-10 pb-16 px-6">
         <h2 className="text-2xl font-bold">Where Our Alumni Landed</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Placements pulled from the CAMS alumni rolodex.
