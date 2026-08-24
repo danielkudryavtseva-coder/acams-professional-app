@@ -321,7 +321,7 @@ export default function Landing() {
             {/* Desktop/tablet: both CTAs */}
             <Link
               to="/portfolio"
-              className="hidden items-center justify-center rounded-md border border-white/80 bg-white/5 px-5 py-3 text-sm font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
+              className="hidden items-center justify-center rounded-md border border-white/80 bg-white/5 px-[35px] py-[21px] text-[24.5px] font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
             >
               Explore Our Portfolio
             </Link>
@@ -329,7 +329,7 @@ export default function Landing() {
               href={APPLY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden items-center justify-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
+              className="hidden items-center justify-center rounded-md bg-white px-[35px] py-[21px] text-[24.5px] font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
             >
               Apply
             </a>
