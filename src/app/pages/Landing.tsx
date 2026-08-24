@@ -377,13 +377,13 @@ export default function Landing() {
       </section>
 
       {/* Mission & What We Do — condensed; collapsed accordion on mobile, always open (but compact) on desktop */}
-      <section className="border-y border-border/60 bg-paper py-6 dark:border-border dark:bg-card md:py-8">
+      <section className="border-y border-border/60 bg-paper pb-4 pt-6 dark:border-border dark:bg-card md:py-8">
         <div className="mx-auto max-w-content px-6">
           <button
             type="button"
             onClick={() => setMissionOpen((v) => !v)}
             aria-expanded={missionOpen}
-            className="flex w-full items-center justify-between gap-3 md:pointer-events-none md:justify-center"
+            className="flex w-full items-center justify-center gap-3 md:pointer-events-none"
           >
             <h2 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
               Mission &amp; What We Do
@@ -437,7 +437,7 @@ export default function Landing() {
       </section>
 
       {/* Meet the Executives */}
-      <section className="py-16 md:py-20">
+      <section className="pb-16 pt-8 md:py-20">
         <div className="mx-auto max-w-content px-6">
           <h2 className="text-center font-display text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
             Meet the <span className="text-crimson">Executives</span>
