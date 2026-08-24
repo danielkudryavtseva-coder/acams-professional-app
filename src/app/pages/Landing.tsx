@@ -291,7 +291,7 @@ export default function Landing() {
             height={900}
             decoding="async"
             fetchPriority="high"
-            className="h-full w-full object-cover object-[center_50%]"
+            className="h-full w-full object-cover object-[center_55%]"
             aria-hidden
           />
         </div>
