@@ -120,7 +120,7 @@ function ExecCard({ name, title, image, bio }: ExecCardProps) {
 
   return (
     <div className="flex flex-col items-center text-center">
-      <div className="h-[10.5rem] w-[10.5rem] overflow-hidden rounded-full bg-crimson/15 ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background">
+      <div className="h-[14rem] w-[14rem] overflow-hidden rounded-full bg-crimson/15 ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background">
         {image ? (
           <img
             src={image}
@@ -253,7 +253,7 @@ export default function Landing() {
       {/* Hero — full-bleed photo under CAMS crimson veil + vignette for readable white copy */}
       <section
         ref={heroSectionRef}
-        className="relative isolate min-h-[22rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:min-h-[32rem] md:min-h-[38rem]"
+        className="relative isolate min-h-[22rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:flex sm:min-h-[32rem] sm:flex-col sm:justify-center md:min-h-[38rem]"
       >
         <div className="absolute inset-0">
           <img
@@ -276,20 +276,7 @@ export default function Landing() {
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.42)_0%,transparent_38%,transparent_72%,rgba(0,0,0,0.28)_100%)] md:bg-[linear-gradient(to_right,rgba(0,0,0,0.38)_0%,transparent_55%)]"
           aria-hidden
         />
-        <svg
-          className="pointer-events-none absolute inset-0 hidden h-full w-full opacity-[0.12] sm:block"
-          viewBox="0 0 1200 400"
-          preserveAspectRatio="none"
-          aria-hidden
-        >
-          <polyline
-            fill="none"
-            stroke="white"
-            strokeWidth="2"
-            points="0,300 100,260 200,280 300,210 400,230 500,170 600,200 700,140 800,180 900,110 1000,150 1100,80 1200,120"
-          />
-        </svg>
-        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-3 pt-16 text-center sm:items-start sm:justify-center sm:pb-16 sm:pt-32 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
+        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-3 pt-16 text-center sm:items-start sm:justify-center sm:py-24 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
           <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
             <span className="block sm:inline">Capstone Asset</span>{" "}
             <span className="block sm:inline">Management Society</span>
@@ -348,20 +335,20 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Mission & What We Do — condensed; collapsed accordion on mobile, always open (but compact) on desktop */}
+      {/* Mission & What We Do — collapsed accordion by default on all breakpoints */}
       <section className="border-y border-border/60 bg-paper pb-4 pt-6 dark:border-border dark:bg-card md:py-8">
         <div className="mx-auto max-w-content px-6">
           <button
             type="button"
             onClick={() => setMissionOpen((v) => !v)}
             aria-expanded={missionOpen}
-            className="flex w-full items-center justify-center gap-3 md:pointer-events-none"
+            className="flex w-full items-center justify-center gap-3"
           >
             <h2 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
               Mission &amp; What We Do
             </h2>
             <ChevronDown
-              className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-base ease-smooth md:hidden ${missionOpen ? "rotate-180" : ""}`}
+              className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-base ease-smooth ${missionOpen ? "rotate-180" : ""}`}
             />
           </button>
 
@@ -375,7 +362,7 @@ export default function Landing() {
           )}
 
           <div
-            className={`grid overflow-hidden transition-all duration-base ease-smooth md:!grid-rows-[1fr] md:!opacity-100 ${
+            className={`grid overflow-hidden transition-all duration-base ease-smooth ${
               missionOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
             }`}
           >
@@ -418,7 +405,7 @@ export default function Landing() {
             Student leaders driving research, portfolio strategy, and member
             development.
           </p>
-          <div className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {EXECUTIVES.map((e) => (
               <ExecCard key={e.name} {...e} />
             ))}
