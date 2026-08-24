@@ -281,7 +281,7 @@ export default function Landing() {
       {/* Hero — full-bleed photo under CAMS crimson veil + vignette for readable white copy */}
       <section
         ref={heroSectionRef}
-        className="relative isolate min-h-[26rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:min-h-[32rem] md:min-h-[38rem]"
+        className="relative isolate min-h-[22rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:min-h-[32rem] md:min-h-[38rem]"
       >
         <div className="absolute inset-0">
           <img
@@ -317,7 +317,7 @@ export default function Landing() {
             points="0,300 100,260 200,280 300,210 400,230 500,170 600,200 700,140 800,180 900,110 1000,150 1100,80 1200,120"
           />
         </svg>
-        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-3 pt-28 text-center sm:items-start sm:justify-center sm:pb-16 sm:pt-32 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
+        <div className="relative z-10 mx-auto flex max-w-content flex-col items-center justify-end px-6 pb-3 pt-16 text-center sm:items-start sm:justify-center sm:pb-16 sm:pt-32 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
           <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
             <span className="block sm:inline">Capstone Asset</span>{" "}
             <span className="block sm:inline">Management Society</span>
