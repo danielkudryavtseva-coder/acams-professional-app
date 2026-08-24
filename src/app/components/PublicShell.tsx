@@ -12,7 +12,6 @@ const PUBLIC_NAV = [
   { label: "Home", href: "/", end: true },
   { label: "Membership", href: "/membership", end: false },
   { label: "Committees", href: "/committees", end: false },
-  { label: "Portfolio", href: "/portfolio", end: false },
   { label: "News", href: "/news", end: false },
 ];
 
@@ -79,6 +78,29 @@ export function PublicShell({ children }: PublicShellProps) {
             </Button>
           </div>
         </div>
+
+        <nav
+          className="flex items-center gap-1 overflow-x-auto border-t border-border/60 px-4 py-2 md:hidden"
+          aria-label="Main mobile"
+        >
+          {PUBLIC_NAV.map(({ label, href, end }) => (
+            <NavLink
+              key={href}
+              to={href}
+              end={end}
+              className={({ isActive }) =>
+                cn(
+                  "shrink-0 rounded-md px-3 py-1.5 text-sm transition-colors duration-base ease-smooth",
+                  isActive
+                    ? "font-medium text-crimson"
+                    : "text-ink/80 hover:bg-muted/80 hover:text-crimson dark:text-foreground/80 dark:hover:bg-muted/50",
+                )
+              }
+            >
+              {label}
+            </NavLink>
+          ))}
+        </nav>
       </header>
 
       <main className="flex-1">{children}</main>
@@ -131,11 +153,6 @@ export function PublicShell({ children }: PublicShellProps) {
               <li>
                 <Link to="/committees" className={footerLinkClass}>
                   Committees
-                </Link>
-              </li>
-              <li>
-                <Link to="/portfolio" className={footerLinkClass}>
-                  Portfolio
                 </Link>
               </li>
               <li>

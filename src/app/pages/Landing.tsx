@@ -326,9 +326,20 @@ export default function Landing() {
             University of Alabama.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
+            {/* Mobile: single big Apply button */}
+            <a
+              href={APPLY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex w-full items-center justify-center rounded-md bg-white px-5 py-4 text-base font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:hidden"
+            >
+              Apply
+            </a>
+
+            {/* Desktop/tablet: both CTAs */}
             <Link
               to="/portfolio"
-              className="inline-flex items-center justify-center rounded-md border border-white/80 bg-white/5 px-5 py-3 text-sm font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson"
+              className="hidden items-center justify-center rounded-md border border-white/80 bg-white/5 px-5 py-3 text-sm font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
             >
               Explore Our Portfolio
             </Link>
@@ -336,7 +347,7 @@ export default function Landing() {
               href={APPLY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson"
+              className="hidden items-center justify-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
             >
               Apply
             </a>
@@ -377,9 +388,17 @@ export default function Landing() {
           >
             <div className="min-h-0">
               <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground md:mt-3 md:max-w-3xl md:text-base">
-                CAMS prepares University of Alabama students for careers in
-                finance through hands-on investment management, structured
-                recruiting mentorship, and a strong professional network.
+                The Capstone Asset Management Society (CAMS) is a student-led
+                organization dedicated to helping members grow their
+                knowledge of investing and prepare for successful careers in
+                finance. We offer a multitude of resources to assist
+                committed and eager students in learning the principles of
+                value investing and market analysis. CAMS is open to all
+                students, regardless of grade level or prior experience, and
+                is focused on helping members secure internships and careers
+                in the financial services industry through networking
+                opportunities, member education seminars, and career
+                development workshops.
               </p>
               <div className="mt-5 grid gap-x-6 gap-y-4 sm:grid-cols-2 md:mt-6 md:grid-cols-4 md:gap-x-6">
                 {PILLARS.map(({ title, body }) => (
