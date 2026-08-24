@@ -253,7 +253,7 @@ export default function Landing() {
       {/* Hero — full-bleed photo under CAMS crimson veil + vignette for readable white copy */}
       <section
         ref={heroSectionRef}
-        className="relative isolate min-h-[22rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:flex sm:min-h-[32rem] sm:flex-col sm:justify-center md:min-h-[38rem]"
+        className="relative isolate min-h-[27rem] overflow-hidden bg-[var(--crimson-darker)] text-white sm:flex sm:min-h-[32rem] sm:flex-col sm:justify-center md:min-h-[38rem]"
       >
         <div className="absolute inset-0">
           <img
