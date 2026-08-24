@@ -328,7 +328,7 @@ export default function Landing() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               to="/portfolio"
-              className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson"
+              className="inline-flex items-center justify-center rounded-md border border-white/80 bg-white/5 px-5 py-3 text-sm font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson"
             >
               Explore Our Portfolio
             </Link>
@@ -336,7 +336,7 @@ export default function Landing() {
               href={APPLY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-md border border-white/80 bg-white/5 px-5 py-3 text-sm font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson"
+              className="inline-flex items-center justify-center rounded-md bg-white px-5 py-3 text-sm font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson"
             >
               Apply
             </a>
@@ -362,7 +362,7 @@ export default function Landing() {
           </button>
 
           {totalValue > 0 && (
-            <p className="mt-1 text-center text-xs font-medium text-muted-foreground md:mt-1.5">
+            <p className="mt-1 text-center text-base font-medium text-muted-foreground md:mt-1.5 md:text-lg">
               Total AUM:{" "}
               <span className="font-semibold text-crimson">
                 ${totalValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
