@@ -43,7 +43,7 @@ const EXECUTIVES: Executive[] = [
     image: williamHessler,
   },
   {
-    name: "Ford Alderice",
+    name: "Ford Alderdice",
     title: "Director of Recruitment",
     image: fordAlderice,
   },
