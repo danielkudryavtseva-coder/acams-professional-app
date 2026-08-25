@@ -303,7 +303,7 @@ export default function Landing() {
               href={APPLY_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex w-full items-center justify-center rounded-full bg-white px-5 py-4 text-xl font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:hidden"
+              className="inline-flex h-14 w-full items-center justify-center rounded-full bg-white px-5 text-xl font-semibold text-crimson shadow-hero transition-[box-shadow,background-color,color] duration-base ease-smooth hover:bg-paper hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:hidden"
             >
               Apply
             </a>
