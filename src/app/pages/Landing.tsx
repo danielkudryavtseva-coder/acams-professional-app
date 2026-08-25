@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { APPLY_URL } from "../components/PublicShell";
 import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
 import bradyBelden from "../../assets/execs/brady-belden.jpg";
@@ -401,15 +401,6 @@ export default function Landing() {
             {EXECUTIVES.map((e) => (
               <ExecCard key={e.name} {...e} />
             ))}
-          </div>
-          <div className="mt-12 text-center">
-            <Link
-              to="/roster"
-              className="inline-flex items-center gap-2 rounded-md text-sm font-medium text-crimson underline-offset-4 transition-colors duration-base ease-smooth hover:underline"
-            >
-              See the full society roster
-              <ArrowRight className="h-4 w-4" />
-            </Link>
           </div>
         </div>
       </section>
