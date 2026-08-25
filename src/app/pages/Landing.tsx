@@ -267,7 +267,7 @@ export default function Landing() {
           aria-hidden
         />
         <div className="absolute inset-0 z-10 mx-auto flex max-w-content flex-col items-center justify-center px-6 text-center sm:items-start sm:justify-center sm:py-24 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
-          <div className="flex flex-col items-center sm:items-start">
+          <div className="absolute inset-x-6 top-1/2 flex -translate-y-1/2 flex-col items-center sm:static sm:inset-auto sm:translate-y-0 sm:items-start">
             <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold uppercase leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
               <span className="block">Capstone Asset</span>
               <span className="block">Management Society</span>
@@ -297,7 +297,7 @@ export default function Landing() {
               </div>
             </div>
           </div>
-          <div className="mt-8 flex w-full flex-wrap justify-center gap-3 sm:mt-8 sm:w-auto sm:justify-start">
+          <div className="absolute inset-x-6 bottom-14 flex flex-wrap justify-center gap-3 sm:static sm:inset-auto sm:mt-8 sm:w-auto sm:justify-start">
             {/* Mobile: single big pill Apply button */}
             <a
               href={APPLY_URL}
