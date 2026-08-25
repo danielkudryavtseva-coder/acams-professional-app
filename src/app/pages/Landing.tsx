@@ -1,13 +1,8 @@
-import { useMemo, useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { APPLY_URL } from "../components/PublicShell";
 import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
-import { sortNewsPosts, useNews } from "../context/NewsContext";
-import {
-  NewsFeaturedCard,
-  NewsLatestListItem,
-} from "../components/NewsBlogLayout";
 import bradyBelden from "../../assets/execs/brady-belden.jpg";
 import cadeAndrews from "../../assets/execs/cade-andrews.jpg";
 import alexWylie from "../../assets/execs/alex-wylie.png";
@@ -54,17 +49,17 @@ const EXECUTIVES: Executive[] = [
   },
   {
     name: "Matt Rochford",
-    title: "Co-Director of Media Development",
+    title: "Co-Director of Professional Development",
     image: mattRochford,
   },
   {
     name: "Brady Belden",
-    title: "Co-Director of Media Development",
+    title: "Co-Director of Professional Development",
     image: bradyBelden,
   },
   {
     name: "Cade Andrews",
-    title: "Co-Director of Media Development",
+    title: "Co-Director of Professional Development",
     image: cadeAndrews,
   },
   {
@@ -243,11 +238,6 @@ export default function Landing() {
     };
   }, []);
 
-  const { posts } = useNews();
-  const landingNews = useMemo(() => sortNewsPosts(posts).slice(0, 5), [posts]);
-  const landingFeatured = landingNews[0];
-  const landingRest = landingNews.slice(1, 5);
-
   return (
     <>
       {/* Hero — full-bleed photo under CAMS crimson veil + vignette for readable white copy */}
@@ -424,52 +414,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Latest Society News */}
-      <section className="border-y border-border/60 bg-paper py-16 dark:border-border dark:bg-card">
-        <div className="mx-auto max-w-content px-6">
-          <div className="flex items-end justify-between gap-4">
-            <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground">
-              Latest Society News
-            </h2>
-            <Link
-              to="/news"
-              className="hidden rounded-md text-sm font-medium text-crimson underline-offset-4 transition-colors duration-base ease-smooth hover:underline sm:inline-flex"
-            >
-              All news &rarr;
-            </Link>
-          </div>
-          {landingFeatured ? (
-            <div className="mt-8 grid gap-8 lg:grid-cols-3 lg:items-start">
-              <div className="lg:col-span-2">
-                <NewsFeaturedCard post={landingFeatured} />
-              </div>
-              <div>
-                <h3 className="font-display text-lg font-semibold tracking-tight text-foreground md:text-xl">
-                  Latest post
-                </h3>
-                {landingRest.length > 0 ? (
-                  <ul className="mt-4 space-y-1 border-t border-border/60 pt-2">
-                    {landingRest.map((p) => (
-                      <NewsLatestListItem key={p.id} post={p} />
-                    ))}
-                  </ul>
-                ) : null}
-                <Link
-                  to="/news"
-                  className="mt-6 inline-flex rounded-md text-sm font-medium text-crimson underline-offset-4 transition-colors duration-base ease-smooth hover:underline sm:hidden"
-                >
-                  All news &rarr;
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <p className="mt-6 text-sm text-muted-foreground">
-              Check back soon for society updates.
-            </p>
-          )}
-        </div>
-      </section>
-
       {/* Member CTA */}
       <section className="py-16">
         <div className="mx-auto max-w-content px-6">
@@ -494,12 +438,6 @@ export default function Landing() {
               >
                 Apply
               </a>
-              <Link
-                to="/login"
-                className="inline-flex items-center justify-center rounded-md border border-border bg-background px-5 py-3 text-sm font-semibold shadow-xs transition-[background-color,box-shadow,border-color] duration-base ease-smooth hover:border-border hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-              >
-                Log in
-              </Link>
             </div>
           </div>
         </div>
