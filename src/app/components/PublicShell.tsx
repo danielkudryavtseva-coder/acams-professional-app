@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "./ui/utils";
@@ -7,13 +7,6 @@ import camsLogo from "../../assets/cams-logo.png";
 
 export const APPLY_URL =
   "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=jnIAKtDwtECk6M5DPz-8p-dm6BAHXZ5FpC2yR0M_VpJUNktCRjRJRDRFVk9ZVkFNT0tUSjdPN1FTUC4u";
-
-const PUBLIC_NAV = [
-  { label: "Home", href: "/", end: true },
-  { label: "Membership", href: "/membership", end: false },
-  { label: "Committees", href: "/committees", end: false },
-  { label: "News", href: "/news", end: false },
-];
 
 const footerLinkClass =
   "text-muted-foreground transition-colors duration-base ease-smooth hover:text-crimson focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-paper rounded-sm dark:focus-visible:ring-offset-card";
@@ -41,26 +34,6 @@ export function PublicShell({ children }: PublicShellProps) {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
-            {PUBLIC_NAV.map(({ label, href, end }) => (
-              <NavLink
-                key={href}
-                to={href}
-                end={end}
-                className={({ isActive }) =>
-                  cn(
-                    "rounded-md px-3 py-2 text-sm transition-colors duration-base ease-smooth",
-                    isActive
-                      ? "font-medium text-crimson"
-                      : "text-ink/80 hover:bg-muted/80 hover:text-crimson dark:text-foreground/80 dark:hover:bg-muted/50",
-                  )
-                }
-              >
-                {label}
-              </NavLink>
-            ))}
-          </nav>
-
           <div className="flex items-center gap-2 shrink-0">
             <ThemeToggle />
             <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
@@ -78,29 +51,6 @@ export function PublicShell({ children }: PublicShellProps) {
             </Button>
           </div>
         </div>
-
-        <nav
-          className="flex items-center justify-center gap-1 overflow-x-auto border-t border-border/60 px-4 py-2 md:hidden"
-          aria-label="Main mobile"
-        >
-          {PUBLIC_NAV.map(({ label, href, end }) => (
-            <NavLink
-              key={href}
-              to={href}
-              end={end}
-              className={({ isActive }) =>
-                cn(
-                  "shrink-0 rounded-md px-3 py-1.5 text-sm transition-colors duration-base ease-smooth",
-                  isActive
-                    ? "font-medium text-crimson"
-                    : "text-ink/80 hover:bg-muted/80 hover:text-crimson dark:text-foreground/80 dark:hover:bg-muted/50",
-                )
-              }
-            >
-              {label}
-            </NavLink>
-          ))}
-        </nav>
       </header>
 
       <main className="flex-1">{children}</main>

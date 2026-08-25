@@ -276,11 +276,11 @@ export default function Landing() {
           className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.42)_0%,transparent_38%,transparent_72%,rgba(0,0,0,0.28)_100%)] md:bg-[linear-gradient(to_right,rgba(0,0,0,0.38)_0%,transparent_55%)]"
           aria-hidden
         />
-        <div className="absolute inset-0 z-10 mx-auto flex max-w-content flex-col items-center justify-between px-6 pb-[82px] pt-[82px] text-center sm:items-start sm:justify-center sm:py-24 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
+        <div className="absolute inset-0 z-10 mx-auto flex max-w-content flex-col items-center justify-center px-6 text-center sm:items-start sm:justify-center sm:py-24 sm:text-left md:min-h-[28rem] md:py-24 lg:py-32">
           <div className="flex flex-col items-center sm:items-start">
             <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold uppercase leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
               <span className="block">Capstone Asset</span>
-              <span className="block pl-8 sm:pl-16">Management Society</span>
+              <span className="block sm:pl-16">Management Society</span>
             </h1>
             <button
               type="button"
@@ -307,7 +307,7 @@ export default function Landing() {
               </div>
             </div>
           </div>
-          <div className="flex w-full flex-wrap justify-center gap-3 sm:mt-8 sm:w-auto sm:justify-start">
+          <div className="mt-8 flex w-full flex-wrap justify-center gap-3 sm:mt-8 sm:w-auto sm:justify-start">
             {/* Mobile: single big pill Apply button */}
             <a
               href={APPLY_URL}
