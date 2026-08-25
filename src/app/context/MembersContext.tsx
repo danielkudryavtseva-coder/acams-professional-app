@@ -1,11 +1,13 @@
-import React, { createContext, useContext, useState } from "react";
-import { MOCK_MEMBERS, type Member } from "../data/mockData";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import type { Member } from "../data/mockData";
+import { supabase, supabaseConfigured } from "../lib/supabaseClient";
 
 interface MembersContextValue {
   members: Member[];
+  loading: boolean;
   updateMember: (id: string, updates: Partial<Member>) => void;
   setPnlTag: (memberId: string, tagged: boolean, reason?: string) => void;
-  addMember: (member: Member) => void;
+  addMember: (member: Member) => Promise<void>;
   /** Mark a member as inactive — they're hidden from public surfaces (Roster, Scoreboard) but still visible to execs. */
   deactivateMember: (memberId: string) => void;
   /** Restore a previously deactivated member. */
@@ -13,20 +15,126 @@ interface MembersContextValue {
 }
 const MembersContext = createContext<MembersContextValue | null>(null);
 
+/** Member fields stored as first-class columns (privilege-gated server-side); everything else lives in the `profile` jsonb blob. */
+const TOP_LEVEL_KEYS = new Set(["id", "email", "role", "active", "pnlTagged", "pnlReason"]);
+
+interface MemberRow {
+  id: string;
+  email: string;
+  role: string;
+  active: boolean;
+  pnl_tagged: boolean;
+  pnl_reason: string | null;
+  profile: Record<string, unknown>;
+}
+
+function rowToMember(row: MemberRow): Member {
+  return {
+    ...(row.profile as object),
+    id: row.id,
+    email: row.email,
+    role: row.role as Member["role"],
+    active: row.active,
+    pnlTagged: row.pnl_tagged,
+    pnlReason: row.pnl_reason ?? undefined,
+  } as Member;
+}
+
+/** Splits a Member(-ish) object into the privileged top-level columns and the free-form profile blob. */
+function splitMember(data: Partial<Member>) {
+  const top: Record<string, unknown> = {};
+  const profile: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    if (key === "password") continue; // Supabase Auth owns credentials now.
+    if (key === "id") continue; // never updated after insert.
+    if (TOP_LEVEL_KEYS.has(key)) {
+      const column = key === "pnlTagged" ? "pnl_tagged" : key === "pnlReason" ? "pnl_reason" : key;
+      top[column] = value;
+    } else {
+      profile[key] = value;
+    }
+  }
+  return { top, profile };
+}
+
 export function MembersProvider({ children }: { children: React.ReactNode }) {
-  const [members, setMembers] = useState<Member[]>(() => {
-    try { const v = localStorage.getItem("cams_members.v2"); return v ? JSON.parse(v) : MOCK_MEMBERS; } catch { return MOCK_MEMBERS; }
-  });
-  const save = (next: Member[]) => { setMembers(next); localStorage.setItem("cams_members.v2", JSON.stringify(next)); };
-  const updateMember = (id: string, updates: Partial<Member>) => save(members.map((m) => (m.id === id ? { ...m, ...updates } : m)));
-  const setPnlTag = (memberId: string, tagged: boolean, reason?: string) => save(members.map((m) => (m.id === memberId ? { ...m, pnlTagged: tagged, pnlReason: reason } : m)));
-  const addMember = (member: Member) => save([...members, member]);
-  const deactivateMember = (memberId: string) => save(members.map((m) => (m.id === memberId ? { ...m, active: false } : m)));
-  const reactivateMember = (memberId: string) => save(members.map((m) => (m.id === memberId ? { ...m, active: true } : m)));
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(supabaseConfigured);
+
+  useEffect(() => {
+    if (!supabaseConfigured) return;
+
+    let cancelled = false;
+
+    async function load() {
+      const { data, error } = await supabase.from("members").select("*");
+      if (cancelled) return;
+      if (!error && data) setMembers((data as MemberRow[]).map(rowToMember));
+      setLoading(false);
+    }
+    load();
+
+    const channel = supabase
+      .channel("members-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "members" },
+        (payload) => {
+          setMembers((prev) => {
+            if (payload.eventType === "DELETE") {
+              const oldId = (payload.old as { id: string }).id;
+              return prev.filter((m) => m.id !== oldId);
+            }
+            const next = rowToMember(payload.new as MemberRow);
+            const exists = prev.some((m) => m.id === next.id);
+            return exists ? prev.map((m) => (m.id === next.id ? next : m)) : [...prev, next];
+          });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const updateMember = (id: string, updates: Partial<Member>) => {
+    const current = members.find((m) => m.id === id);
+    if (!current) return;
+    const { top, profile } = splitMember(updates);
+    const mergedProfile = { ...splitMember(current).profile, ...profile };
+    void supabase
+      .from("members")
+      .update({ ...top, profile: mergedProfile })
+      .eq("id", id);
+    // Optimistic local update — the realtime subscription will reconcile shortly after.
+    setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates } : m)));
+  };
+
+  const setPnlTag = (memberId: string, tagged: boolean, reason?: string) =>
+    updateMember(memberId, { pnlTagged: tagged, pnlReason: reason });
+
+  const addMember = async (member: Member) => {
+    const { top, profile } = splitMember(member);
+    const { error } = await supabase.from("members").insert({ id: member.id, ...top, profile });
+    if (error) throw error;
+    setMembers((prev) => [...prev, member]);
+  };
+
+  const deactivateMember = (memberId: string) => updateMember(memberId, { active: false });
+  const reactivateMember = (memberId: string) => updateMember(memberId, { active: true });
+
   return (
-    <MembersContext.Provider value={{ members, updateMember, setPnlTag, addMember, deactivateMember, reactivateMember }}>
+    <MembersContext.Provider
+      value={{ members, loading, updateMember, setPnlTag, addMember, deactivateMember, reactivateMember }}
+    >
       {children}
     </MembersContext.Provider>
   );
 }
-export function useMembers() { const c = useContext(MembersContext); if (!c) throw new Error("useMembers must be used inside MembersProvider"); return c; }
+export function useMembers() {
+  const c = useContext(MembersContext);
+  if (!c) throw new Error("useMembers must be used inside MembersProvider");
+  return c;
+}

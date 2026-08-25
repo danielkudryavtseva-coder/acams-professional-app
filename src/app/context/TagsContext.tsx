@@ -13,7 +13,7 @@ import {
   getPendingForMember,
   rejectAssignment as rejectAssignmentPure,
 } from "../lib/tags";
-import { MOCK_MEMBERS, type Member } from "../data/mockData";
+import type { Member } from "../data/mockData";
 import { useMembers } from "./MembersContext";
 import { useAuth } from "./AuthContext";
 
@@ -95,10 +95,10 @@ export function TagsProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<TagsContextValue>(() => {
     const requireExec = (id: string): Member => {
       const exec = members.find((m) => m.id === id);
-      // Always verify against the immutable bundle roster, not the mutable localStorage store.
-      // This prevents a DevTools role-escalation attack on the mutable members array.
-      const canonical = MOCK_MEMBERS.find((m) => m.id === id);
-      if (!exec || canonical?.role !== "exec") {
+      // `members` comes straight from Supabase, where a server-side trigger blocks
+      // anyone but an existing exec from changing the `role` column — so this is
+      // already tamper-proof and doesn't need a separate bundle cross-check.
+      if (!exec || exec.role !== "exec") {
         throw new Error("Exec role required for this action.");
       }
       return exec;

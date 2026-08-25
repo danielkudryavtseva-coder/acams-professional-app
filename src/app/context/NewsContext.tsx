@@ -7,7 +7,6 @@ import React, {
   useState,
 } from "react";
 import {
-  MOCK_MEMBERS,
   MOCK_NEWS,
   type NewsCategory,
   type NewsPost,
@@ -78,7 +77,7 @@ interface NewsContextValue {
 const NewsContext = createContext<NewsContextValue | null>(null);
 
 export function NewsProvider({ children }: { children: React.ReactNode }) {
-  const { currentUser } = useAuth();
+  const { currentUser, isExec } = useAuth();
   const [posts, setPosts] = useState<NewsPost[]>(() => {
     const stored = loadJsonPosts();
     if (stored) return stored;
@@ -91,8 +90,7 @@ export function NewsProvider({ children }: { children: React.ReactNode }) {
 
   const addPost = useCallback(
     (input: AddNewsPostInput): NewsPost | null => {
-      const canonical = MOCK_MEMBERS.find((m) => m.id === currentUser?.id);
-      if (!currentUser || canonical?.role !== "exec") return null;
+      if (!currentUser || !isExec) return null;
       const title = input.title.trim();
       const body = input.body.trim();
       if (!title || !body) return null;
@@ -118,7 +116,7 @@ export function NewsProvider({ children }: { children: React.ReactNode }) {
       setPosts((prev) => [...prev, post]);
       return post;
     },
-    [currentUser],
+    [currentUser, isExec],
   );
 
   const value = useMemo<NewsContextValue>(
