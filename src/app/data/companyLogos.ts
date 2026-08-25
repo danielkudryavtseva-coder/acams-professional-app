@@ -47,7 +47,7 @@ export const COMPANY_DOMAINS: Record<string, string> = {
   "S&P Global Market Intelligence": "spglobal.com",
   "Texas Capital": "texascapitalbank.com",
   "RSM": "rsmus.com",
-  "Northrup Grumman": "northropgrumman.com",
+  "Northrop Grumman": "northropgrumman.com",
   "Shell": "shell.com",
   "Amazon Web Services": "aws.amazon.com",
   "Boston Consulting Group": "bcg.com",

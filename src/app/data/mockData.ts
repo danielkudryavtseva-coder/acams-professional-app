@@ -568,7 +568,7 @@ export const MOCK_FIRM_CARDS: FirmCard[] = [
   {
     firmName: "Goldman Sachs",
     track: "IB",
-    recentDeals: ["Advisored on $4.2B DataCo acquisition"],
+    recentDeals: ["Advised on $4.2B DataCo acquisition"],
     camsAlumniIds: ["alum-033", "alum-045", "alum-071", "alum-103", "alum-125", "alum-133", "alum-141"],
     historicalPlacements: 7,
     notes: "Behavioral + technical heavy.",
