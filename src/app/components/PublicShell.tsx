@@ -38,7 +38,7 @@ export function PublicShell({ children }: PublicShellProps) {
             <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
               <Link to="/login">Log in</Link>
             </Button>
-            <Button size="sm" className="hidden md:inline-flex shadow-soft text-base" asChild>
+            <Button size="sm" className="hidden md:inline-flex shadow-soft" asChild>
               <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
                 Apply
               </a>
