@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./ThemeToggle";
-import { cn } from "./ui/utils";
 import camsLogo from "../../assets/cams-logo.png";
 
 export const APPLY_URL =
@@ -79,14 +78,6 @@ export function PublicShell({ children }: PublicShellProps) {
             </h4>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>Tuscaloosa, AL</li>
-              <li>
-                <a
-                  href="mailto:contact@cams.ua.edu"
-                  className={cn(footerLinkClass, "underline-offset-4 hover:underline")}
-                >
-                  contact@cams.ua.edu
-                </a>
-              </li>
               <li>Culverhouse College of Business</li>
             </ul>
           </div>
