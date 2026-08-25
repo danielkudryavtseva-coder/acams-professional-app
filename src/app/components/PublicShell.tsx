@@ -96,21 +96,6 @@ export function PublicShell({ children }: PublicShellProps) {
             </h4>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
-                <Link to="/membership" className={footerLinkClass}>
-                  Membership
-                </Link>
-              </li>
-              <li>
-                <Link to="/committees" className={footerLinkClass}>
-                  Committees
-                </Link>
-              </li>
-              <li>
-                <Link to="/news" className={footerLinkClass}>
-                  News
-                </Link>
-              </li>
-              <li>
                 <a
                   href={APPLY_URL}
                   target="_blank"
