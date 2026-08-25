@@ -218,6 +218,13 @@ export function PlacementsMap() {
       style: CARTO_LIGHT_STYLE,
       center: [-88, 36],
       zoom: 3.4,
+      minZoom: 3,
+      // Keeps the map locked to the continental US + AK/HI — placements are US-only, so
+      // there's no reason to let visitors pan/zoom out to the rest of the world.
+      maxBounds: [
+        [-172, 14],
+        [-60, 72],
+      ],
       attributionControl: { compact: true },
     });
     mapRef.current = map;
