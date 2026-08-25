@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./ThemeToggle";
 import camsLogo from "../../assets/cams-logo.png";
@@ -15,6 +15,8 @@ interface PublicShellProps {
 }
 
 export function PublicShell({ children }: PublicShellProps) {
+  const { pathname } = useLocation();
+  const isHome = pathname === "/";
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 border-b border-border/80 bg-card/95 shadow-header backdrop-blur-md supports-[backdrop-filter]:bg-card/80">
@@ -54,6 +56,7 @@ export function PublicShell({ children }: PublicShellProps) {
 
       <main className="flex-1">{children}</main>
 
+      {!isHome && (
       <footer className="border-t border-border bg-paper dark:bg-card">
         <div className="mx-auto grid max-w-content gap-10 px-6 py-14 md:grid-cols-3">
           <div>
@@ -104,6 +107,7 @@ export function PublicShell({ children }: PublicShellProps) {
           Society · University of Alabama
         </div>
       </footer>
+      )}
     </div>
   );
 }
