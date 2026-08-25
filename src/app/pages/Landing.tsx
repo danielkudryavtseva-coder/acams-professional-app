@@ -414,34 +414,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Member CTA */}
-      <section className="py-16">
-        <div className="mx-auto max-w-content px-6">
-          <div className="rounded-lg border border-border/90 bg-card p-8 text-center shadow-elevated ring-1 ring-border/40 md:p-12">
-            <p className="text-xs font-semibold uppercase tracking-wider text-crimson">
-              For CAMS members
-            </p>
-            <h2 className="mt-3 font-display text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-              Track recruiting, contacts, pipeline, and pitches in one place.
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
-              Members get access to the full CAMS workspace — recruiting
-              programs, contact CRM, deal pipeline, alumni rolodex, events, and
-              exec tools.
-            </p>
-            <div className="mt-8 flex flex-wrap justify-center gap-3">
-              <a
-                href={APPLY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-md bg-crimson px-5 py-3 text-sm font-semibold text-white shadow-soft transition-[background-color,box-shadow] duration-base ease-smooth hover:bg-crimson-dark hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-card"
-              >
-                Apply
-              </a>
-            </div>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
