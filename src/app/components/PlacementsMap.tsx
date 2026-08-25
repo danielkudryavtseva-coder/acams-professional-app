@@ -29,6 +29,9 @@ const ZOOM_REVEAL_THRESHOLD = 4.2;
 /** How many firms to show in the always-visible top-companies overview. */
 const TOP_COMPANIES_COUNT = 20;
 
+/** Firms excluded from the "Top Placements" logo wall specifically (still counted in city pins/stats). */
+const TOP_PLACEMENTS_EXCLUDE = new Set(["Point72"]);
+
 interface Company {
   firm: string;
   count: number;
@@ -302,7 +305,10 @@ export function PlacementsMap() {
     (a) => Number.isFinite(a.mapLat) && Number.isFinite(a.mapLng),
   ).length;
   const topCompanies = React.useMemo(
-    () => mergeCompanies(buildCityClusters()).slice(0, TOP_COMPANIES_COUNT),
+    () =>
+      mergeCompanies(buildCityClusters())
+        .filter((c) => !TOP_PLACEMENTS_EXCLUDE.has(c.firm))
+        .slice(0, TOP_COMPANIES_COUNT),
     [],
   );
 

@@ -89,7 +89,7 @@ const PILLARS = [
   },
   {
     title: "Alumni Network",
-    body: "Our alumni are placed at Goldman Sachs, BlackRock, J.P. Morgan, KKR, and beyond. Active mentorship connects current members with those paths.",
+    body: "Our alumni are placed at Goldman Sachs, BlackRock, J.P. Morgan, and beyond. Active mentorship connects current members with those paths.",
   },
 ];
 
