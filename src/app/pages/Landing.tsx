@@ -280,7 +280,7 @@ export default function Landing() {
           <div className="flex flex-col items-center sm:items-start">
             <h1 className="mt-0 max-w-3xl font-display text-4xl font-semibold uppercase leading-[1.1] tracking-tight drop-shadow-[0_2px_28px_rgba(0,0,0,0.5)] sm:mt-0 md:text-6xl">
               <span className="block">Capstone Asset</span>
-              <span className="block sm:pl-16">Management Society</span>
+              <span className="block">Management Society</span>
             </h1>
             <button
               type="button"
