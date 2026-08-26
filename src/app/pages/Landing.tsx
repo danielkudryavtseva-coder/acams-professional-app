@@ -1,5 +1,4 @@
 import { useRef, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 import { APPLY_URL } from "../components/PublicShell";
 import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
@@ -308,13 +307,7 @@ export default function Landing() {
               Apply
             </a>
 
-            {/* Desktop/tablet: both CTAs */}
-            <Link
-              to="/portfolio"
-              className="hidden items-center justify-center rounded-md border border-white/80 bg-white/5 px-[35px] py-[21px] text-[24.5px] font-semibold text-white shadow-soft backdrop-blur-[2px] transition-[background-color,border-color,box-shadow] duration-base ease-smooth hover:border-white hover:bg-white/12 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-crimson sm:inline-flex"
-            >
-              Explore Our Portfolio
-            </Link>
+            {/* Desktop/tablet CTA */}
             <a
               href={APPLY_URL}
               target="_blank"

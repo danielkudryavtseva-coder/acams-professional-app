@@ -1,8 +1,11 @@
 import type { ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { ThemeToggle } from "./ThemeToggle";
+import { cn } from "./ui/utils";
 import camsLogo from "../../assets/cams-logo.png";
+
+const CONTACT_EMAIL = "Alabamacams2026@gmail.com";
 
 export const APPLY_URL =
   "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=jnIAKtDwtECk6M5DPz-8p-dm6BAHXZ5FpC2yR0M_VpJUNktCRjRJRDRFVk9ZVkFNT0tUSjdPN1FTUC4u";
@@ -15,8 +18,6 @@ interface PublicShellProps {
 }
 
 export function PublicShell({ children }: PublicShellProps) {
-  const { pathname } = useLocation();
-  const isHome = pathname === "/";
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <header className="sticky top-0 z-50 border-b border-border/80 bg-card/95 shadow-header backdrop-blur-md supports-[backdrop-filter]:bg-card/80">
@@ -56,7 +57,6 @@ export function PublicShell({ children }: PublicShellProps) {
 
       <main className="flex-1">{children}</main>
 
-      {!isHome && (
       <footer className="border-t border-border bg-paper dark:bg-card">
         <div className="mx-auto grid max-w-content gap-10 px-6 py-14 md:grid-cols-3">
           <div>
@@ -81,6 +81,14 @@ export function PublicShell({ children }: PublicShellProps) {
             </h4>
             <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
               <li>Tuscaloosa, AL</li>
+              <li>
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className={cn(footerLinkClass, "underline-offset-4 hover:underline")}
+                >
+                  {CONTACT_EMAIL}
+                </a>
+              </li>
               <li>Culverhouse College of Business</li>
             </ul>
           </div>
@@ -107,7 +115,6 @@ export function PublicShell({ children }: PublicShellProps) {
           Society · University of Alabama
         </div>
       </footer>
-      )}
     </div>
   );
 }
