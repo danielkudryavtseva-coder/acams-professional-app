@@ -6,6 +6,8 @@ import { APPLY_URL } from "../components/PublicShell";
 
 interface CommitteeInfo {
   name: "TMT" | "Contrarian" | "Financials" | "Consumer" | "Healthcare" | "Industrials & Energy";
+  /** Full spelled-out name for the header — falls back to `name` when not set. */
+  displayName?: string;
   tagline: string;
   description: string;
   activities: string[];
@@ -14,6 +16,7 @@ interface CommitteeInfo {
 const COMMITTEES: CommitteeInfo[] = [
   {
     name: "TMT",
+    displayName: "Technology, Media & Telecom",
     tagline: "Sector coverage for Technology, Media & Telecom",
     description:
       "The TMT Committee owns sector coverage for technology, media, and telecommunications names. Members track the coverage universe, monitor earnings and competitive dynamics, and build sector-specific theses that feed directly into the full committee's pitch process.",
@@ -103,44 +106,62 @@ function CommitteeHeadPlaceholder() {
   );
 }
 
-/** Top 5 coverage/holdings companies per committee (from portfolio decisions). */
-const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; domain: string }[]> = {
+/**
+ * Full-resolution wordmark logos, served straight from Wikimedia Commons
+ * (`Special:FilePath` rasterizes SVGs server-side at whatever width we ask
+ * for, so they stay crisp — no pixelation like the old favicon-service
+ * crops). A few firms don't have a usable Commons logo; those fall back to
+ * Google's favicon service or the firm's own site icon instead.
+ */
+function commonsLogo(file: string, width = 500): string {
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=${width}`;
+}
+function faviconLogo(domain: string): string {
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=256`;
+}
+
+/** Top coverage/holdings companies per committee (from portfolio decisions). */
+const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; logo: string }[]> = {
   TMT: [
-    { ticker: "AMZN", name: "Amazon.com, Inc.", domain: "amazon.com" },
-    { ticker: "AAPL", name: "Apple Inc.", domain: "apple.com" },
-    { ticker: "UBER", name: "Uber Technologies, Inc.", domain: "uber.com" },
-    { ticker: "NVDA", name: "NVIDIA Corporation", domain: "nvidia.com" },
+    { ticker: "AMZN", name: "Amazon.com, Inc.", logo: commonsLogo("Amazon logo.svg") },
+    { ticker: "AAPL", name: "Apple Inc.", logo: commonsLogo("Apple logo grey.svg") },
+    { ticker: "UBER", name: "Uber Technologies, Inc.", logo: commonsLogo("Uber logo 2018.svg") },
+    { ticker: "NVDA", name: "NVIDIA Corporation", logo: commonsLogo("NVIDIA logo.svg") },
   ],
   Contrarian: [
-    { ticker: "GTBIF", name: "Green Thumb Industries Inc.", domain: "gtigrows.com" },
-    { ticker: "ACN", name: "Accenture plc", domain: "accenture.com" },
-    { ticker: "UNH", name: "UnitedHealth Group Incorporated", domain: "unitedhealthgroup.com" },
+    { ticker: "GTBIF", name: "Green Thumb Industries Inc.", logo: faviconLogo("gtigrows.com") },
+    { ticker: "ACN", name: "Accenture plc", logo: commonsLogo("Accenture.svg") },
+    { ticker: "UNH", name: "UnitedHealth Group Incorporated", logo: commonsLogo("UnitedHealth Group logo.svg") },
   ],
   Financials: [
-    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", domain: "goldmansachs.com" },
-    { ticker: "APO", name: "Apollo Global Management, Inc.", domain: "apollo.com" },
-    { ticker: "MA", name: "Mastercard Incorporated", domain: "mastercard.com" },
-    { ticker: "UNM", name: "Unum Group", domain: "unum.com" },
+    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", logo: commonsLogo("Goldman Sachs logo.svg") },
+    { ticker: "APO", name: "Apollo Global Management, Inc.", logo: commonsLogo("Apollo Global Management logo.svg") },
+    { ticker: "MA", name: "Mastercard Incorporated", logo: commonsLogo("Mastercard 2019 logo.svg") },
+    { ticker: "UNM", name: "Unum Group", logo: commonsLogo("Unum Group logo.svg") },
   ],
   Consumer: [
-    { ticker: "SG", name: "Sweetgreen, Inc.", domain: "sweetgreen.com" },
-    { ticker: "ULTA", name: "Ulta Beauty, Inc.", domain: "ulta.com" },
-    { ticker: "MC", name: "LVMH Moët Hennessy Louis Vuitton", domain: "lvmh.com" },
-    { ticker: "CMG", name: "Chipotle Mexican Grill, Inc.", domain: "chipotle.com" },
+    { ticker: "SG", name: "Sweetgreen, Inc.", logo: commonsLogo("Sweetgreen logo.svg") },
+    { ticker: "ULTA", name: "Ulta Beauty, Inc.", logo: commonsLogo("Ulta Beauty logo.svg") },
+    { ticker: "MC", name: "LVMH Moët Hennessy Louis Vuitton", logo: commonsLogo("LVMH logo.svg") },
+    {
+      ticker: "CMG",
+      name: "Chipotle Mexican Grill, Inc.",
+      logo: "https://www.chipotle.com/content/dam/chipotle/icons-and-animations/chipotle-pepper-icon/pepper-general.png",
+    },
   ],
   Healthcare: [
-    { ticker: "VRTX", name: "Vertex Pharmaceuticals", domain: "vrtx.com" },
-    { ticker: "LLY", name: "Eli Lilly and Company", domain: "lilly.com" },
-    { ticker: "NVO", name: "Novo Nordisk A/S", domain: "novonordisk.com" },
-    { ticker: "ISRG", name: "Intuitive Surgical, Inc.", domain: "intuitive.com" },
-    { ticker: "RDNT", name: "RadNet, Inc.", domain: "radnet.com" },
+    { ticker: "VRTX", name: "Vertex Pharmaceuticals", logo: commonsLogo("Vertex logo.svg") },
+    { ticker: "LLY", name: "Eli Lilly and Company", logo: commonsLogo("Eli Lilly and Company.svg") },
+    { ticker: "NVO", name: "Novo Nordisk A/S", logo: faviconLogo("novonordisk.com") },
+    { ticker: "ISRG", name: "Intuitive Surgical, Inc.", logo: commonsLogo("Intuitive Surgical logo.svg") },
+    { ticker: "RDNT", name: "RadNet, Inc.", logo: faviconLogo("radnet.com") },
   ],
   "Industrials & Energy": [
-    { ticker: "WM", name: "Waste Management, Inc.", domain: "wm.com" },
-    { ticker: "WMS", name: "Advanced Drainage Systems, Inc.", domain: "adspipe.com" },
-    { ticker: "CVE", name: "Cenovus Energy Inc.", domain: "cenovus.com" },
-    { ticker: "CCJ", name: "Cameco Corporation", domain: "cameco.com" },
-    { ticker: "VST", name: "Vistra Corp.", domain: "vistracorp.com" },
+    { ticker: "WM", name: "Waste Management, Inc.", logo: commonsLogo("Waste Management logo.svg") },
+    { ticker: "WMS", name: "Advanced Drainage Systems, Inc.", logo: commonsLogo("Advanced Drainage Systems logo.svg") },
+    { ticker: "CVE", name: "Cenovus Energy Inc.", logo: commonsLogo("Cenovus logo.svg") },
+    { ticker: "CCJ", name: "Cameco Corporation", logo: commonsLogo("Cameco Logo.svg") },
+    { ticker: "VST", name: "Vistra Corp.", logo: commonsLogo("Vistra logo.svg") },
   ],
 };
 
@@ -164,11 +185,11 @@ function CommitteeLogos({ committee }: { committee: string }) {
     );
   }
   return (
-    <div className="flex flex-1 flex-wrap items-center justify-center gap-5 sm:justify-start">
+    <div className="flex flex-1 flex-wrap items-center justify-center gap-6 sm:justify-start">
       {holdings.map((h, i) => (
         <div
           key={h.ticker}
-          className={`relative flex h-20 w-20 items-center justify-center rounded-xl border border-border bg-white p-3 shadow-soft transition-transform duration-base ease-smooth hover:-translate-y-1 dark:bg-card sm:h-24 sm:w-24 ${FLOAT_OFFSETS[i]}`}
+          className={`relative flex h-16 items-center justify-center rounded-xl border border-border bg-white px-4 py-2 shadow-soft transition-transform duration-base ease-smooth hover:-translate-y-1 sm:h-20 ${FLOAT_OFFSETS[i]}`}
           title={h.name}
         >
           {i === 0 && (
@@ -179,11 +200,8 @@ function CommitteeLogos({ committee }: { committee: string }) {
               <Star className="h-3.5 w-3.5 fill-current" />
             </div>
           )}
-          <img
-            src={`https://www.google.com/s2/favicons?domain=${h.domain}&sz=128`}
-            alt={h.name}
-            className="h-full w-full object-contain"
-          />
+          {/* Full wordmark, unscaled to a square crop — width follows the logo's own aspect ratio. */}
+          <img src={h.logo} alt={h.name} className="h-full w-auto max-w-[180px] object-contain" />
         </div>
       ))}
     </div>
@@ -205,8 +223,11 @@ export default function CommitteesPage() {
       <section className="max-w-5xl mx-auto w-full py-14 px-6 space-y-6">
         {COMMITTEES.map((c) => (
           <Card key={c.name} className="bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-xl">{c.name} Committee</CardTitle>
+            <CardHeader className="items-center gap-2 pb-4 pt-8 text-center">
+              <CardTitle className="text-3xl font-bold tracking-tight md:text-4xl">
+                {c.displayName ?? c.name} Committee
+              </CardTitle>
+              <p className="max-w-xl text-sm text-muted-foreground">{c.tagline}</p>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
