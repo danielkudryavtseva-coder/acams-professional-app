@@ -212,11 +212,8 @@ export default function CommitteesPage() {
   return (
     <div className="flex flex-col">
       {/* Header */}
-      <section className="bg-gradient-to-br from-[#7d2c45] to-[#c63f60] px-6 py-10 text-center text-white">
-        <h1 className="text-3xl font-bold tracking-tight">Our Committees</h1>
-        <p className="mx-auto mt-2 max-w-xl text-base text-white/80">
-          Sector coverage teams that research, pitch, and manage the CAMS portfolio.
-        </p>
+      <section className="bg-gradient-to-br from-[#7d2c45] to-[#c63f60] px-6 py-14 text-center text-white">
+        <h1 className="text-5xl font-bold tracking-tight md:text-7xl">Committees</h1>
       </section>
 
       {/* Committee cards */}
