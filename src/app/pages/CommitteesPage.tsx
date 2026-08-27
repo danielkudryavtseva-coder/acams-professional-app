@@ -179,12 +179,15 @@ function faviconLogo(domain: string): string {
 }
 
 /** Top coverage/holdings companies per committee (from portfolio decisions). */
-const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; logo: string; large?: boolean }[]> = {
+const COMMITTEE_HOLDINGS: Record<
+  string,
+  { ticker: string; name: string; logo: string; large?: boolean; bare?: boolean }[]
+> = {
   TMT: [
     { ticker: "AMZN", name: "Amazon.com, Inc.", logo: amazonLogo },
     { ticker: "AAPL", name: "Apple Inc.", logo: appleLogo },
     { ticker: "UBER", name: "Uber Technologies, Inc.", logo: commonsLogo("Uber logo 2018.svg") },
-    { ticker: "NVDA", name: "NVIDIA Corporation", logo: nvidiaLogo },
+    { ticker: "NVDA", name: "NVIDIA Corporation", logo: nvidiaLogo, bare: true },
   ],
   Contrarian: [
     { ticker: "GTBIF", name: "Green Thumb Industries Inc.", logo: greenThumbLogo },
@@ -192,8 +195,8 @@ const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; logo: s
     { ticker: "UNH", name: "UnitedHealth Group Incorporated", logo: commonsLogo("UnitedHealth Group logo.svg") },
   ],
   Financials: [
-    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", logo: goldmanSachsLogo, large: true },
-    { ticker: "APO", name: "Apollo Global Management, Inc.", logo: apolloLogo },
+    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", logo: goldmanSachsLogo, large: true, bare: true },
+    { ticker: "APO", name: "Apollo Global Management, Inc.", logo: apolloLogo, bare: true },
     { ticker: "MA", name: "Mastercard Incorporated", logo: mastercardLogo },
     { ticker: "UNM", name: "Unum Group", logo: commonsLogo("Unum Group logo.svg") },
   ],
@@ -211,7 +214,7 @@ const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; logo: s
     { ticker: "RDNT", name: "RadNet, Inc.", logo: faviconLogo("radnet.com") },
   ],
   "Industrials & Energy": [
-    { ticker: "WM", name: "Waste Management, Inc.", logo: wasteManagementLogo },
+    { ticker: "WM", name: "Waste Management, Inc.", logo: wasteManagementLogo, bare: true },
     { ticker: "WMS", name: "Advanced Drainage Systems, Inc.", logo: commonsLogo("Advanced Drainage Systems logo.svg") },
     { ticker: "CVE", name: "Cenovus Energy Inc.", logo: commonsLogo("Cenovus logo.svg") },
     { ticker: "CCJ", name: "Cameco Corporation", logo: commonsLogo("Cameco Logo.svg") },
@@ -245,7 +248,15 @@ function shuffle<T>(arr: T[], seed: string): T[] {
   return out;
 }
 
-type Holding = { ticker: string; name: string; logo: string; large?: boolean; highest?: boolean };
+type Holding = {
+  ticker: string;
+  name: string;
+  logo: string;
+  large?: boolean;
+  highest?: boolean;
+  /** Logo image already has its own card/shadow baked in — skip the badge's border/ring so it's not double-framed. */
+  bare?: boolean;
+};
 type SizeTier = "base" | "md" | "lg";
 
 /** Badge height/padding/max-width per size tier, so committees can be scaled as a group. */
@@ -271,10 +282,14 @@ function LogoBadge({
   const delay = rand() * -duration; // negative delay staggers the starting phase
   // Goldman's extra "large" flag bumps it a size class further, whatever tier it's in.
   const { box, maxW } = h.large ? { box: "h-24 px-6 py-3 sm:h-28", maxW: "max-w-[260px]" } : TIER_CLASSES[tier];
+  // Bare logos already have their own card/shadow baked into the image — no border/ring/shadow, so it isn't double-framed.
+  const frame = h.bare
+    ? "bg-transparent"
+    : "border border-border bg-gradient-to-b from-white to-neutral-50 ring-1 ring-black/5 shadow-md hover:shadow-lg";
   return (
     <div style={offsetY ? { transform: `translateY(${offsetY}px)` } : undefined}>
       <div
-        className={`animate-float relative flex items-center justify-center rounded-xl border border-border bg-gradient-to-b from-white to-neutral-50 shadow-md ring-1 ring-black/5 transition-transform duration-base ease-smooth hover:-translate-y-1 hover:shadow-lg ${box}`}
+        className={`animate-float relative flex items-center justify-center rounded-xl transition-transform duration-base ease-smooth hover:-translate-y-1 ${frame} ${box}`}
         style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
         title={h.name}
       >
