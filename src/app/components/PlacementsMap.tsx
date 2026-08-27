@@ -1,29 +1,24 @@
 import * as React from "react";
-import * as maplibregl from "maplibre-gl";
-import "maplibre-gl/dist/maplibre-gl.css";
+import { geoAlbersUsa, geoPath } from "d3-geo";
+import { feature } from "topojson-client";
+import type { Topology, GeometryObject } from "topojson-specification";
+import usNationTopology from "us-atlas/nation-albers-10m.json";
 import { MOCK_ALUMNI } from "../data/mockData";
 import { logoUrlForFirm, prestigeRank } from "../data/companyLogos";
 import pinImage from "../../assets/map/pin.png";
 
-const CARTO_LIGHT_STYLE: maplibregl.StyleSpecification = {
-  version: 8,
-  glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
-  sources: {
-    "osm-light": {
-      type: "raster",
-      // CARTO's free basemap CDN started requiring an API key — switched to the
-      // standard OSM tile servers, which stay free/keyless for this traffic level.
-      tiles: [
-        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
-      ],
-      tileSize: 256,
-      attribution: "&copy; OpenStreetMap contributors",
-    },
-  },
-  layers: [{ id: "osm-base", type: "raster", source: "osm-light" }],
-};
+/** Matches the projection us-atlas used to pre-render nation-albers-10m.json (Bostock's standard scale/translate). */
+const PROJECTION = geoAlbersUsa().scale(1280).translate([480, 300]);
+const VIEWBOX_WIDTH = 975;
+const VIEWBOX_HEIGHT = 610;
+
+const NATION_PATH: string = (() => {
+  const topology = usNationTopology as unknown as Topology;
+  const nationGeometry = topology.objects.nation as GeometryObject;
+  const nationFeature = feature(topology, nationGeometry);
+  const path = geoPath(null); // coordinates in the topology are already projected
+  return path(nationFeature as never) ?? "";
+})();
 
 /** How many firms to show in the always-visible top-companies overview. */
 const TOP_COMPANIES_COUNT = 20;
@@ -69,8 +64,8 @@ interface Company {
 
 interface CityPin {
   city: string;
-  lat: number;
-  lng: number;
+  xPct: number;
+  yPct: number;
   alumniCount: number;
   companies: Company[];
 }
@@ -123,7 +118,15 @@ function buildCityPins(): CityPin[] {
         logo: logoUrlForFirm(firm),
       })),
     );
-    return { city: city.city, lat: city.lat, lng: city.lng, alumniCount: alumni.length, companies };
+    const projected = PROJECTION([city.lng, city.lat]);
+    const [x, y] = projected ?? [0, 0];
+    return {
+      city: city.city,
+      xPct: (x / VIEWBOX_WIDTH) * 100,
+      yPct: (y / VIEWBOX_HEIGHT) * 100,
+      alumniCount: alumni.length,
+      companies,
+    };
   });
 }
 
@@ -140,9 +143,9 @@ function mergeAllCompanies(): Company[] {
   return sortCompanies(Array.from(merged.values()));
 }
 
-/** Square pin image size in px, scaled by alumni count. */
+/** Pin image size in px, scaled by alumni count. */
 function pinSize(count: number): number {
-  return Math.round(Math.min(48, 28 + count * 2));
+  return Math.round(Math.min(40, 22 + count * 2));
 }
 
 function CompanyTile({ firm, count, logo }: Company) {
@@ -227,10 +230,15 @@ const PANEL_ANIMATION_CSS = `
 `;
 
 export function PlacementsMap() {
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const mapRef = React.useRef<maplibregl.Map | null>(null);
-
   const [selectedCity, setSelectedCity] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (document.getElementById("cams-panel-style")) return;
+    const style = document.createElement("style");
+    style.id = "cams-panel-style";
+    style.textContent = PANEL_ANIMATION_CSS;
+    document.head.appendChild(style);
+  }, []);
 
   const cityPins = React.useMemo(() => buildCityPins(), []);
   const topCompanies = React.useMemo(
@@ -239,70 +247,6 @@ export function PlacementsMap() {
   );
   const selectedPin = selectedCity ? cityPins.find((c) => c.city === selectedCity) ?? null : null;
 
-  React.useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-
-    if (!document.getElementById("cams-panel-style")) {
-      const style = document.createElement("style");
-      style.id = "cams-panel-style";
-      style.textContent = PANEL_ANIMATION_CSS;
-      document.head.appendChild(style);
-    }
-
-    const map = new maplibregl.Map({
-      container: containerRef.current,
-      style: CARTO_LIGHT_STYLE,
-      center: [-96, 38.5],
-      zoom: 3.6,
-      // Fully static — no pan, zoom, rotate, or scroll interaction. This is a
-      // fixed overview of major-city pins, not a pannable/zoomable map.
-      interactive: false,
-      attributionControl: { compact: true },
-    });
-    mapRef.current = map;
-
-    for (const pin of cityPins) {
-      const size = pinSize(pin.alumniCount);
-
-      // MapLibre applies its own positioning transform (translate) directly
-      // to the marker's root element — never set `transform` on `el` itself
-      // or it clobbers that positioning. Hover scaling goes on this inner
-      // `img` instead, which MapLibre never touches.
-      const el = document.createElement("div");
-      el.style.cursor = "pointer";
-      const img = document.createElement("img");
-      img.src = pinImage;
-      img.alt = "";
-      img.style.width = `${size}px`;
-      img.style.height = `${size}px`;
-      img.style.display = "block";
-      img.style.transition = "transform 120ms ease-out";
-      img.style.transformOrigin = "bottom center";
-      img.style.filter = "drop-shadow(0 2px 3px rgba(0,0,0,0.35))";
-      el.appendChild(img);
-
-      el.addEventListener("mouseenter", () => {
-        img.style.transform = "scale(1.15)";
-      });
-      el.addEventListener("mouseleave", () => {
-        img.style.transform = "scale(1)";
-      });
-      el.addEventListener("click", () => {
-        setSelectedCity((prev) => (prev === pin.city ? null : pin.city));
-      });
-
-      new maplibregl.Marker({ element: el, anchor: "bottom" })
-        .setLngLat([pin.lng, pin.lat])
-        .addTo(map);
-    }
-
-    return () => {
-      map.remove();
-      mapRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const placedCount = MOCK_ALUMNI.filter(
     (a) => Number.isFinite(a.mapLat) && Number.isFinite(a.mapLng),
   ).length;
@@ -310,7 +254,43 @@ export function PlacementsMap() {
   return (
     <div>
       <div className="flex flex-col-reverse md:flex-row">
-        <div ref={containerRef} className="h-[420px] w-full sm:h-[480px] md:flex-1" />
+        <div
+          className="relative w-full md:flex-1"
+          style={{ aspectRatio: `${VIEWBOX_WIDTH} / ${VIEWBOX_HEIGHT}` }}
+        >
+          <svg
+            viewBox={`0 0 ${VIEWBOX_WIDTH} ${VIEWBOX_HEIGHT}`}
+            className="absolute inset-0 h-full w-full"
+            aria-hidden
+          >
+            <path d={NATION_PATH} fill="#c1c8d1" />
+          </svg>
+          {cityPins.map((pin) => {
+            const size = pinSize(pin.alumniCount);
+            const isSelected = selectedPin?.city === pin.city;
+            return (
+              <button
+                key={pin.city}
+                type="button"
+                onClick={() => setSelectedCity((prev) => (prev === pin.city ? null : pin.city))}
+                title={pin.city}
+                aria-label={pin.city}
+                className="absolute -translate-x-1/2 -translate-y-full cursor-pointer transition-transform duration-150 ease-out hover:scale-110"
+                style={{
+                  left: `${pin.xPct}%`,
+                  top: `${pin.yPct}%`,
+                  width: size,
+                  height: size,
+                  filter: isSelected
+                    ? "drop-shadow(0 2px 4px rgba(0,0,0,0.45))"
+                    : "drop-shadow(0 1px 2px rgba(0,0,0,0.35))",
+                }}
+              >
+                <img src={pinImage} alt="" className="h-full w-full" />
+              </button>
+            );
+          })}
+        </div>
         <aside className="w-full shrink-0 bg-paper p-4 dark:bg-card sm:h-[480px] md:w-64">
           {!selectedPin ? (
             <div className="cams-panel-fade">
