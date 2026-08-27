@@ -137,9 +137,9 @@ function CommitteeHead({ name, image, major }: { name: string; image?: string; m
         </div>
       )}
       <div>
-        <p className="text-center text-base font-semibold text-foreground">{name}</p>
+        <p className="text-center text-[2rem] font-semibold leading-tight text-foreground">{name}</p>
         {major && (
-          <p className="mt-0.5 text-center text-xs text-muted-foreground">{major}</p>
+          <p className="mt-1 text-center text-[1.5rem] leading-tight text-muted-foreground">{major}</p>
         )}
       </div>
     </div>
@@ -409,7 +409,7 @@ export default function CommitteesPage() {
       {/* Committee cards */}
       <section className="max-w-5xl mx-auto w-full py-14 px-6 space-y-6">
         {COMMITTEES.map((c) => (
-          <Card key={c.name} className="relative bg-gradient-to-br from-card to-muted/20 shadow-sm">
+          <Card key={c.name} className="relative border-0 bg-gradient-to-br from-card to-muted/20 shadow-sm">
             <CardCornerBrackets />
             <CardHeader className="items-center pb-4 pt-8 text-center">
               <CardTitle className="text-3xl font-bold tracking-tight md:text-4xl">
