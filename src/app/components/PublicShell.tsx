@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
-import { ThemeToggle } from "./ThemeToggle";
 import { cn } from "./ui/utils";
 import camsLogo from "../../assets/cams-logo.png";
 
@@ -37,10 +36,6 @@ export function PublicShell({ children }: PublicShellProps) {
           </Link>
 
           <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle />
-            <Button variant="ghost" size="sm" className="hidden sm:inline-flex" asChild>
-              <Link to="/login">Log in</Link>
-            </Button>
             <Button size="sm" className="hidden md:inline-flex shadow-soft" asChild>
               <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
                 Apply

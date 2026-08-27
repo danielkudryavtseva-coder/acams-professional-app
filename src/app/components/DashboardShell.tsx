@@ -7,7 +7,6 @@ import {
   BriefcaseBusiness, LogOut, Award, Trophy, PenLine, UserSquare2,
 } from "lucide-react";
 import { cn } from "./ui/utils";
-import { ThemeToggle } from "./ThemeToggle";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
@@ -184,7 +183,6 @@ export function DashboardShell({ children }: DashboardShellProps) {
             />
           </Link>
           <div className="flex items-center justify-end gap-1 px-1">
-            <ThemeToggle />
             <Button
               variant="ghost"
               size="icon"
