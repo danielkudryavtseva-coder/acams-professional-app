@@ -8,6 +8,21 @@ import matthewWorthington from "../../assets/execs/matthew-worthington.png";
 import phillipGorokhovich from "../../assets/execs/phillip-gorokhovich.jpg";
 import brianWilk from "../../assets/execs/brian-wilk.png";
 import hartwellForstman from "../../assets/execs/hartwell-forstman.png";
+import zachBlincoe from "../../assets/execs/zach-blincoe.jpg";
+import ultaBeautyLogo from "../../assets/logos/ulta-beauty.png";
+import chipotleLogo from "../../assets/logos/chipotle.png";
+import greenThumbLogo from "../../assets/logos/green-thumb.png";
+import lvmhLogo from "../../assets/logos/lvmh.jpg";
+import accentureLogo from "../../assets/logos/accenture.png";
+import goldmanSachsLogo from "../../assets/logos/goldman-sachs.png";
+import apolloLogo from "../../assets/logos/apollo.png";
+import mastercardLogo from "../../assets/logos/mastercard.png";
+import novoNordiskLogo from "../../assets/logos/novo-nordisk.png";
+import eliLillyLogo from "../../assets/logos/eli-lilly.png";
+import wasteManagementLogo from "../../assets/logos/waste-management.png";
+import amazonLogo from "../../assets/logos/amazon.png";
+import nvidiaLogo from "../../assets/logos/nvidia.png";
+import appleLogo from "../../assets/logos/apple.png";
 
 interface CommitteeInfo {
   name: "TMT" | "Contrarian" | "Financials" | "Consumer" | "Healthcare" | "Industrials & Energy";
@@ -80,8 +95,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Healthcare",
     tagline: "Sector coverage for pharma, biotech & providers",
-    // No photo on file yet for Zach Blincoe — falls back to the placeholder avatar below.
-    head: { name: "Zach Blincoe" },
+    head: { name: "Zach Blincoe", image: zachBlincoe },
     description:
       "The Healthcare Committee covers pharmaceuticals, biotech, medtech, and healthcare providers — a sector defined by regulatory catalysts, pipeline risk, and long development cycles. Members build coverage that stands up to that complexity.",
     activities: [
@@ -115,11 +129,11 @@ function CommitteeHead({ name, image }: { name: string; image?: string }) {
         <img
           src={image}
           alt={name}
-          className="h-28 w-28 rounded-full object-cover ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-32 sm:w-32"
+          className="h-36 w-36 rounded-full object-cover ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-44 sm:w-44"
         />
       ) : (
-        <div className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-dashed border-border bg-crimson/10 text-muted-foreground ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-32 sm:w-32">
-          <User className="h-10 w-10 opacity-40" />
+        <div className="flex h-36 w-36 items-center justify-center rounded-full border-2 border-dashed border-border bg-crimson/10 text-muted-foreground ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-44 sm:w-44">
+          <User className="h-14 w-14 opacity-40" />
         </div>
       )}
       <p className="text-center text-sm font-semibold text-foreground">{name}</p>
@@ -144,41 +158,37 @@ function faviconLogo(domain: string): string {
 /** Top coverage/holdings companies per committee (from portfolio decisions). */
 const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; logo: string }[]> = {
   TMT: [
-    { ticker: "AMZN", name: "Amazon.com, Inc.", logo: commonsLogo("Amazon logo.svg") },
-    { ticker: "AAPL", name: "Apple Inc.", logo: commonsLogo("Apple logo grey.svg") },
+    { ticker: "AMZN", name: "Amazon.com, Inc.", logo: amazonLogo },
+    { ticker: "AAPL", name: "Apple Inc.", logo: appleLogo },
     { ticker: "UBER", name: "Uber Technologies, Inc.", logo: commonsLogo("Uber logo 2018.svg") },
-    { ticker: "NVDA", name: "NVIDIA Corporation", logo: commonsLogo("NVIDIA logo.svg") },
+    { ticker: "NVDA", name: "NVIDIA Corporation", logo: nvidiaLogo },
   ],
   Contrarian: [
-    { ticker: "GTBIF", name: "Green Thumb Industries Inc.", logo: faviconLogo("gtigrows.com") },
-    { ticker: "ACN", name: "Accenture plc", logo: commonsLogo("Accenture.svg") },
+    { ticker: "GTBIF", name: "Green Thumb Industries Inc.", logo: greenThumbLogo },
+    { ticker: "ACN", name: "Accenture plc", logo: accentureLogo },
     { ticker: "UNH", name: "UnitedHealth Group Incorporated", logo: commonsLogo("UnitedHealth Group logo.svg") },
   ],
   Financials: [
-    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", logo: commonsLogo("Goldman Sachs logo.svg") },
-    { ticker: "APO", name: "Apollo Global Management, Inc.", logo: commonsLogo("Apollo Global Management logo.svg") },
-    { ticker: "MA", name: "Mastercard Incorporated", logo: commonsLogo("Mastercard 2019 logo.svg") },
+    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", logo: goldmanSachsLogo },
+    { ticker: "APO", name: "Apollo Global Management, Inc.", logo: apolloLogo },
+    { ticker: "MA", name: "Mastercard Incorporated", logo: mastercardLogo },
     { ticker: "UNM", name: "Unum Group", logo: commonsLogo("Unum Group logo.svg") },
   ],
   Consumer: [
     { ticker: "SG", name: "Sweetgreen, Inc.", logo: commonsLogo("Sweetgreen logo.svg") },
-    { ticker: "ULTA", name: "Ulta Beauty, Inc.", logo: commonsLogo("Ulta Beauty logo.svg") },
-    { ticker: "MC", name: "LVMH Moët Hennessy Louis Vuitton", logo: commonsLogo("LVMH logo.svg") },
-    {
-      ticker: "CMG",
-      name: "Chipotle Mexican Grill, Inc.",
-      logo: "https://www.chipotle.com/content/dam/chipotle/icons-and-animations/chipotle-pepper-icon/pepper-general.png",
-    },
+    { ticker: "ULTA", name: "Ulta Beauty, Inc.", logo: ultaBeautyLogo },
+    { ticker: "MC", name: "LVMH Moët Hennessy Louis Vuitton", logo: lvmhLogo },
+    { ticker: "CMG", name: "Chipotle Mexican Grill, Inc.", logo: chipotleLogo },
   ],
   Healthcare: [
     { ticker: "VRTX", name: "Vertex Pharmaceuticals", logo: commonsLogo("Vertex logo.svg") },
-    { ticker: "LLY", name: "Eli Lilly and Company", logo: commonsLogo("Eli Lilly and Company.svg") },
-    { ticker: "NVO", name: "Novo Nordisk A/S", logo: faviconLogo("novonordisk.com") },
+    { ticker: "LLY", name: "Eli Lilly and Company", logo: eliLillyLogo },
+    { ticker: "NVO", name: "Novo Nordisk A/S", logo: novoNordiskLogo },
     { ticker: "ISRG", name: "Intuitive Surgical, Inc.", logo: commonsLogo("Intuitive Surgical logo.svg") },
     { ticker: "RDNT", name: "RadNet, Inc.", logo: faviconLogo("radnet.com") },
   ],
   "Industrials & Energy": [
-    { ticker: "WM", name: "Waste Management, Inc.", logo: commonsLogo("Waste Management logo.svg") },
+    { ticker: "WM", name: "Waste Management, Inc.", logo: wasteManagementLogo },
     { ticker: "WMS", name: "Advanced Drainage Systems, Inc.", logo: commonsLogo("Advanced Drainage Systems logo.svg") },
     { ticker: "CVE", name: "Cenovus Energy Inc.", logo: commonsLogo("Cenovus logo.svg") },
     { ticker: "CCJ", name: "Cameco Corporation", logo: commonsLogo("Cameco Logo.svg") },
@@ -206,7 +216,7 @@ function CommitteeLogos({ committee }: { committee: string }) {
     );
   }
   return (
-    <div className="flex flex-1 flex-wrap items-center justify-center gap-6 sm:justify-start">
+    <div className="flex w-full flex-1 flex-wrap items-center justify-center gap-6 sm:justify-between">
       {holdings.map((h, i) => (
         <div
           key={h.ticker}
@@ -241,11 +251,10 @@ export default function CommitteesPage() {
       <section className="max-w-5xl mx-auto w-full py-14 px-6 space-y-6">
         {COMMITTEES.map((c) => (
           <Card key={c.name} className="bg-card">
-            <CardHeader className="items-center gap-2 pb-4 pt-8 text-center">
+            <CardHeader className="items-center pb-4 pt-8 text-center">
               <CardTitle className="text-3xl font-bold tracking-tight md:text-4xl">
                 {c.displayName ?? c.name} Committee
               </CardTitle>
-              <p className="max-w-xl text-sm text-muted-foreground">{c.tagline}</p>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
