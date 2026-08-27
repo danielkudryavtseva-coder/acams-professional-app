@@ -141,6 +141,29 @@ function CommitteeHead({ name, image }: { name: string; image?: string }) {
   );
 }
 
+/** Layered corner-bracket mark (echoing the reference icon), reused at each card corner. */
+function CornerBracketIcon({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 22 22" fill="none" className={className} aria-hidden="true">
+      <path d="M8 8H17M8 8V17" stroke="currentColor" strokeWidth="2.25" strokeLinecap="square" />
+      <path d="M5 5H14M5 5V14" stroke="currentColor" strokeWidth="2.25" strokeLinecap="square" />
+      <path d="M2 2H11M2 2V11" stroke="currentColor" strokeWidth="2.25" strokeLinecap="square" />
+    </svg>
+  );
+}
+
+/** One small crimson bracket per corner, kept modest in size so it reads as an accent, not a frame. */
+function CardCornerBrackets() {
+  return (
+    <>
+      <CornerBracketIcon className="pointer-events-none absolute left-2 top-2 h-4 w-4 text-crimson/80" />
+      <CornerBracketIcon className="pointer-events-none absolute right-2 top-2 h-4 w-4 -scale-x-100 text-crimson/80" />
+      <CornerBracketIcon className="pointer-events-none absolute bottom-2 left-2 h-4 w-4 -scale-y-100 text-crimson/80" />
+      <CornerBracketIcon className="pointer-events-none absolute bottom-2 right-2 h-4 w-4 -scale-x-100 -scale-y-100 text-crimson/80" />
+    </>
+  );
+}
+
 /**
  * Full-resolution wordmark logos, served straight from Wikimedia Commons
  * (`Special:FilePath` rasterizes SVGs server-side at whatever width we ask
@@ -223,17 +246,35 @@ function shuffle<T>(arr: T[], seed: string): T[] {
 }
 
 type Holding = { ticker: string; name: string; logo: string; large?: boolean; highest?: boolean };
+type SizeTier = "base" | "md" | "lg";
+
+/** Badge height/padding/max-width per size tier, so committees can be scaled as a group. */
+const TIER_CLASSES: Record<SizeTier, { box: string; maxW: string }> = {
+  base: { box: "h-16 px-4 py-2 sm:h-20", maxW: "max-w-[180px]" },
+  md: { box: "h-[4.5rem] px-4 py-2 sm:h-[5.5rem]", maxW: "max-w-[200px]" },
+  lg: { box: "h-20 px-5 py-3 sm:h-24", maxW: "max-w-[220px]" },
+};
 
 /** One logo badge: static `offsetY` (px) for layout placement, plus its own independent float animation. */
-function LogoBadge({ h, rand, offsetY = 0 }: { h: Holding; rand: () => number; offsetY?: number }) {
+function LogoBadge({
+  h,
+  rand,
+  offsetY = 0,
+  tier = "base",
+}: {
+  h: Holding;
+  rand: () => number;
+  offsetY?: number;
+  tier?: SizeTier;
+}) {
   const duration = 3.5 + rand() * 2.5; // 3.5s–6s, varies per logo
   const delay = rand() * -duration; // negative delay staggers the starting phase
+  // Goldman's extra "large" flag bumps it a size class further, whatever tier it's in.
+  const { box, maxW } = h.large ? { box: "h-24 px-6 py-3 sm:h-28", maxW: "max-w-[260px]" } : TIER_CLASSES[tier];
   return (
     <div style={offsetY ? { transform: `translateY(${offsetY}px)` } : undefined}>
       <div
-        className={`animate-float relative flex items-center justify-center rounded-xl border border-border bg-gradient-to-b from-white to-neutral-50 shadow-md ring-1 ring-black/5 transition-transform duration-base ease-smooth hover:-translate-y-1 hover:shadow-lg ${
-          h.large ? "h-20 px-5 py-3 sm:h-24" : "h-16 px-4 py-2 sm:h-20"
-        }`}
+        className={`animate-float relative flex items-center justify-center rounded-xl border border-border bg-gradient-to-b from-white to-neutral-50 shadow-md ring-1 ring-black/5 transition-transform duration-base ease-smooth hover:-translate-y-1 hover:shadow-lg ${box}`}
         style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
         title={h.name}
       >
@@ -246,14 +287,17 @@ function LogoBadge({ h, rand, offsetY = 0 }: { h: Holding; rand: () => number; o
           </div>
         )}
         {/* Full wordmark, unscaled to a square crop — width follows the logo's own aspect ratio. */}
-        <img
-          src={h.logo}
-          alt={h.name}
-          className={`h-full w-auto object-contain ${h.large ? "max-w-[220px]" : "max-w-[180px]"}`}
-        />
+        <img src={h.logo} alt={h.name} className={`h-full w-auto object-contain ${maxW}`} />
       </div>
     </div>
   );
+}
+
+/** TMT stays the baseline; the rest are bumped up so no committee's logo row looks undersized next to it. */
+function sizeTierFor(committee: string): SizeTier {
+  if (committee === "Industrials & Energy") return "md";
+  if (committee === "TMT") return "base";
+  return "lg";
 }
 
 function CommitteeLogos({ committee }: { committee: string }) {
@@ -276,6 +320,7 @@ function CommitteeLogos({ committee }: { committee: string }) {
   const tagged = holdings.map((h, i) => ({ ...h, highest: i === 0 }));
   const shuffled = shuffle(tagged, committee);
   const rand = seededRandom(hashSeed(committee));
+  const tier = sizeTierFor(committee);
 
   // 4 holdings (TMT, Financials, Consumer) — even 2x2 grid, centered as a tight group.
   if (shuffled.length === 4) {
@@ -283,7 +328,7 @@ function CommitteeLogos({ committee }: { committee: string }) {
       <div className="flex flex-1 justify-center">
         <div className="grid w-fit grid-cols-2 justify-items-center gap-5">
           {shuffled.map((h) => (
-            <LogoBadge key={h.ticker} h={h} rand={rand} />
+            <LogoBadge key={h.ticker} h={h} rand={rand} tier={tier} />
           ))}
         </div>
       </div>
@@ -295,10 +340,10 @@ function CommitteeLogos({ committee }: { committee: string }) {
     return (
       <div className="flex w-full flex-1 flex-col items-center gap-8">
         <div className="flex gap-8">
-          <LogoBadge h={shuffled[0]} rand={rand} />
-          <LogoBadge h={shuffled[1]} rand={rand} />
+          <LogoBadge h={shuffled[0]} rand={rand} tier={tier} />
+          <LogoBadge h={shuffled[1]} rand={rand} tier={tier} />
         </div>
-        <LogoBadge h={shuffled[2]} rand={rand} />
+        <LogoBadge h={shuffled[2]} rand={rand} tier={tier} />
       </div>
     );
   }
@@ -311,13 +356,13 @@ function CommitteeLogos({ committee }: { committee: string }) {
     return (
       <div className="flex w-full flex-1 flex-col items-center gap-10">
         <div className={`flex ${rowGap}`}>
-          <LogoBadge h={shuffled[0]} rand={rand} />
-          <LogoBadge h={shuffled[1]} rand={rand} offsetY={isIndustrials ? 24 : 0} />
-          <LogoBadge h={shuffled[2]} rand={rand} />
+          <LogoBadge h={shuffled[0]} rand={rand} tier={tier} />
+          <LogoBadge h={shuffled[1]} rand={rand} tier={tier} offsetY={isIndustrials ? 24 : 0} />
+          <LogoBadge h={shuffled[2]} rand={rand} tier={tier} />
         </div>
         <div className={`flex ${rowGap}`}>
-          <LogoBadge h={shuffled[3]} rand={rand} />
-          <LogoBadge h={shuffled[4]} rand={rand} />
+          <LogoBadge h={shuffled[3]} rand={rand} tier={tier} />
+          <LogoBadge h={shuffled[4]} rand={rand} tier={tier} />
         </div>
       </div>
     );
@@ -327,7 +372,7 @@ function CommitteeLogos({ committee }: { committee: string }) {
   return (
     <div className="flex w-full flex-1 flex-wrap items-center justify-center gap-6 sm:justify-between">
       {shuffled.map((h) => (
-        <LogoBadge key={h.ticker} h={h} rand={rand} />
+        <LogoBadge key={h.ticker} h={h} rand={rand} tier={tier} />
       ))}
     </div>
   );
@@ -344,7 +389,8 @@ export default function CommitteesPage() {
       {/* Committee cards */}
       <section className="max-w-5xl mx-auto w-full py-14 px-6 space-y-6">
         {COMMITTEES.map((c) => (
-          <Card key={c.name} className="bg-gradient-to-br from-card to-muted/20 shadow-sm">
+          <Card key={c.name} className="relative bg-gradient-to-br from-card to-muted/20 shadow-sm">
+            <CardCornerBrackets />
             <CardHeader className="items-center pb-4 pt-8 text-center">
               <CardTitle className="text-3xl font-bold tracking-tight md:text-4xl">
                 {c.displayName ?? c.name}
