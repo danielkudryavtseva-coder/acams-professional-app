@@ -137,35 +137,12 @@ function CommitteeHead({ name, image, major }: { name: string; image?: string; m
         </div>
       )}
       <div>
-        <p className="text-center text-[2rem] font-semibold leading-tight text-foreground">{name}</p>
+        <p className="text-center text-[1.6rem] font-semibold leading-tight text-foreground">{name}</p>
         {major && (
-          <p className="mt-1 text-center text-[1.5rem] leading-tight text-muted-foreground">{major}</p>
+          <p className="mt-1 text-center text-[0.75rem] leading-tight text-muted-foreground">{major}</p>
         )}
       </div>
     </div>
-  );
-}
-
-/** Layered corner-bracket mark (echoing the reference icon), reused at each card corner. */
-function CornerBracketIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 22 22" fill="none" className={className} aria-hidden="true">
-      <path d="M8 8H17M8 8V17" stroke="currentColor" strokeWidth="2.25" strokeLinecap="square" />
-      <path d="M5 5H14M5 5V14" stroke="currentColor" strokeWidth="2.25" strokeLinecap="square" />
-      <path d="M2 2H11M2 2V11" stroke="currentColor" strokeWidth="2.25" strokeLinecap="square" />
-    </svg>
-  );
-}
-
-/** One small crimson bracket per corner, kept modest in size so it reads as an accent, not a frame. */
-function CardCornerBrackets() {
-  return (
-    <>
-      <CornerBracketIcon className="pointer-events-none absolute left-2 top-2 h-4 w-4 text-crimson/80" />
-      <CornerBracketIcon className="pointer-events-none absolute right-2 top-2 h-4 w-4 -scale-x-100 text-crimson/80" />
-      <CornerBracketIcon className="pointer-events-none absolute bottom-2 left-2 h-4 w-4 -scale-y-100 text-crimson/80" />
-      <CornerBracketIcon className="pointer-events-none absolute bottom-2 right-2 h-4 w-4 -scale-x-100 -scale-y-100 text-crimson/80" />
-    </>
   );
 }
 
@@ -409,8 +386,7 @@ export default function CommitteesPage() {
       {/* Committee cards */}
       <section className="max-w-5xl mx-auto w-full py-14 px-6 space-y-6">
         {COMMITTEES.map((c) => (
-          <Card key={c.name} className="relative border-0 bg-gradient-to-br from-card to-muted/20 shadow-sm">
-            <CardCornerBrackets />
+          <Card key={c.name} className="relative bg-gradient-to-br from-card to-muted/20 shadow-sm">
             <CardHeader className="items-center pb-4 pt-8 text-center">
               <CardTitle className="text-3xl font-bold tracking-tight md:text-4xl">
                 {c.displayName ?? c.name}
