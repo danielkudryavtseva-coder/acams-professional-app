@@ -3,6 +3,11 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { User, Image, Star } from "lucide-react";
 import { APPLY_URL } from "../components/PublicShell";
+import mattRochford from "../../assets/execs/matt-rochford.png";
+import matthewWorthington from "../../assets/execs/matthew-worthington.png";
+import phillipGorokhovich from "../../assets/execs/phillip-gorokhovich.jpg";
+import brianWilk from "../../assets/execs/brian-wilk.png";
+import hartwellForstman from "../../assets/execs/hartwell-forstman.png";
 
 interface CommitteeInfo {
   name: "TMT" | "Contrarian" | "Financials" | "Consumer" | "Healthcare" | "Industrials & Energy";
@@ -11,6 +16,7 @@ interface CommitteeInfo {
   tagline: string;
   description: string;
   activities: string[];
+  head: { name: string; image?: string };
 }
 
 const COMMITTEES: CommitteeInfo[] = [
@@ -18,6 +24,7 @@ const COMMITTEES: CommitteeInfo[] = [
     name: "TMT",
     displayName: "Technology, Media & Telecom",
     tagline: "Sector coverage for Technology, Media & Telecom",
+    head: { name: "Matt Rochford", image: mattRochford },
     description:
       "The TMT Committee owns sector coverage for technology, media, and telecommunications names. Members track the coverage universe, monitor earnings and competitive dynamics, and build sector-specific theses that feed directly into the full committee's pitch process.",
     activities: [
@@ -31,6 +38,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Contrarian",
     tagline: "Stress-testing the portfolio's consensus bets",
+    head: { name: "Matthew Worthington", image: matthewWorthington },
     description:
       "The Contrarian Committee builds the dissenting case on every pitch under consideration — short theses, bear cases, and second-order risks the coverage teams may be missing. Every position that survives Contrarian scrutiny enters the portfolio stronger.",
     activities: [
@@ -44,6 +52,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Financials",
     tagline: "Sector coverage for banks, insurers & fintech",
+    head: { name: "Phillip Gorokhovich", image: phillipGorokhovich },
     description:
       "The Financials Committee covers banks, insurers, asset managers, and fintech names — sectors with their own valuation frameworks and regulatory dynamics. Members build coverage on rate sensitivity, credit cycles, and capital markets exposure.",
     activities: [
@@ -57,6 +66,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Consumer",
     tagline: "Sector coverage for retail & consumer brands",
+    head: { name: "Brian Wilk", image: brianWilk },
     description:
       "The Consumer Committee covers retail, consumer packaged goods, and brand-driven businesses. Members track same-store sales, brand strength, and shifting consumer behavior to build coverage on names the whole society interacts with daily.",
     activities: [
@@ -70,6 +80,8 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Healthcare",
     tagline: "Sector coverage for pharma, biotech & providers",
+    // No photo on file yet for Zach Blincoe — falls back to the placeholder avatar below.
+    head: { name: "Zach Blincoe" },
     description:
       "The Healthcare Committee covers pharmaceuticals, biotech, medtech, and healthcare providers — a sector defined by regulatory catalysts, pipeline risk, and long development cycles. Members build coverage that stands up to that complexity.",
     activities: [
@@ -83,6 +95,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Industrials & Energy",
     tagline: "Sector coverage for industrials, materials & energy",
+    head: { name: "Hartwell Forstman", image: hartwellForstman },
     description:
       "The Industrials & Energy Committee covers manufacturers, materials producers, and energy companies — sectors shaped by commodity cycles, capex spending, and global supply chains. Members build coverage across the full value chain.",
     activities: [
@@ -95,13 +108,21 @@ const COMMITTEES: CommitteeInfo[] = [
   },
 ];
 
-function CommitteeHeadPlaceholder() {
+function CommitteeHead({ name, image }: { name: string; image?: string }) {
   return (
     <div className="flex w-full shrink-0 flex-col items-center gap-3 sm:w-40">
-      <div className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-dashed border-border bg-crimson/10 text-muted-foreground ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-32 sm:w-32">
-        <User className="h-10 w-10 opacity-40" />
-      </div>
-      <p className="text-center text-sm font-semibold text-foreground">Name coming soon</p>
+      {image ? (
+        <img
+          src={image}
+          alt={name}
+          className="h-28 w-28 rounded-full object-cover ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-32 sm:w-32"
+        />
+      ) : (
+        <div className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-dashed border-border bg-crimson/10 text-muted-foreground ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-32 sm:w-32">
+          <User className="h-10 w-10 opacity-40" />
+        </div>
+      )}
+      <p className="text-center text-sm font-semibold text-foreground">{name}</p>
     </div>
   );
 }
@@ -228,7 +249,7 @@ export default function CommitteesPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-                <CommitteeHeadPlaceholder />
+                <CommitteeHead name={c.head.name} image={c.head.image} />
                 <CommitteeLogos committee={c.name} />
               </div>
             </CardContent>
