@@ -124,7 +124,7 @@ const COMMITTEES: CommitteeInfo[] = [
 
 function CommitteeHead({ name, image }: { name: string; image?: string }) {
   return (
-    <div className="flex w-full shrink-0 flex-col items-center gap-3 sm:w-40">
+    <div className="flex w-full shrink-0 flex-col items-center justify-center gap-3 py-2 sm:w-40 sm:-translate-y-2 sm:translate-x-3">
       {image ? (
         <img
           src={image}
@@ -136,7 +136,7 @@ function CommitteeHead({ name, image }: { name: string; image?: string }) {
           <User className="h-14 w-14 opacity-40" />
         </div>
       )}
-      <p className="text-center text-sm font-semibold text-foreground">{name}</p>
+      <p className="text-center text-base font-semibold text-foreground">{name}</p>
     </div>
   );
 }
