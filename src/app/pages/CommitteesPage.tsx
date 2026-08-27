@@ -124,7 +124,7 @@ const COMMITTEES: CommitteeInfo[] = [
 
 function CommitteeHead({ name, image }: { name: string; image?: string }) {
   return (
-    <div className="flex w-full shrink-0 flex-col items-center justify-center gap-3 py-2 sm:w-40 sm:-translate-y-2 sm:translate-x-3">
+    <div className="flex w-full shrink-0 flex-col items-center justify-center gap-3 py-2 sm:w-48 sm:-translate-y-2">
       {image ? (
         <img
           src={image}
@@ -289,7 +289,7 @@ export default function CommitteesPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
+              <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
                 <CommitteeHead name={c.head.name} image={c.head.image} />
                 <CommitteeLogos committee={c.name} />
               </div>
