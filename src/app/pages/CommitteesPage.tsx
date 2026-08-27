@@ -196,8 +196,31 @@ const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; logo: s
   ],
 };
 
-/** Small deterministic vertical offsets per slot so the logos read as "floating" rather than a rigid grid. */
-const FLOAT_OFFSETS = ["translate-y-0", "-translate-y-2", "translate-y-3", "-translate-y-3", "translate-y-1"];
+/** Tiny seeded PRNG (mulberry32) so the shuffle/float variation is stable across re-renders. */
+function seededRandom(seed: number): () => number {
+  let t = seed;
+  return () => {
+    t += 0x6d2b79f5;
+    let r = Math.imul(t ^ (t >>> 15), 1 | t);
+    r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+    return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function hashSeed(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return h >>> 0;
+}
+/** Deterministic per-committee shuffle — same order every render, different order than the source list. */
+function shuffle<T>(arr: T[], seed: string): T[] {
+  const rand = seededRandom(hashSeed(seed));
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 function CommitteeLogos({ committee }: { committee: string }) {
   const holdings = COMMITTEE_HOLDINGS[committee]?.slice(0, 5) ?? [];
@@ -207,7 +230,7 @@ function CommitteeLogos({ committee }: { committee: string }) {
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className={`flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/40 text-muted-foreground sm:h-24 sm:w-24 ${FLOAT_OFFSETS[i]}`}
+            className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/40 text-muted-foreground sm:h-24 sm:w-24"
           >
             <Image className="h-6 w-6 opacity-40" />
           </div>
@@ -215,26 +238,35 @@ function CommitteeLogos({ committee }: { committee: string }) {
       </div>
     );
   }
+  // Mark the highest-market-cap name (the list's original first entry) before shuffling display order.
+  const tagged = holdings.map((h, i) => ({ ...h, highest: i === 0 }));
+  const shuffled = shuffle(tagged, committee);
+  const rand = seededRandom(hashSeed(committee));
   return (
     <div className="flex w-full flex-1 flex-wrap items-center justify-center gap-6 sm:justify-between">
-      {holdings.map((h, i) => (
-        <div
-          key={h.ticker}
-          className={`relative flex h-16 items-center justify-center rounded-xl border border-border bg-white px-4 py-2 shadow-soft transition-transform duration-base ease-smooth hover:-translate-y-1 sm:h-20 ${FLOAT_OFFSETS[i]}`}
-          title={h.name}
-        >
-          {i === 0 && (
-            <div
-              title="Highest market cap"
-              className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-crimson text-white shadow-soft"
-            >
-              <Star className="h-3.5 w-3.5 fill-current" />
-            </div>
-          )}
-          {/* Full wordmark, unscaled to a square crop — width follows the logo's own aspect ratio. */}
-          <img src={h.logo} alt={h.name} className="h-full w-auto max-w-[180px] object-contain" />
-        </div>
-      ))}
+      {shuffled.map((h) => {
+        const duration = 3.5 + rand() * 2.5; // 3.5s–6s, varies per logo
+        const delay = rand() * -duration; // negative delay staggers the starting phase
+        return (
+          <div
+            key={h.ticker}
+            className="animate-float relative flex h-16 items-center justify-center rounded-xl border border-border bg-white px-4 py-2 shadow-soft transition-transform duration-base ease-smooth hover:-translate-y-1 sm:h-20"
+            style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
+            title={h.name}
+          >
+            {h.highest && (
+              <div
+                title="Highest market cap"
+                className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-crimson text-white shadow-soft"
+              >
+                <Star className="h-3.5 w-3.5 fill-current" />
+              </div>
+            )}
+            {/* Full wordmark, unscaled to a square crop — width follows the logo's own aspect ratio. */}
+            <img src={h.logo} alt={h.name} className="h-full w-auto max-w-[180px] object-contain" />
+          </div>
+        );
+      })}
     </div>
   );
 }
