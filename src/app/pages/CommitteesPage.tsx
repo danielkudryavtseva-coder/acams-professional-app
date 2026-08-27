@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { User, Image } from "lucide-react";
+import { User, Image, Star } from "lucide-react";
 import { APPLY_URL } from "../components/PublicShell";
 
 interface CommitteeInfo {
@@ -176,19 +176,34 @@ function CommitteeLogos({ committee }: { committee: string }) {
         Companies We Cover
       </p>
       <div className="flex flex-wrap justify-center gap-4">
-        {holdings.map((h) => (
+        {holdings.map((h, i) => (
           <div key={h.ticker} className="flex flex-col items-center gap-1.5">
-            <div
-              title={h.name}
-              className="flex h-16 w-16 items-center justify-center rounded-xl border border-border bg-white p-2.5 shadow-soft dark:bg-card sm:h-20 sm:w-20"
-            >
-              <img
-                src={`https://www.google.com/s2/favicons?domain=${h.domain}&sz=128`}
-                alt={h.name}
-                className="h-full w-full object-contain"
-              />
+            <div className="relative">
+              {i === 0 && (
+                <div
+                  title="Highest market cap"
+                  className="absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-crimson text-white shadow-soft"
+                >
+                  <Star className="h-3 w-3 fill-current" />
+                </div>
+              )}
+              <div
+                title={h.name}
+                className="flex h-16 w-16 items-center justify-center rounded-xl border border-border bg-white p-2.5 shadow-soft dark:bg-card sm:h-20 sm:w-20"
+              >
+                <img
+                  src={`https://www.google.com/s2/favicons?domain=${h.domain}&sz=128`}
+                  alt={h.name}
+                  className="h-full w-full object-contain"
+                />
+              </div>
             </div>
             <p className="text-xs font-semibold text-foreground">{h.ticker}</p>
+            {i === 0 && (
+              <p className="text-[10px] font-medium uppercase tracking-wide text-crimson">
+                Highest Market-Cap
+              </p>
+            )}
           </div>
         ))}
       </div>
@@ -217,6 +232,7 @@ export default function CommitteesPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <CommitteeHeadPlaceholder />
+              <CommitteeLogos committee={c.name} />
               <p className="text-sm leading-relaxed text-muted-foreground">{c.description}</p>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
@@ -231,7 +247,6 @@ export default function CommitteesPage() {
                   ))}
                 </ul>
               </div>
-              <CommitteeLogos committee={c.name} />
             </CardContent>
           </Card>
         ))}

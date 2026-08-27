@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { Image } from "lucide-react";
+import { Image, ArrowRight } from "lucide-react";
 import { PlacementsMap } from "../components/PlacementsMap";
 import { APPLY_URL } from "../components/PublicShell";
 
@@ -67,13 +67,44 @@ export default function MembershipPage() {
       </section>
 
       {/* Placements map */}
-      <section className="max-w-5xl mx-auto w-full pt-10 pb-16 px-6">
+      <section className="max-w-5xl mx-auto w-full pt-10 pb-10 px-6">
         <h2 className="text-2xl font-bold">Where Our Alumni Landed</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Placements pulled from the CAMS alumni rolodex.
         </p>
         <div className="mt-6">
           <PlacementsMap />
+        </div>
+      </section>
+
+      {/* Process to join */}
+      <section className="max-w-5xl mx-auto w-full pb-16 px-6">
+        <h2 className="text-center text-2xl font-bold">Process to Join</h2>
+        <div className="mt-8 flex flex-wrap items-start justify-center gap-x-2 gap-y-8">
+          {TIMELINE.map(({ step, label, detail }, i) => (
+            <div key={step} className="flex items-start">
+              <div className="flex w-32 flex-col items-center text-center sm:w-36">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-crimson text-sm font-bold text-white">
+                  {i + 1}
+                </div>
+                <p className="mt-2 text-sm font-semibold">{label}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
+              </div>
+              {i < TIMELINE.length - 1 && (
+                <ArrowRight className="mt-2.5 hidden h-4 w-4 shrink-0 text-muted-foreground sm:block" />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <Button asChild>
+            <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
+              Start Your Application
+            </a>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link to="/committees">View Committees</Link>
+          </Button>
         </div>
       </section>
 
@@ -127,34 +158,6 @@ export default function MembershipPage() {
         </div>
       </section>
 
-      {/* Application timeline */}
-      <section className="max-w-4xl mx-auto w-full py-16 px-6">
-        <h2 className="text-2xl font-bold">How to Join</h2>
-        <div className="mt-8 space-y-6">
-          {TIMELINE.map(({ step, label, detail }) => (
-            <div key={step} className="flex gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#c63f60] text-white text-sm font-bold">
-                {step}
-              </div>
-              <div className="pt-1.5">
-                <p className="font-semibold text-sm">{label}</p>
-                <p className="text-sm text-muted-foreground">{detail}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="mt-10 flex flex-wrap gap-3">
-          <Button asChild>
-            <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
-              Start Your Application
-            </a>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/committees">View Committees</Link>
-          </Button>
-        </div>
-      </section>
     </div>
   );
 }
