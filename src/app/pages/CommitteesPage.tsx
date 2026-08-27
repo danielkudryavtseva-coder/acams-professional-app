@@ -124,7 +124,7 @@ const COMMITTEES: CommitteeInfo[] = [
 
 function CommitteeHead({ name, image }: { name: string; image?: string }) {
   return (
-    <div className="flex w-full shrink-0 flex-col items-center justify-center gap-3 py-2 sm:w-48 sm:-translate-y-2">
+    <div className="flex w-full shrink-0 flex-col items-center justify-center gap-3 py-3 sm:w-48 sm:-translate-y-4 sm:translate-x-4">
       {image ? (
         <img
           src={image}
@@ -156,7 +156,7 @@ function faviconLogo(domain: string): string {
 }
 
 /** Top coverage/holdings companies per committee (from portfolio decisions). */
-const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; logo: string }[]> = {
+const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; logo: string; large?: boolean }[]> = {
   TMT: [
     { ticker: "AMZN", name: "Amazon.com, Inc.", logo: amazonLogo },
     { ticker: "AAPL", name: "Apple Inc.", logo: appleLogo },
@@ -169,7 +169,7 @@ const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; logo: s
     { ticker: "UNH", name: "UnitedHealth Group Incorporated", logo: commonsLogo("UnitedHealth Group logo.svg") },
   ],
   Financials: [
-    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", logo: goldmanSachsLogo },
+    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", logo: goldmanSachsLogo, large: true },
     { ticker: "APO", name: "Apollo Global Management, Inc.", logo: apolloLogo },
     { ticker: "MA", name: "Mastercard Incorporated", logo: mastercardLogo },
     { ticker: "UNM", name: "Unum Group", logo: commonsLogo("Unum Group logo.svg") },
@@ -222,6 +222,40 @@ function shuffle<T>(arr: T[], seed: string): T[] {
   return out;
 }
 
+type Holding = { ticker: string; name: string; logo: string; large?: boolean; highest?: boolean };
+
+/** One logo badge: static `offsetY` (px) for layout placement, plus its own independent float animation. */
+function LogoBadge({ h, rand, offsetY = 0 }: { h: Holding; rand: () => number; offsetY?: number }) {
+  const duration = 3.5 + rand() * 2.5; // 3.5s–6s, varies per logo
+  const delay = rand() * -duration; // negative delay staggers the starting phase
+  return (
+    <div style={offsetY ? { transform: `translateY(${offsetY}px)` } : undefined}>
+      <div
+        className={`animate-float relative flex items-center justify-center rounded-xl border border-border bg-white shadow-soft transition-transform duration-base ease-smooth hover:-translate-y-1 ${
+          h.large ? "h-20 px-5 py-3 sm:h-24" : "h-16 px-4 py-2 sm:h-20"
+        }`}
+        style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
+        title={h.name}
+      >
+        {h.highest && (
+          <div
+            title="Highest market cap"
+            className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-crimson text-white shadow-soft"
+          >
+            <Star className="h-3.5 w-3.5 fill-current" />
+          </div>
+        )}
+        {/* Full wordmark, unscaled to a square crop — width follows the logo's own aspect ratio. */}
+        <img
+          src={h.logo}
+          alt={h.name}
+          className={`h-full w-auto object-contain ${h.large ? "max-w-[220px]" : "max-w-[180px]"}`}
+        />
+      </div>
+    </div>
+  );
+}
+
 function CommitteeLogos({ committee }: { committee: string }) {
   const holdings = COMMITTEE_HOLDINGS[committee]?.slice(0, 5) ?? [];
   if (holdings.length === 0) {
@@ -242,31 +276,56 @@ function CommitteeLogos({ committee }: { committee: string }) {
   const tagged = holdings.map((h, i) => ({ ...h, highest: i === 0 }));
   const shuffled = shuffle(tagged, committee);
   const rand = seededRandom(hashSeed(committee));
+
+  // 4 holdings (TMT, Financials, Consumer) — even 2x2 grid.
+  if (shuffled.length === 4) {
+    return (
+      <div className="grid w-full flex-1 grid-cols-2 justify-items-center gap-8">
+        {shuffled.map((h) => (
+          <LogoBadge key={h.ticker} h={h} rand={rand} />
+        ))}
+      </div>
+    );
+  }
+
+  // 3 holdings (Contrarian) — two on top, one centered underneath.
+  if (shuffled.length === 3) {
+    return (
+      <div className="flex w-full flex-1 flex-col items-center gap-8">
+        <div className="flex gap-8">
+          <LogoBadge h={shuffled[0]} rand={rand} />
+          <LogoBadge h={shuffled[1]} rand={rand} />
+        </div>
+        <LogoBadge h={shuffled[2]} rand={rand} />
+      </div>
+    );
+  }
+
+  // 5 holdings (Healthcare, Industrials & Energy) — three on top, two staggered
+  // underneath the gaps. Industrials additionally sags its top-middle logo lower.
+  if (shuffled.length === 5) {
+    const isIndustrials = committee === "Industrials & Energy";
+    return (
+      <div className="flex w-full flex-1 flex-col items-center gap-10">
+        <div className="flex gap-8">
+          <LogoBadge h={shuffled[0]} rand={rand} />
+          <LogoBadge h={shuffled[1]} rand={rand} offsetY={isIndustrials ? 24 : 0} />
+          <LogoBadge h={shuffled[2]} rand={rand} />
+        </div>
+        <div className="flex gap-8">
+          <LogoBadge h={shuffled[3]} rand={rand} />
+          <LogoBadge h={shuffled[4]} rand={rand} />
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback for any other count — free-flowing wrap.
   return (
     <div className="flex w-full flex-1 flex-wrap items-center justify-center gap-6 sm:justify-between">
-      {shuffled.map((h) => {
-        const duration = 3.5 + rand() * 2.5; // 3.5s–6s, varies per logo
-        const delay = rand() * -duration; // negative delay staggers the starting phase
-        return (
-          <div
-            key={h.ticker}
-            className="animate-float relative flex h-16 items-center justify-center rounded-xl border border-border bg-white px-4 py-2 shadow-soft transition-transform duration-base ease-smooth hover:-translate-y-1 sm:h-20"
-            style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
-            title={h.name}
-          >
-            {h.highest && (
-              <div
-                title="Highest market cap"
-                className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-crimson text-white shadow-soft"
-              >
-                <Star className="h-3.5 w-3.5 fill-current" />
-              </div>
-            )}
-            {/* Full wordmark, unscaled to a square crop — width follows the logo's own aspect ratio. */}
-            <img src={h.logo} alt={h.name} className="h-full w-auto max-w-[180px] object-contain" />
-          </div>
-        );
-      })}
+      {shuffled.map((h) => (
+        <LogoBadge key={h.ticker} h={h} rand={rand} />
+      ))}
     </div>
   );
 }
