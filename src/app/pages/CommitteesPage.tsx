@@ -94,16 +94,11 @@ const COMMITTEES: CommitteeInfo[] = [
 
 function CommitteeHeadPlaceholder() {
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-border bg-muted/40 text-muted-foreground">
-        <User className="h-5 w-5 opacity-40" />
+    <div className="flex w-full shrink-0 flex-col items-center gap-3 sm:w-40">
+      <div className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-dashed border-border bg-crimson/10 text-muted-foreground ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-32 sm:w-32">
+        <User className="h-10 w-10 opacity-40" />
       </div>
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Committee Head
-        </p>
-        <p className="text-sm text-muted-foreground">Name coming soon</p>
-      </div>
+      <p className="text-center text-sm font-semibold text-foreground">Name coming soon</p>
     </div>
   );
 }
@@ -154,15 +149,18 @@ const COMMITTEE_HOLDINGS: Record<string, { ticker: string; name: string; domain:
   ],
 };
 
+/** Small deterministic vertical offsets per slot so the logos read as "floating" rather than a rigid grid. */
+const FLOAT_OFFSETS = ["translate-y-0", "-translate-y-2", "translate-y-3", "-translate-y-3", "translate-y-1"];
+
 function CommitteeLogos({ committee }: { committee: string }) {
   const holdings = COMMITTEE_HOLDINGS[committee]?.slice(0, 5) ?? [];
   if (holdings.length === 0) {
     return (
-      <div className="flex flex-wrap justify-center gap-4">
+      <div className="flex flex-1 flex-wrap items-center justify-center gap-5 sm:justify-start">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="flex h-16 w-16 items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/40 text-muted-foreground sm:h-20 sm:w-20"
+            className={`flex h-20 w-20 items-center justify-center rounded-xl border-2 border-dashed border-border bg-muted/40 text-muted-foreground sm:h-24 sm:w-24 ${FLOAT_OFFSETS[i]}`}
           >
             <Image className="h-6 w-6 opacity-40" />
           </div>
@@ -171,42 +169,28 @@ function CommitteeLogos({ committee }: { committee: string }) {
     );
   }
   return (
-    <div>
-      <p className="mb-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-        Companies We Cover
-      </p>
-      <div className="flex flex-wrap justify-center gap-4">
-        {holdings.map((h, i) => (
-          <div key={h.ticker} className="flex flex-col items-center gap-1.5">
-            <div className="relative">
-              {i === 0 && (
-                <div
-                  title="Highest market cap"
-                  className="absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-crimson text-white shadow-soft"
-                >
-                  <Star className="h-3 w-3 fill-current" />
-                </div>
-              )}
-              <div
-                title={h.name}
-                className="flex h-16 w-16 items-center justify-center rounded-xl border border-border bg-white p-2.5 shadow-soft dark:bg-card sm:h-20 sm:w-20"
-              >
-                <img
-                  src={`https://www.google.com/s2/favicons?domain=${h.domain}&sz=128`}
-                  alt={h.name}
-                  className="h-full w-full object-contain"
-                />
-              </div>
+    <div className="flex flex-1 flex-wrap items-center justify-center gap-5 sm:justify-start">
+      {holdings.map((h, i) => (
+        <div
+          key={h.ticker}
+          className={`relative flex h-20 w-20 items-center justify-center rounded-xl border border-border bg-white p-3 shadow-soft transition-transform duration-base ease-smooth hover:-translate-y-1 dark:bg-card sm:h-24 sm:w-24 ${FLOAT_OFFSETS[i]}`}
+          title={h.name}
+        >
+          {i === 0 && (
+            <div
+              title="Highest market cap"
+              className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-crimson text-white shadow-soft"
+            >
+              <Star className="h-3.5 w-3.5 fill-current" />
             </div>
-            <p className="text-xs font-semibold text-foreground">{h.ticker}</p>
-            {i === 0 && (
-              <p className="text-[10px] font-medium uppercase tracking-wide text-crimson">
-                Highest Market-Cap
-              </p>
-            )}
-          </div>
-        ))}
-      </div>
+          )}
+          <img
+            src={`https://www.google.com/s2/favicons?domain=${h.domain}&sz=128`}
+            alt={h.name}
+            className="h-full w-full object-contain"
+          />
+        </div>
+      ))}
     </div>
   );
 }
@@ -228,24 +212,11 @@ export default function CommitteesPage() {
           <Card key={c.name} className="bg-card">
             <CardHeader className="pb-3">
               <CardTitle className="text-xl">{c.name} Committee</CardTitle>
-              <p className="text-sm text-muted-foreground mt-0.5">{c.tagline}</p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <CommitteeHeadPlaceholder />
-              <CommitteeLogos committee={c.name} />
-              <p className="text-sm leading-relaxed text-muted-foreground">{c.description}</p>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-                  Key Activities
-                </p>
-                <ul className="space-y-1">
-                  {c.activities.map((a) => (
-                    <li key={a} className="text-sm flex items-start gap-2">
-                      <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-crimson shrink-0" />
-                      {a}
-                    </li>
-                  ))}
-                </ul>
+            <CardContent>
+              <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center">
+                <CommitteeHeadPlaceholder />
+                <CommitteeLogos committee={c.name} />
               </div>
             </CardContent>
           </Card>
