@@ -129,39 +129,15 @@ function CommitteeHead({ name, image }: { name: string; image?: string }) {
         <img
           src={image}
           alt={name}
-          className="h-36 w-36 rounded-full object-cover shadow-[0_12px_28px_-8px_rgba(124,20,38,0.55)] ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-44 sm:w-44"
+          className="h-36 w-36 rounded-full object-cover shadow-md ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-44 sm:w-44"
         />
       ) : (
-        <div className="flex h-36 w-36 items-center justify-center rounded-full border-2 border-dashed border-border bg-crimson/10 text-muted-foreground shadow-[0_12px_28px_-8px_rgba(124,20,38,0.55)] ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-44 sm:w-44">
+        <div className="flex h-36 w-36 items-center justify-center rounded-full border-2 border-dashed border-border bg-crimson/10 text-muted-foreground shadow-md ring-[6px] ring-crimson ring-offset-[3px] ring-offset-background sm:h-44 sm:w-44">
           <User className="h-14 w-14 opacity-40" />
         </div>
       )}
       <p className="text-center text-base font-semibold text-foreground">{name}</p>
     </div>
-  );
-}
-
-/** Ornate corner brackets + faint low-poly line accent, echoing the reference card frame. */
-function CardFrameAccents() {
-  return (
-    <>
-      <span className="pointer-events-none absolute left-3 top-3 h-6 w-6 rounded-tl-sm border-l-2 border-t-2 border-crimson/60" />
-      <span className="pointer-events-none absolute right-3 top-3 h-6 w-6 rounded-tr-sm border-r-2 border-t-2 border-crimson/60" />
-      <span className="pointer-events-none absolute bottom-3 left-3 h-6 w-6 rounded-bl-sm border-b-2 border-l-2 border-crimson/60" />
-      <span className="pointer-events-none absolute bottom-3 right-3 h-6 w-6 rounded-br-sm border-b-2 border-r-2 border-crimson/60" />
-      <svg
-        className="pointer-events-none absolute -left-6 -top-6 h-40 w-40 text-crimson/[0.08]"
-        viewBox="0 0 160 160"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path
-          d="M10 90 L60 20 L140 45 L110 110 L40 140 Z M60 20 L110 110 M60 20 L40 140 M140 45 L110 110"
-          stroke="currentColor"
-          strokeWidth="1"
-        />
-      </svg>
-    </>
   );
 }
 
@@ -255,7 +231,7 @@ function LogoBadge({ h, rand, offsetY = 0 }: { h: Holding; rand: () => number; o
   return (
     <div style={offsetY ? { transform: `translateY(${offsetY}px)` } : undefined}>
       <div
-        className={`animate-float relative flex items-center justify-center rounded-xl border border-border bg-gradient-to-b from-white to-neutral-50 shadow-[0_14px_24px_-10px_rgba(124,20,38,0.35)] ring-1 ring-black/5 transition-transform duration-base ease-smooth hover:-translate-y-1 hover:shadow-[0_18px_30px_-10px_rgba(124,20,38,0.45)] ${
+        className={`animate-float relative flex items-center justify-center rounded-xl border border-border bg-gradient-to-b from-white to-neutral-50 shadow-md ring-1 ring-black/5 transition-transform duration-base ease-smooth hover:-translate-y-1 hover:shadow-lg ${
           h.large ? "h-20 px-5 py-3 sm:h-24" : "h-16 px-4 py-2 sm:h-20"
         }`}
         style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
@@ -264,7 +240,7 @@ function LogoBadge({ h, rand, offsetY = 0 }: { h: Holding; rand: () => number; o
         {h.highest && (
           <div
             title="Highest market cap"
-            className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-crimson text-white shadow-[0_4px_10px_-2px_rgba(124,20,38,0.6)] ring-2 ring-white"
+            className="absolute -top-2 -right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-crimson text-white shadow-sm ring-2 ring-white"
           >
             <Star className="h-3.5 w-3.5 fill-current" />
           </div>
@@ -368,11 +344,7 @@ export default function CommitteesPage() {
       {/* Committee cards */}
       <section className="max-w-5xl mx-auto w-full py-14 px-6 space-y-6">
         {COMMITTEES.map((c) => (
-          <Card
-            key={c.name}
-            className="relative overflow-hidden bg-gradient-to-br from-card to-muted/20 shadow-[0_16px_36px_-16px_rgba(124,20,38,0.25)]"
-          >
-            <CardFrameAccents />
+          <Card key={c.name} className="bg-gradient-to-br from-card to-muted/20 shadow-sm">
             <CardHeader className="items-center pb-4 pt-8 text-center">
               <CardTitle className="text-3xl font-bold tracking-tight md:text-4xl">
                 {c.displayName ?? c.name}
