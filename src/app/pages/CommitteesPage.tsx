@@ -285,7 +285,7 @@ export default function CommitteesPage() {
           <Card key={c.name} className="bg-card">
             <CardHeader className="items-center pb-4 pt-8 text-center">
               <CardTitle className="text-3xl font-bold tracking-tight md:text-4xl">
-                {c.displayName ?? c.name} Committee
+                {c.displayName ?? c.name}
               </CardTitle>
             </CardHeader>
             <CardContent>
