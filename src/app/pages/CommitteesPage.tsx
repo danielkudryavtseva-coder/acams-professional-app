@@ -277,13 +277,15 @@ function CommitteeLogos({ committee }: { committee: string }) {
   const shuffled = shuffle(tagged, committee);
   const rand = seededRandom(hashSeed(committee));
 
-  // 4 holdings (TMT, Financials, Consumer) — even 2x2 grid.
+  // 4 holdings (TMT, Financials, Consumer) — even 2x2 grid, centered as a tight group.
   if (shuffled.length === 4) {
     return (
-      <div className="grid w-full flex-1 grid-cols-2 justify-items-center gap-8">
-        {shuffled.map((h) => (
-          <LogoBadge key={h.ticker} h={h} rand={rand} />
-        ))}
+      <div className="flex flex-1 justify-center">
+        <div className="grid w-fit grid-cols-2 justify-items-center gap-5">
+          {shuffled.map((h) => (
+            <LogoBadge key={h.ticker} h={h} rand={rand} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -305,14 +307,15 @@ function CommitteeLogos({ committee }: { committee: string }) {
   // underneath the gaps. Industrials additionally sags its top-middle logo lower.
   if (shuffled.length === 5) {
     const isIndustrials = committee === "Industrials & Energy";
+    const rowGap = isIndustrials ? "gap-8" : "gap-5";
     return (
       <div className="flex w-full flex-1 flex-col items-center gap-10">
-        <div className="flex gap-8">
+        <div className={`flex ${rowGap}`}>
           <LogoBadge h={shuffled[0]} rand={rand} />
           <LogoBadge h={shuffled[1]} rand={rand} offsetY={isIndustrials ? 24 : 0} />
           <LogoBadge h={shuffled[2]} rand={rand} />
         </div>
-        <div className="flex gap-8">
+        <div className={`flex ${rowGap}`}>
           <LogoBadge h={shuffled[3]} rand={rand} />
           <LogoBadge h={shuffled[4]} rand={rand} />
         </div>
