@@ -9,28 +9,57 @@ const CARTO_LIGHT_STYLE: maplibregl.StyleSpecification = {
   version: 8,
   glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
   sources: {
-    "carto-light": {
+    "osm-light": {
       type: "raster",
+      // CARTO's free basemap CDN started requiring an API key — switched to the
+      // standard OSM tile servers, which stay free/keyless for this traffic level.
       tiles: [
-        "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
-        "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
-        "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
+        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
       ],
       tileSize: 256,
-      attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+      attribution: "&copy; OpenStreetMap contributors",
     },
   },
-  layers: [{ id: "carto-base", type: "raster", source: "carto-light" }],
+  layers: [{ id: "osm-base", type: "raster", source: "osm-light" }],
 };
-
-/** Below this zoom level the side panel shows the top companies overview instead of a per-city breakdown. */
-const ZOOM_REVEAL_THRESHOLD = 4.2;
 
 /** How many firms to show in the always-visible top-companies overview. */
 const TOP_COMPANIES_COUNT = 20;
 
-/** Firms excluded from the "Top Placements" logo wall specifically (still counted in city pins/stats). */
+/** Firms excluded from the "Top Placements" logo wall specifically (still counted toward city totals). */
 const TOP_PLACEMENTS_EXCLUDE = new Set(["Point72"]);
+
+/** Fixed pins: the 25 largest US metros + Birmingham (CAMS's home city), always shown regardless of data. */
+const MAJOR_CITIES: { city: string; lat: number; lng: number }[] = [
+  { city: "New York, NY", lat: 40.7128, lng: -74.006 },
+  { city: "Los Angeles, CA", lat: 34.0522, lng: -118.2437 },
+  { city: "Chicago, IL", lat: 41.8781, lng: -87.6298 },
+  { city: "Dallas, TX", lat: 32.7767, lng: -96.797 },
+  { city: "Houston, TX", lat: 29.7604, lng: -95.3698 },
+  { city: "Washington, DC", lat: 38.9072, lng: -77.0369 },
+  { city: "Miami, FL", lat: 25.7617, lng: -80.1918 },
+  { city: "Philadelphia, PA", lat: 39.9526, lng: -75.1652 },
+  { city: "Atlanta, GA", lat: 33.749, lng: -84.388 },
+  { city: "Phoenix, AZ", lat: 33.4484, lng: -112.074 },
+  { city: "Boston, MA", lat: 42.3601, lng: -71.0589 },
+  { city: "San Francisco, CA", lat: 37.7749, lng: -122.4194 },
+  { city: "Detroit, MI", lat: 42.3314, lng: -83.0458 },
+  { city: "Seattle, WA", lat: 47.6062, lng: -122.3321 },
+  { city: "Minneapolis, MN", lat: 44.9778, lng: -93.265 },
+  { city: "San Diego, CA", lat: 32.7157, lng: -117.1611 },
+  { city: "Tampa, FL", lat: 27.9506, lng: -82.4572 },
+  { city: "Denver, CO", lat: 39.7392, lng: -104.9903 },
+  { city: "St. Louis, MO", lat: 38.627, lng: -90.1994 },
+  { city: "Baltimore, MD", lat: 39.2904, lng: -76.6122 },
+  { city: "Charlotte, NC", lat: 35.2271, lng: -80.8431 },
+  { city: "Orlando, FL", lat: 28.5383, lng: -81.3792 },
+  { city: "San Antonio, TX", lat: 29.4241, lng: -98.4936 },
+  { city: "Portland, OR", lat: 45.5152, lng: -122.6784 },
+  { city: "Nashville, TN", lat: 36.1627, lng: -86.7816 },
+  { city: "Birmingham, AL", lat: 33.5186, lng: -86.8104 },
+];
 
 interface Company {
   firm: string;
@@ -38,46 +67,12 @@ interface Company {
   logo: string | null;
 }
 
-interface CityCluster {
+interface CityPin {
   city: string;
   lat: number;
   lng: number;
   alumniCount: number;
   companies: Company[];
-}
-
-function buildCityClusters(): CityCluster[] {
-  const byCity = new Map<
-    string,
-    { lat: number; lng: number; alumni: typeof MOCK_ALUMNI }
-  >();
-  for (const a of MOCK_ALUMNI) {
-    if (!Number.isFinite(a.mapLat) || !Number.isFinite(a.mapLng)) continue;
-    const key = a.mapCity || `${a.mapLat},${a.mapLng}`;
-    const existing = byCity.get(key);
-    if (existing) {
-      existing.alumni.push(a);
-    } else {
-      byCity.set(key, { lat: a.mapLat, lng: a.mapLng, alumni: [a] });
-    }
-  }
-
-  return Array.from(byCity.entries()).map(([city, { lat, lng, alumni }]) => {
-    const companyCounts = new Map<string, number>();
-    for (const a of alumni) {
-      const firm = a.firm?.trim();
-      if (!firm || firm === "—") continue;
-      companyCounts.set(firm, (companyCounts.get(firm) ?? 0) + 1);
-    }
-    const companies = sortCompanies(
-      Array.from(companyCounts.entries()).map(([firm, count]) => ({
-        firm,
-        count,
-        logo: logoUrlForFirm(firm),
-      })),
-    );
-    return { city, lat, lng, alumniCount: alumni.length, companies };
-  });
 }
 
 function sortCompanies(companies: Company[]): Company[] {
@@ -92,22 +87,62 @@ function sortCompanies(companies: Company[]): Company[] {
   });
 }
 
-/** Merge companies across every city currently in view, summing headcounts for repeats. */
-function mergeCompanies(clusters: CityCluster[]): Company[] {
-  const merged = new Map<string, Company>();
-  for (const cluster of clusters) {
-    for (const co of cluster.companies) {
-      const existing = merged.get(co.firm);
-      if (existing) existing.count += co.count;
-      else merged.set(co.firm, { ...co });
+/** Buckets every alumnus with map coordinates into whichever major-city pin is geographically nearest. */
+function buildCityPins(): CityPin[] {
+  const buckets = new Map<string, typeof MOCK_ALUMNI>();
+  for (const city of MAJOR_CITIES) buckets.set(city.city, []);
+
+  for (const a of MOCK_ALUMNI) {
+    if (!Number.isFinite(a.mapLat) || !Number.isFinite(a.mapLng)) continue;
+    let nearest = MAJOR_CITIES[0];
+    let bestDist = Infinity;
+    for (const city of MAJOR_CITIES) {
+      const dLat = city.lat - a.mapLat;
+      const dLng = city.lng - a.mapLng;
+      const dist = dLat * dLat + dLng * dLng;
+      if (dist < bestDist) {
+        bestDist = dist;
+        nearest = city;
+      }
     }
+    buckets.get(nearest.city)!.push(a);
+  }
+
+  return MAJOR_CITIES.map((city) => {
+    const alumni = buckets.get(city.city) ?? [];
+    const companyCounts = new Map<string, number>();
+    for (const a of alumni) {
+      const firm = a.firm?.trim();
+      if (!firm || firm === "—") continue;
+      companyCounts.set(firm, (companyCounts.get(firm) ?? 0) + 1);
+    }
+    const companies = sortCompanies(
+      Array.from(companyCounts.entries()).map(([firm, count]) => ({
+        firm,
+        count,
+        logo: logoUrlForFirm(firm),
+      })),
+    );
+    return { city: city.city, lat: city.lat, lng: city.lng, alumniCount: alumni.length, companies };
+  });
+}
+
+/** Merge companies across every alumnus, summing headcounts for repeats. */
+function mergeAllCompanies(): Company[] {
+  const merged = new Map<string, Company>();
+  for (const a of MOCK_ALUMNI) {
+    const firm = a.firm?.trim();
+    if (!firm || firm === "—") continue;
+    const existing = merged.get(firm);
+    if (existing) existing.count += 1;
+    else merged.set(firm, { firm, count: 1, logo: logoUrlForFirm(firm) });
   }
   return sortCompanies(Array.from(merged.values()));
 }
 
 /** Square pin image size in px, scaled by alumni count. */
 function pinSize(count: number): number {
-  return Math.round(Math.min(52, 26 + count * 3));
+  return Math.round(Math.min(48, 28 + count * 2));
 }
 
 function CompanyTile({ firm, count, logo }: Company) {
@@ -194,11 +229,15 @@ const PANEL_ANIMATION_CSS = `
 export function PlacementsMap() {
   const containerRef = React.useRef<HTMLDivElement>(null);
   const mapRef = React.useRef<maplibregl.Map | null>(null);
-  const clustersRef = React.useRef<CityCluster[]>([]);
 
-  const [zoomedIn, setZoomedIn] = React.useState(false);
-  const [panelLabel, setPanelLabel] = React.useState<string | null>(null);
-  const [visibleCompanies, setVisibleCompanies] = React.useState<Company[]>([]);
+  const [selectedCity, setSelectedCity] = React.useState<string | null>(null);
+
+  const cityPins = React.useMemo(() => buildCityPins(), []);
+  const topCompanies = React.useMemo(
+    () => mergeAllCompanies().filter((c) => !TOP_PLACEMENTS_EXCLUDE.has(c.firm)).slice(0, TOP_COMPANIES_COUNT),
+    [],
+  );
+  const selectedPin = selectedCity ? cityPins.find((c) => c.city === selectedCity) ?? null : null;
 
   React.useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -210,28 +249,20 @@ export function PlacementsMap() {
       document.head.appendChild(style);
     }
 
-    const clusters = buildCityClusters();
-    clustersRef.current = clusters;
-
     const map = new maplibregl.Map({
       container: containerRef.current,
       style: CARTO_LIGHT_STYLE,
-      center: [-88, 36],
-      zoom: 3.4,
-      minZoom: 3,
-      // Keeps the map locked to the continental US + AK/HI — placements are US-only, so
-      // there's no reason to let visitors pan/zoom out to the rest of the world.
-      maxBounds: [
-        [-172, 14],
-        [-60, 72],
-      ],
+      center: [-96, 38.5],
+      zoom: 3.6,
+      // Fully static — no pan, zoom, rotate, or scroll interaction. This is a
+      // fixed overview of major-city pins, not a pannable/zoomable map.
+      interactive: false,
       attributionControl: { compact: true },
     });
     mapRef.current = map;
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
 
-    for (const cluster of clusters) {
-      const size = pinSize(cluster.alumniCount);
+    for (const pin of cityPins) {
+      const size = pinSize(pin.alumniCount);
 
       // MapLibre applies its own positioning transform (translate) directly
       // to the marker's root element — never set `transform` on `el` itself
@@ -257,74 +288,31 @@ export function PlacementsMap() {
         img.style.transform = "scale(1)";
       });
       el.addEventListener("click", () => {
-        map.flyTo({
-          center: [cluster.lng, cluster.lat],
-          zoom: Math.max(map.getZoom(), ZOOM_REVEAL_THRESHOLD + 1.5),
-          duration: 700,
-          essential: true,
-        });
+        setSelectedCity((prev) => (prev === pin.city ? null : pin.city));
       });
 
       new maplibregl.Marker({ element: el, anchor: "bottom" })
-        .setLngLat([cluster.lng, cluster.lat])
+        .setLngLat([pin.lng, pin.lat])
         .addTo(map);
     }
 
-    const updatePanel = () => {
-      const zoom = map.getZoom();
-      if (zoom < ZOOM_REVEAL_THRESHOLD) {
-        setZoomedIn(false);
-        setPanelLabel(null);
-        setVisibleCompanies([]);
-        return;
-      }
-      setZoomedIn(true);
-      const bounds = map.getBounds();
-      const inView = clustersRef.current.filter((c) =>
-        bounds.contains([c.lng, c.lat]),
-      );
-      if (inView.length === 0) {
-        setPanelLabel(null);
-        setVisibleCompanies([]);
-        return;
-      }
-      setPanelLabel(
-        inView.length === 1 ? inView[0].city : `${inView.length} cities in view`,
-      );
-      setVisibleCompanies(mergeCompanies(inView));
-    };
-
-    updatePanel();
-
-    map.on("moveend", updatePanel);
-    map.on("zoomend", updatePanel);
-
     return () => {
-      map.off("moveend", updatePanel);
-      map.off("zoomend", updatePanel);
       map.remove();
       mapRef.current = null;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const clusterCount = React.useMemo(() => buildCityClusters().length, []);
   const placedCount = MOCK_ALUMNI.filter(
     (a) => Number.isFinite(a.mapLat) && Number.isFinite(a.mapLng),
   ).length;
-  const topCompanies = React.useMemo(
-    () =>
-      mergeCompanies(buildCityClusters())
-        .filter((c) => !TOP_PLACEMENTS_EXCLUDE.has(c.firm))
-        .slice(0, TOP_COMPANIES_COUNT),
-    [],
-  );
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border shadow-sm">
+    <div>
       <div className="flex flex-col-reverse md:flex-row">
         <div ref={containerRef} className="h-[420px] w-full sm:h-[480px] md:flex-1" />
-        <aside className="w-full shrink-0 border-b border-border bg-paper p-4 dark:bg-card sm:h-[480px] md:w-64 md:border-b-0 md:border-l">
-          {!zoomedIn ? (
+        <aside className="w-full shrink-0 bg-paper p-4 dark:bg-card sm:h-[480px] md:w-64">
+          {!selectedPin ? (
             <div className="cams-panel-fade">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Top placements
@@ -335,17 +323,22 @@ export function PlacementsMap() {
                 ))}
               </div>
             </div>
-          ) : visibleCompanies.length === 0 ? (
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              No tracked placements in this view yet — pan toward a pin.
-            </p>
+          ) : selectedPin.companies.length === 0 ? (
+            <div key={selectedPin.city} className="cams-panel-fade">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {selectedPin.city}
+              </p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                No tracked placements near {selectedPin.city} yet.
+              </p>
+            </div>
           ) : (
-            <div key={panelLabel ?? ""} className="cams-panel-fade">
+            <div key={selectedPin.city} className="cams-panel-fade">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {panelLabel}
+                {selectedPin.city}
               </p>
               <div className="max-h-[240px] space-y-2 overflow-y-auto pr-1 sm:max-h-[400px] md:max-h-[340px]">
-                {visibleCompanies.map((c) => (
+                {selectedPin.companies.map((c) => (
                   <CompanyTile key={c.firm} {...c} />
                 ))}
               </div>
@@ -353,9 +346,9 @@ export function PlacementsMap() {
           )}
         </aside>
       </div>
-      <div className="border-t border-border bg-paper px-4 py-2 text-center text-xs text-muted-foreground dark:bg-card">
-        {placedCount} CAMS alumni across {clusterCount} cities &middot; zoom in to see the firms
-      </div>
+      <p className="px-1 pt-2 text-center text-xs text-muted-foreground">
+        {placedCount} CAMS alumni &middot; click a pin to see placements in that area
+      </p>
     </div>
   );
 }
