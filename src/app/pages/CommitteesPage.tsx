@@ -31,7 +31,7 @@ interface CommitteeInfo {
   tagline: string;
   description: string;
   activities: string[];
-  head: { name: string; image?: string };
+  head: { name: string; image?: string; major?: string };
 }
 
 const COMMITTEES: CommitteeInfo[] = [
@@ -39,7 +39,7 @@ const COMMITTEES: CommitteeInfo[] = [
     name: "TMT",
     displayName: "Technology, Media & Telecom",
     tagline: "Sector coverage for Technology, Media & Telecom",
-    head: { name: "Matt Rochford", image: mattRochford },
+    head: { name: "Matt Rochford", image: mattRochford, major: "Finance and Economics" },
     description:
       "The TMT Committee owns sector coverage for technology, media, and telecommunications names. Members track the coverage universe, monitor earnings and competitive dynamics, and build sector-specific theses that feed directly into the full committee's pitch process.",
     activities: [
@@ -53,7 +53,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Contrarian",
     tagline: "Stress-testing the portfolio's consensus bets",
-    head: { name: "Matthew Worthington", image: matthewWorthington },
+    head: { name: "Matthew Worthington", image: matthewWorthington, major: "Mechanical Engineering and Economics" },
     description:
       "The Contrarian Committee builds the dissenting case on every pitch under consideration — short theses, bear cases, and second-order risks the coverage teams may be missing. Every position that survives Contrarian scrutiny enters the portfolio stronger.",
     activities: [
@@ -67,7 +67,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Financials",
     tagline: "Sector coverage for banks, insurers & fintech",
-    head: { name: "Phillip Gorokhovich", image: phillipGorokhovich },
+    head: { name: "Phillip Gorokhovich", image: phillipGorokhovich, major: "Finance and Accounting" },
     description:
       "The Financials Committee covers banks, insurers, asset managers, and fintech names — sectors with their own valuation frameworks and regulatory dynamics. Members build coverage on rate sensitivity, credit cycles, and capital markets exposure.",
     activities: [
@@ -81,7 +81,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Consumer",
     tagline: "Sector coverage for retail & consumer brands",
-    head: { name: "Brian Wilk", image: brianWilk },
+    head: { name: "Brian Wilk", image: brianWilk, major: "Finance and Accounting" },
     description:
       "The Consumer Committee covers retail, consumer packaged goods, and brand-driven businesses. Members track same-store sales, brand strength, and shifting consumer behavior to build coverage on names the whole society interacts with daily.",
     activities: [
@@ -95,7 +95,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Healthcare",
     tagline: "Sector coverage for pharma, biotech & providers",
-    head: { name: "Zach Blincoe", image: zachBlincoe },
+    head: { name: "Zach Blincoe", image: zachBlincoe, major: "Finance and Economics" },
     description:
       "The Healthcare Committee covers pharmaceuticals, biotech, medtech, and healthcare providers — a sector defined by regulatory catalysts, pipeline risk, and long development cycles. Members build coverage that stands up to that complexity.",
     activities: [
@@ -109,7 +109,7 @@ const COMMITTEES: CommitteeInfo[] = [
   {
     name: "Industrials & Energy",
     tagline: "Sector coverage for industrials, materials & energy",
-    head: { name: "Hartwell Forstman", image: hartwellForstman },
+    head: { name: "Hartwell Forstman", image: hartwellForstman, major: "Finance and Accounting" },
     description:
       "The Industrials & Energy Committee covers manufacturers, materials producers, and energy companies — sectors shaped by commodity cycles, capex spending, and global supply chains. Members build coverage across the full value chain.",
     activities: [
@@ -122,7 +122,7 @@ const COMMITTEES: CommitteeInfo[] = [
   },
 ];
 
-function CommitteeHead({ name, image }: { name: string; image?: string }) {
+function CommitteeHead({ name, image, major }: { name: string; image?: string; major?: string }) {
   return (
     <div className="flex w-full shrink-0 flex-col items-center justify-center gap-3 py-3 sm:w-48 sm:-translate-y-4 sm:translate-x-4">
       {image ? (
@@ -136,7 +136,12 @@ function CommitteeHead({ name, image }: { name: string; image?: string }) {
           <User className="h-14 w-14 opacity-40" />
         </div>
       )}
-      <p className="text-center text-base font-semibold text-foreground">{name}</p>
+      <div>
+        <p className="text-center text-base font-semibold text-foreground">{name}</p>
+        {major && (
+          <p className="mt-0.5 text-center text-xs text-muted-foreground">{major}</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -413,7 +418,7 @@ export default function CommitteesPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
-                <CommitteeHead name={c.head.name} image={c.head.image} />
+                <CommitteeHead name={c.head.name} image={c.head.image} major={c.head.major} />
                 <CommitteeLogos committee={c.name} />
               </div>
             </CardContent>
