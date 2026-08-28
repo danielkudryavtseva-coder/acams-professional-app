@@ -196,7 +196,7 @@ const COMMITTEE_HOLDINGS: Record<
     { ticker: "RDNT", name: "RadNet, Inc.", logo: faviconLogo("radnet.com") },
   ],
   "Industrials & Energy": [
-    { ticker: "WM", name: "Waste Management, Inc.", logo: wasteManagementLogo, bare: true },
+    { ticker: "WM", name: "Waste Management, Inc.", logo: wasteManagementLogo },
     { ticker: "WMS", name: "Advanced Drainage Systems, Inc.", logo: commonsLogo("Advanced Drainage Systems logo.svg") },
     { ticker: "CVE", name: "Cenovus Energy Inc.", logo: commonsLogo("Cenovus logo.svg") },
     { ticker: "CCJ", name: "Cameco Corporation", logo: commonsLogo("Cameco Logo.svg") },
