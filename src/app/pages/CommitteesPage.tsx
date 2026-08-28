@@ -14,14 +14,14 @@ import chipotleLogo from "../../assets/logos/chipotle.png";
 import greenThumbLogo from "../../assets/logos/green-thumb.png";
 import lvmhLogo from "../../assets/logos/lvmh.jpg";
 import accentureLogo from "../../assets/logos/accenture.png";
-import goldmanSachsLogo from "../../assets/logos/goldman-sachs.jpg";
-import apolloLogo from "../../assets/logos/apollo.jpg";
+import goldmanSachsLogo from "../../assets/logos/goldman-sachs.png";
+import apolloLogo from "../../assets/logos/apollo.png";
 import mastercardLogo from "../../assets/logos/mastercard.png";
 import novoNordiskLogo from "../../assets/logos/novo-nordisk.png";
 import eliLillyLogo from "../../assets/logos/eli-lilly.png";
 import wasteManagementLogo from "../../assets/logos/waste-management.jpg";
 import amazonLogo from "../../assets/logos/amazon.png";
-import nvidiaLogo from "../../assets/logos/nvidia.jpg";
+import nvidiaLogo from "../../assets/logos/nvidia.png";
 import appleLogo from "../../assets/logos/apple.png";
 
 interface CommitteeInfo {
@@ -191,7 +191,7 @@ const COMMITTEE_HOLDINGS: Record<
   Healthcare: [
     { ticker: "VRTX", name: "Vertex Pharmaceuticals", logo: commonsLogo("Vertex logo.svg") },
     { ticker: "LLY", name: "Eli Lilly and Company", logo: eliLillyLogo },
-    { ticker: "NVO", name: "Novo Nordisk A/S", logo: novoNordiskLogo },
+    { ticker: "NVO", name: "Novo Nordisk A/S", logo: novoNordiskLogo, bare: true },
     { ticker: "ISRG", name: "Intuitive Surgical, Inc.", logo: commonsLogo("Intuitive Surgical logo.svg") },
     { ticker: "RDNT", name: "RadNet, Inc.", logo: faviconLogo("radnet.com") },
   ],
