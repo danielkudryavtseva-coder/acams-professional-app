@@ -339,11 +339,12 @@ function CommitteeLogos({ committee }: { committee: string }) {
     );
   }
 
-  // 3 holdings (Contrarian) — two on top, one centered underneath.
+  // 3 holdings (Contrarian) — two on top, one centered underneath. Rows wrap on
+  // narrow screens instead of forcing a fixed-width row wider than the viewport.
   if (shuffled.length === 3) {
     return (
-      <div className="flex w-full flex-1 flex-col items-center gap-8">
-        <div className="flex gap-8">
+      <div className="flex w-full flex-1 flex-col items-center gap-6 sm:gap-8">
+        <div className="flex flex-wrap justify-center gap-4 sm:flex-nowrap sm:gap-8">
           <LogoBadge h={shuffled[0]} rand={rand} tier={tier} />
           <LogoBadge h={shuffled[1]} rand={rand} tier={tier} />
         </div>
@@ -354,17 +355,19 @@ function CommitteeLogos({ committee }: { committee: string }) {
 
   // 5 holdings (Healthcare, Industrials & Energy) — three on top, two staggered
   // underneath the gaps. Industrials additionally sags its top-middle logo lower.
+  // Rows wrap on narrow screens instead of forcing a fixed-width row wider than
+  // the viewport; the sag offset only applies once the row is back to one line.
   if (shuffled.length === 5) {
     const isIndustrials = committee === "Industrials & Energy";
-    const rowGap = isIndustrials ? "gap-8" : "gap-5";
+    const rowGap = isIndustrials ? "sm:gap-8" : "sm:gap-5";
     return (
-      <div className="flex w-full flex-1 flex-col items-center gap-10">
-        <div className={`flex ${rowGap}`}>
+      <div className="flex w-full flex-1 flex-col items-center gap-6 sm:gap-10">
+        <div className={`flex flex-wrap justify-center gap-4 sm:flex-nowrap ${rowGap}`}>
           <LogoBadge h={shuffled[0]} rand={rand} tier={tier} />
           <LogoBadge h={shuffled[1]} rand={rand} tier={tier} offsetY={isIndustrials ? 24 : 0} />
           <LogoBadge h={shuffled[2]} rand={rand} tier={tier} />
         </div>
-        <div className={`flex ${rowGap}`}>
+        <div className={`flex flex-wrap justify-center gap-4 sm:flex-nowrap ${rowGap}`}>
           <LogoBadge h={shuffled[3]} rand={rand} tier={tier} />
           <LogoBadge h={shuffled[4]} rand={rand} tier={tier} />
         </div>
@@ -395,7 +398,13 @@ export default function CommitteesPage() {
         {COMMITTEES.map((c) => (
           <Card key={c.name} className="relative bg-gradient-to-br from-card to-muted/20 shadow-sm">
             <CardHeader className="items-center pb-4 pt-8 text-center">
-              <CardTitle className="text-3xl font-bold tracking-tight md:text-4xl">
+              <CardTitle
+                className={`font-bold tracking-tight md:text-4xl ${
+                  ["Contrarian", "Financials", "Consumer", "Healthcare"].includes(c.name)
+                    ? "text-4xl"
+                    : "text-3xl"
+                }`}
+              >
                 {c.displayName ?? c.name}
               </CardTitle>
             </CardHeader>
