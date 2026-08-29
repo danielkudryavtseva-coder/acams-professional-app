@@ -163,7 +163,7 @@ function faviconLogo(domain: string): string {
 /** Top coverage/holdings companies per committee (from portfolio decisions). */
 const COMMITTEE_HOLDINGS: Record<
   string,
-  { ticker: string; name: string; logo: string; large?: boolean; bare?: boolean }[]
+  { ticker: string; name: string; logo: string; large?: boolean; small?: boolean; bare?: boolean }[]
 > = {
   TMT: [
     { ticker: "AMZN", name: "Amazon.com, Inc.", logo: amazonLogo },
@@ -184,9 +184,9 @@ const COMMITTEE_HOLDINGS: Record<
   ],
   Consumer: [
     { ticker: "SG", name: "Sweetgreen, Inc.", logo: commonsLogo("Sweetgreen logo.svg") },
-    { ticker: "ULTA", name: "Ulta Beauty, Inc.", logo: ultaBeautyLogo },
+    { ticker: "CMG", name: "Chipotle Mexican Grill, Inc.", logo: chipotleLogo, small: true },
     { ticker: "MC", name: "LVMH Moët Hennessy Louis Vuitton", logo: lvmhLogo },
-    { ticker: "CMG", name: "Chipotle Mexican Grill, Inc.", logo: chipotleLogo },
+    { ticker: "ULTA", name: "Ulta Beauty, Inc.", logo: ultaBeautyLogo },
   ],
   Healthcare: [
     { ticker: "VRTX", name: "Vertex Pharmaceuticals", logo: commonsLogo("Vertex logo.svg") },
@@ -235,17 +235,20 @@ type Holding = {
   name: string;
   logo: string;
   large?: boolean;
+  /** Bumps the badge a notch smaller than its tier default (e.g. a wordmark that reads oversized next to its neighbors). */
+  small?: boolean;
   highest?: boolean;
   /** Logo image already has its own card/shadow baked in — skip the badge's border/ring so it's not double-framed. */
   bare?: boolean;
 };
 type SizeTier = "base" | "md" | "lg";
 
-/** Badge height/padding/max-width per size tier, so committees can be scaled as a group. */
+/** Badge height/padding/max-width per size tier, so committees can be scaled as a group.
+ *  maxW has a smaller mobile value first so 2-up grids don't overflow narrow viewports. */
 const TIER_CLASSES: Record<SizeTier, { box: string; maxW: string }> = {
-  base: { box: "h-16 px-4 py-2 sm:h-20", maxW: "max-w-[180px]" },
-  md: { box: "h-[4.5rem] px-4 py-2 sm:h-[5.5rem]", maxW: "max-w-[200px]" },
-  lg: { box: "h-20 px-5 py-3 sm:h-24", maxW: "max-w-[220px]" },
+  base: { box: "h-16 px-4 py-2 sm:h-20", maxW: "max-w-[130px] sm:max-w-[180px]" },
+  md: { box: "h-[4.5rem] px-4 py-2 sm:h-[5.5rem]", maxW: "max-w-[140px] sm:max-w-[200px]" },
+  lg: { box: "h-20 px-5 py-3 sm:h-24", maxW: "max-w-[150px] sm:max-w-[220px]" },
 };
 
 /** One logo badge: static `offsetY` (px) for layout placement, plus its own independent float animation. */
@@ -262,8 +265,12 @@ function LogoBadge({
 }) {
   const duration = 3.5 + rand() * 2.5; // 3.5s–6s, varies per logo
   const delay = rand() * -duration; // negative delay staggers the starting phase
-  // Goldman's extra "large" flag bumps it a size class further, whatever tier it's in.
-  const { box, maxW } = h.large ? { box: "h-24 px-6 py-3 sm:h-28", maxW: "max-w-[260px]" } : TIER_CLASSES[tier];
+  // Goldman's extra "large" flag bumps it a size class further, "small" drops it one, whatever tier it's in.
+  const { box, maxW } = h.large
+    ? { box: "h-24 px-6 py-3 sm:h-28", maxW: "max-w-[170px] sm:max-w-[260px]" }
+    : h.small
+      ? { box: "h-14 px-3 py-1.5 sm:h-[4.25rem]", maxW: "max-w-[110px] sm:max-w-[160px]" }
+      : TIER_CLASSES[tier];
   // Bare logos already have their own card/shadow baked into the image — no border/ring/shadow, so it isn't double-framed.
   const frame = h.bare
     ? "bg-transparent"
@@ -323,7 +330,7 @@ function CommitteeLogos({ committee }: { committee: string }) {
   if (shuffled.length === 4) {
     return (
       <div className="flex flex-1 justify-center">
-        <div className="grid w-fit grid-cols-2 justify-items-center gap-5">
+        <div className="grid w-fit grid-cols-1 justify-items-center gap-3 sm:grid-cols-2 sm:gap-5">
           {shuffled.map((h) => (
             <LogoBadge key={h.ticker} h={h} rand={rand} tier={tier} />
           ))}
