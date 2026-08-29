@@ -169,7 +169,7 @@ const COMMITTEE_HOLDINGS: Record<
     { ticker: "AMZN", name: "Amazon.com, Inc.", logo: amazonLogo },
     { ticker: "AAPL", name: "Apple Inc.", logo: appleLogo },
     { ticker: "UBER", name: "Uber Technologies, Inc.", logo: commonsLogo("Uber logo 2018.svg") },
-    { ticker: "NVDA", name: "NVIDIA Corporation", logo: nvidiaLogo, bare: true },
+    { ticker: "NVDA", name: "NVIDIA Corporation", logo: nvidiaLogo, large: true },
   ],
   Contrarian: [
     { ticker: "GTBIF", name: "Green Thumb Industries Inc.", logo: greenThumbLogo },
@@ -177,8 +177,8 @@ const COMMITTEE_HOLDINGS: Record<
     { ticker: "UNH", name: "UnitedHealth Group Incorporated", logo: commonsLogo("UnitedHealth Group logo.svg") },
   ],
   Financials: [
-    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", logo: goldmanSachsLogo, large: true, bare: true },
-    { ticker: "APO", name: "Apollo Global Management, Inc.", logo: apolloLogo, bare: true },
+    { ticker: "GS", name: "The Goldman Sachs Group, Inc.", logo: goldmanSachsLogo, large: true },
+    { ticker: "APO", name: "Apollo Global Management, Inc.", logo: apolloLogo },
     { ticker: "MA", name: "Mastercard Incorporated", logo: mastercardLogo },
     { ticker: "UNM", name: "Unum Group", logo: commonsLogo("Unum Group logo.svg") },
   ],
@@ -191,7 +191,7 @@ const COMMITTEE_HOLDINGS: Record<
   Healthcare: [
     { ticker: "VRTX", name: "Vertex Pharmaceuticals", logo: commonsLogo("Vertex logo.svg") },
     { ticker: "LLY", name: "Eli Lilly and Company", logo: eliLillyLogo },
-    { ticker: "NVO", name: "Novo Nordisk A/S", logo: novoNordiskLogo, bare: true },
+    { ticker: "NVO", name: "Novo Nordisk A/S", logo: novoNordiskLogo },
     { ticker: "ISRG", name: "Intuitive Surgical, Inc.", logo: commonsLogo("Intuitive Surgical logo.svg") },
     { ticker: "RDNT", name: "RadNet, Inc.", logo: faviconLogo("radnet.com") },
   ],
