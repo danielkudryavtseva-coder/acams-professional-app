@@ -163,11 +163,11 @@ function faviconLogo(domain: string): string {
 /** Top coverage/holdings companies per committee (from portfolio decisions). */
 const COMMITTEE_HOLDINGS: Record<
   string,
-  { ticker: string; name: string; logo: string; large?: boolean; small?: boolean; bare?: boolean }[]
+  { ticker: string; name: string; logo: string; large?: boolean; bare?: boolean }[]
 > = {
   TMT: [
     { ticker: "AMZN", name: "Amazon.com, Inc.", logo: amazonLogo },
-    { ticker: "AAPL", name: "Apple Inc.", logo: appleLogo },
+    { ticker: "AAPL", name: "Apple Inc.", logo: appleLogo, large: true },
     { ticker: "UBER", name: "Uber Technologies, Inc.", logo: commonsLogo("Uber logo 2018.svg") },
     { ticker: "NVDA", name: "NVIDIA Corporation", logo: nvidiaLogo, large: true },
   ],
@@ -184,7 +184,7 @@ const COMMITTEE_HOLDINGS: Record<
   ],
   Consumer: [
     { ticker: "SG", name: "Sweetgreen, Inc.", logo: commonsLogo("Sweetgreen logo.svg") },
-    { ticker: "CMG", name: "Chipotle Mexican Grill, Inc.", logo: chipotleLogo, small: true },
+    { ticker: "CMG", name: "Chipotle Mexican Grill, Inc.", logo: chipotleLogo },
     { ticker: "MC", name: "LVMH Moët Hennessy Louis Vuitton", logo: lvmhLogo },
     { ticker: "ULTA", name: "Ulta Beauty, Inc.", logo: ultaBeautyLogo },
   ],
@@ -235,8 +235,6 @@ type Holding = {
   name: string;
   logo: string;
   large?: boolean;
-  /** Bumps the badge a notch smaller than its tier default (e.g. a wordmark that reads oversized next to its neighbors). */
-  small?: boolean;
   highest?: boolean;
   /** Logo image already has its own card/shadow baked in — skip the badge's border/ring so it's not double-framed. */
   bare?: boolean;
@@ -244,11 +242,12 @@ type Holding = {
 type SizeTier = "base" | "md" | "lg";
 
 /** Badge height/padding/max-width per size tier, so committees can be scaled as a group.
- *  maxW has a smaller mobile value first so 2-up grids don't overflow narrow viewports. */
+ *  Padding and maxW are mobile-compact first (tight enough that two badges fit side by
+ *  side in a card on a phone) then widen at sm+ to the original desktop sizing. */
 const TIER_CLASSES: Record<SizeTier, { box: string; maxW: string }> = {
-  base: { box: "h-16 px-4 py-2 sm:h-20", maxW: "max-w-[130px] sm:max-w-[180px]" },
-  md: { box: "h-[4.5rem] px-4 py-2 sm:h-[5.5rem]", maxW: "max-w-[140px] sm:max-w-[200px]" },
-  lg: { box: "h-20 px-5 py-3 sm:h-24", maxW: "max-w-[150px] sm:max-w-[220px]" },
+  base: { box: "h-16 px-2 py-1.5 sm:h-20 sm:px-4 sm:py-2", maxW: "max-w-[100px] sm:max-w-[180px]" },
+  md: { box: "h-[4.5rem] px-2 py-1.5 sm:h-[5.5rem] sm:px-4 sm:py-2", maxW: "max-w-[100px] sm:max-w-[200px]" },
+  lg: { box: "h-20 px-2 py-1.5 sm:h-24 sm:px-5 sm:py-3", maxW: "max-w-[100px] sm:max-w-[220px]" },
 };
 
 /** One logo badge: static `offsetY` (px) for layout placement, plus its own independent float animation. */
@@ -265,12 +264,10 @@ function LogoBadge({
 }) {
   const duration = 3.5 + rand() * 2.5; // 3.5s–6s, varies per logo
   const delay = rand() * -duration; // negative delay staggers the starting phase
-  // Goldman's extra "large" flag bumps it a size class further, "small" drops it one, whatever tier it's in.
+  // Goldman/NVIDIA/Apple's extra "large" flag bumps the badge a size class further, whatever tier it's in.
   const { box, maxW } = h.large
-    ? { box: "h-24 px-6 py-3 sm:h-28", maxW: "max-w-[170px] sm:max-w-[260px]" }
-    : h.small
-      ? { box: "h-14 px-3 py-1.5 sm:h-[4.25rem]", maxW: "max-w-[110px] sm:max-w-[160px]" }
-      : TIER_CLASSES[tier];
+    ? { box: "h-24 px-3 py-2 sm:h-28 sm:px-6 sm:py-3", maxW: "max-w-[110px] sm:max-w-[260px]" }
+    : TIER_CLASSES[tier];
   // Bare logos already have their own card/shadow baked into the image — no border/ring/shadow, so it isn't double-framed.
   const frame = h.bare
     ? "bg-transparent"
@@ -327,10 +324,11 @@ function CommitteeLogos({ committee }: { committee: string }) {
   const tier = sizeTierFor(committee);
 
   // 4 holdings (TMT, Financials, Consumer) — even 2x2 grid, centered as a tight group.
+  // Badges are sized mobile-compact (see TIER_CLASSES) so the 2 columns fit a phone card.
   if (shuffled.length === 4) {
     return (
       <div className="flex flex-1 justify-center">
-        <div className="grid w-fit grid-cols-1 justify-items-center gap-3 sm:grid-cols-2 sm:gap-5">
+        <div className="grid w-fit grid-cols-2 justify-items-center gap-3 sm:gap-5">
           {shuffled.map((h) => (
             <LogoBadge key={h.ticker} h={h} rand={rand} tier={tier} />
           ))}
@@ -353,25 +351,33 @@ function CommitteeLogos({ committee }: { committee: string }) {
     );
   }
 
-  // 5 holdings (Healthcare, Industrials & Energy) — three on top, two staggered
-  // underneath the gaps. Industrials additionally sags its top-middle logo lower.
-  // Rows wrap on narrow screens instead of forcing a fixed-width row wider than
-  // the viewport; the sag offset only applies once the row is back to one line.
+  // 5 holdings (Healthcare, Industrials & Energy). Two different layouts by breakpoint:
+  // - Mobile: one sequential flex-wrap (2-per-row), so whichever pair the shuffle placed
+  //   next to each other (e.g. Cameco/ADS, Novo/Lilly) actually renders side by side —
+  //   the sm+ two-row split below breaks that adjacency across the row boundary.
+  // - sm+: three on top (Industrials sags its middle logo lower), two staggered underneath.
   if (shuffled.length === 5) {
     const isIndustrials = committee === "Industrials & Energy";
-    const rowGap = isIndustrials ? "sm:gap-8" : "sm:gap-5";
+    const rowGap = isIndustrials ? "gap-8" : "gap-5";
     return (
-      <div className="flex w-full flex-1 flex-col items-center gap-6 sm:gap-10">
-        <div className={`flex flex-wrap justify-center gap-4 sm:flex-nowrap ${rowGap}`}>
-          <LogoBadge h={shuffled[0]} rand={rand} tier={tier} />
-          <LogoBadge h={shuffled[1]} rand={rand} tier={tier} offsetY={isIndustrials ? 24 : 0} />
-          <LogoBadge h={shuffled[2]} rand={rand} tier={tier} />
+      <>
+        <div className="flex w-full flex-1 flex-wrap items-center justify-center gap-3 sm:hidden">
+          {shuffled.map((h) => (
+            <LogoBadge key={h.ticker} h={h} rand={rand} tier={tier} />
+          ))}
         </div>
-        <div className={`flex flex-wrap justify-center gap-4 sm:flex-nowrap ${rowGap}`}>
-          <LogoBadge h={shuffled[3]} rand={rand} tier={tier} />
-          <LogoBadge h={shuffled[4]} rand={rand} tier={tier} />
+        <div className="hidden w-full flex-1 flex-col items-center gap-10 sm:flex">
+          <div className={`flex ${rowGap}`}>
+            <LogoBadge h={shuffled[0]} rand={rand} tier={tier} />
+            <LogoBadge h={shuffled[1]} rand={rand} tier={tier} offsetY={isIndustrials ? 24 : 0} />
+            <LogoBadge h={shuffled[2]} rand={rand} tier={tier} />
+          </div>
+          <div className={`flex ${rowGap}`}>
+            <LogoBadge h={shuffled[3]} rand={rand} tier={tier} />
+            <LogoBadge h={shuffled[4]} rand={rand} tier={tier} />
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
