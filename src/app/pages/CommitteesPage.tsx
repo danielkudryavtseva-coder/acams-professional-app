@@ -1,8 +1,5 @@
-import { Link } from "react-router-dom";
-import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { User, Image, Star } from "lucide-react";
-import { APPLY_URL } from "../components/PublicShell";
 import mattRochford from "../../assets/execs/matt-rochford.png";
 import matthewWorthington from "../../assets/execs/matthew-worthington.png";
 import phillipGorokhovich from "../../assets/execs/phillip-gorokhovich.jpg";
@@ -250,20 +247,16 @@ const TIER_CLASSES: Record<SizeTier, { box: string; maxW: string }> = {
   lg: { box: "h-20 px-2 py-1.5 sm:h-24 sm:px-5 sm:py-3", maxW: "max-w-[100px] sm:max-w-[220px]" },
 };
 
-/** One logo badge: static `offsetY` (px) for layout placement, plus its own independent float animation. */
+/** One logo badge: static `offsetY` (px) for layout placement. */
 function LogoBadge({
   h,
-  rand,
   offsetY = 0,
   tier = "base",
 }: {
   h: Holding;
-  rand: () => number;
   offsetY?: number;
   tier?: SizeTier;
 }) {
-  const duration = 3.5 + rand() * 2.5; // 3.5s–6s, varies per logo
-  const delay = rand() * -duration; // negative delay staggers the starting phase
   // Goldman/NVIDIA/Apple's extra "large" flag bumps the badge a size class further, whatever tier it's in.
   const { box, maxW } = h.large
     ? { box: "h-24 px-3 py-2 sm:h-28 sm:px-6 sm:py-3", maxW: "max-w-[110px] sm:max-w-[260px]" }
@@ -275,8 +268,7 @@ function LogoBadge({
   return (
     <div style={offsetY ? { transform: `translateY(${offsetY}px)` } : undefined}>
       <div
-        className={`animate-float relative flex items-center justify-center rounded-xl transition-transform duration-base ease-smooth hover:-translate-y-1 ${frame} ${box}`}
-        style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
+        className={`relative flex items-center justify-center rounded-xl transition-transform duration-base ease-smooth hover:-translate-y-1 ${frame} ${box}`}
         title={h.name}
       >
         {h.highest && (
@@ -320,7 +312,6 @@ function CommitteeLogos({ committee }: { committee: string }) {
   // Mark the highest-market-cap name (the list's original first entry) before shuffling display order.
   const tagged = holdings.map((h, i) => ({ ...h, highest: i === 0 }));
   const shuffled = shuffle(tagged, committee);
-  const rand = seededRandom(hashSeed(committee));
   const tier = sizeTierFor(committee);
 
   // 4 holdings (TMT, Financials, Consumer) — even 2x2 grid, centered as a tight group.
@@ -330,7 +321,7 @@ function CommitteeLogos({ committee }: { committee: string }) {
       <div className="flex flex-1 justify-center">
         <div className="grid w-fit grid-cols-2 justify-items-center gap-3 sm:gap-5">
           {shuffled.map((h) => (
-            <LogoBadge key={h.ticker} h={h} rand={rand} tier={tier} />
+            <LogoBadge key={h.ticker} h={h} tier={tier} />
           ))}
         </div>
       </div>
@@ -343,10 +334,10 @@ function CommitteeLogos({ committee }: { committee: string }) {
     return (
       <div className="flex w-full flex-1 flex-col items-center gap-6 sm:gap-8">
         <div className="flex flex-wrap justify-center gap-4 sm:flex-nowrap sm:gap-8">
-          <LogoBadge h={shuffled[0]} rand={rand} tier={tier} />
-          <LogoBadge h={shuffled[1]} rand={rand} tier={tier} />
+          <LogoBadge h={shuffled[0]} tier={tier} />
+          <LogoBadge h={shuffled[1]} tier={tier} />
         </div>
-        <LogoBadge h={shuffled[2]} rand={rand} tier={tier} />
+        <LogoBadge h={shuffled[2]} tier={tier} />
       </div>
     );
   }
@@ -363,18 +354,18 @@ function CommitteeLogos({ committee }: { committee: string }) {
       <>
         <div className="flex w-full flex-1 flex-wrap items-center justify-center gap-3 sm:hidden">
           {shuffled.map((h) => (
-            <LogoBadge key={h.ticker} h={h} rand={rand} tier={tier} />
+            <LogoBadge key={h.ticker} h={h} tier={tier} />
           ))}
         </div>
         <div className="hidden w-full flex-1 flex-col items-center gap-10 sm:flex">
           <div className={`flex ${rowGap}`}>
-            <LogoBadge h={shuffled[0]} rand={rand} tier={tier} />
-            <LogoBadge h={shuffled[1]} rand={rand} tier={tier} offsetY={isIndustrials ? 24 : 0} />
-            <LogoBadge h={shuffled[2]} rand={rand} tier={tier} />
+            <LogoBadge h={shuffled[0]} tier={tier} />
+            <LogoBadge h={shuffled[1]} tier={tier} offsetY={isIndustrials ? 24 : 0} />
+            <LogoBadge h={shuffled[2]} tier={tier} />
           </div>
           <div className={`flex ${rowGap}`}>
-            <LogoBadge h={shuffled[3]} rand={rand} tier={tier} />
-            <LogoBadge h={shuffled[4]} rand={rand} tier={tier} />
+            <LogoBadge h={shuffled[3]} tier={tier} />
+            <LogoBadge h={shuffled[4]} tier={tier} />
           </div>
         </div>
       </>
@@ -385,7 +376,7 @@ function CommitteeLogos({ committee }: { committee: string }) {
   return (
     <div className="flex w-full flex-1 flex-wrap items-center justify-center gap-6 sm:justify-between">
       {shuffled.map((h) => (
-        <LogoBadge key={h.ticker} h={h} rand={rand} tier={tier} />
+        <LogoBadge key={h.ticker} h={h} tier={tier} />
       ))}
     </div>
   );
@@ -422,24 +413,6 @@ export default function CommitteesPage() {
             </CardContent>
           </Card>
         ))}
-      </section>
-
-      {/* CTA */}
-      <section className="border-t bg-muted/30 py-14 px-6 text-center">
-        <h2 className="text-xl font-semibold">Ready to join?</h2>
-        <p className="mt-2 text-muted-foreground text-sm">
-          Applications open each semester. Indicate your committee preference during the application.
-        </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Button asChild>
-            <a href={APPLY_URL} target="_blank" rel="noopener noreferrer">
-              Apply to CAMS
-            </a>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/membership">Learn More</Link>
-          </Button>
-        </div>
       </section>
     </div>
   );
