@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { useMembers } from "../context/MembersContext";
 import { useEvents } from "../context/EventsContext";
 import { useConnect } from "../context/ConnectContext";
-import { COMMITTEE_COLORS } from "../data/constants";
+import { COMMITTEE_COLORS, COMMITTEES } from "../data/constants";
 import { cn } from "../components/ui/utils";
 import type { Committee, Member } from "../data/mockData";
 
@@ -207,10 +207,9 @@ export default function ScoreboardPage() {
           onChange={(e) => setCommittee(e.target.value as "all" | Committee)}
         >
           <option value="all">All committees</option>
-          <option value="Investment">Investment</option>
-          <option value="Recruiting">Recruiting</option>
-          <option value="Operations">Operations</option>
-          <option value="Marketing">Marketing</option>
+          {COMMITTEES.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
         </select>
       </div>
 

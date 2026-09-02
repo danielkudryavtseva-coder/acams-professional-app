@@ -4,13 +4,14 @@ import {
   LayoutDashboard, Users, GitBranch, TrendingUp, Briefcase,
   ChevronRight, Lock, Handshake, BookOpen,
   Calendar, ClipboardList, BarChart2, Wrench,
-  BriefcaseBusiness, LogOut, Award, Trophy, PenLine, UserSquare2,
+  BriefcaseBusiness, LogOut, Award, Trophy, PenLine, UserSquare2, UserCheck,
 } from "lucide-react";
 import { cn } from "./ui/utils";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
 import { useAuth } from "../context/AuthContext";
+import { useMembers } from "../context/MembersContext";
 import camsLogo from "../../assets/cams-logo.png";
 
 const MAIN_NAV = [
@@ -58,6 +59,18 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { currentUser, isExec, logout } = useAuth();
+  const { members } = useMembers();
+  const pendingCount = members.filter((m) => m.approvalStatus === "pending").length;
+
+  const execNav: NavItemConfig[] = [
+    ...EXEC_NAV,
+    {
+      label: "Pending Approvals",
+      href: "/dashboard/exec/approvals",
+      icon: UserCheck,
+      badge: pendingCount > 0 ? String(pendingCount) : undefined,
+    },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -140,7 +153,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   <Lock className="h-3 w-3" /> Exec
                 </p>
                 <div className="space-y-0.5">
-                  {EXEC_NAV.map(renderNavItem)}
+                  {execNav.map(renderNavItem)}
                 </div>
               </div>
             </>

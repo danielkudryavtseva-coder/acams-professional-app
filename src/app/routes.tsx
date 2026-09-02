@@ -9,6 +9,8 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Verify from "./pages/Verify";
+import AccountStatusPage from "./pages/AccountStatusPage";
+import ExecApprovalsPage from "./pages/ExecApprovalsPage";
 import DashboardHome from "./pages/DashboardHome";
 import RecruitingPage from "./pages/RecruitingPage";
 import ContactsPage from "./pages/ContactsPage";
@@ -75,6 +77,7 @@ export function AppRoutes() {
 
       {/* Protected dashboard routes */}
       <Route element={<RequireAuth />}>
+        <Route path="/account-status" element={<AccountStatusPage />} />
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<DashboardHome />} />
           <Route path="recruiting" element={<RecruitingPage />} />
@@ -100,6 +103,7 @@ export function AppRoutes() {
             <Route path="exec/new-post" element={<ExecNewPostPage />} />
             <Route path="exec/attendance" element={<AttendancePage />} />
             <Route path="exec/member-report" element={<MemberReportPage />} />
+            <Route path="exec/approvals" element={<ExecApprovalsPage />} />
           </Route>
         </Route>
       </Route>

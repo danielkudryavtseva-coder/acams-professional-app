@@ -4,13 +4,13 @@ import { APPLY_URL } from "../components/PublicShell";
 import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
 import bradyBelden from "../../assets/execs/brady-belden.jpg";
 import cadeAndrews from "../../assets/execs/cade-andrews.jpg";
-import alexWylie from "../../assets/execs/alex-wylie.png";
-import lukeLacke from "../../assets/execs/luke-lacke.png";
-import fordAlderice from "../../assets/execs/ford-alderice.png";
-import matthewWorthington from "../../assets/execs/matthew-worthington.png";
-import williamHessler from "../../assets/execs/william-hessler.png";
-import mattRochford from "../../assets/execs/matt-rochford.png";
-import lucyPetrus from "../../assets/execs/lucy-petrus.png";
+import alexWylie from "../../assets/execs/alex-wylie.jpg";
+import lukeLacke from "../../assets/execs/luke-lacke.jpg";
+import fordAlderice from "../../assets/execs/ford-alderice.jpg";
+import matthewWorthington from "../../assets/execs/matthew-worthington.jpg";
+import williamHessler from "../../assets/execs/william-hessler.jpg";
+import mattRochford from "../../assets/execs/matt-rochford.jpg";
+import lucyPetrus from "../../assets/execs/lucy-petrus.jpg";
 import landingHero from "../../assets/landing-hero-mansion.jpg";
 
 interface Executive {

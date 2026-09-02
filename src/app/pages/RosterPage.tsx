@@ -4,10 +4,11 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
+import { Button } from "../components/ui/button";
 import { useMembers } from "../context/MembersContext";
 import { useAuth } from "../context/AuthContext";
 import { useTags } from "../context/TagsContext";
-import { COMMITTEE_COLORS, TRACK_COLORS } from "../data/constants";
+import { COMMITTEE_COLORS, TRACK_COLORS, GRAD_YEAR_LABEL } from "../data/constants";
 import type { Member, Committee } from "../data/mockData";
 import type { Tag } from "../data/tags";
 import { TAG_CATEGORY_COLORS, type TagCategory } from "../data/tags";
@@ -19,15 +20,11 @@ import { TAG_CATEGORY_COLORS, type TagCategory } from "../data/tags";
 const ROSTER_PHOTOS: { src: string; caption?: string }[] = [];
 // ──────────────────────────────────────────────────────────────────────────────
 
-const GRAD_YEAR: Record<string, string> = {
-  Senior: "Class of '27",
-  Junior: "Class of '28",
-  Sophomore: "Class of '29",
-  Freshman: "Class of '30",
-};
+// Derived from CURRENT_COHORT (constants.ts) so it self-updates each semester instead of going stale.
+const GRAD_YEAR: Record<string, string> = GRAD_YEAR_LABEL;
 
 const CLASS_YEAR_ORDER = ["Senior", "Junior", "Sophomore", "Freshman"] as const;
-const COMMITTEE_ORDER: Committee[] = ["Investment", "Recruiting", "Operations", "Marketing"];
+const COMMITTEE_ORDER: Committee[] = ["TMT", "Contrarian", "Financials", "Consumer", "Healthcare", "Industrials & Energy"];
 
 type ViewMode = "flat" | "committee" | "year";
 
@@ -69,7 +66,7 @@ function MemberAvatar({ member }: { member: Member }) {
 }
 
 export default function RosterPage() {
-  const { members } = useMembers();
+  const { members, updateMember } = useMembers();
   const { isExec, currentUser } = useAuth();
   const { tags, getTagsForMember } = useTags();
 
@@ -140,6 +137,19 @@ export default function RosterPage() {
                 <Badge className={COMMITTEE_COLORS[m.committee]}>{m.committee}</Badge>
               </div>
             </div>
+            {/* Exec-only role toggle. Hidden on your own row to avoid accidentally
+                demoting yourself out of exec access. The DB trigger still enforces
+                server-side that only an exec can change this field either way. */}
+            {isExec && currentUser?.id !== m.id && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-xs h-7 shrink-0"
+                onClick={() => updateMember(m.id, { role: m.role === "exec" ? "member" : "exec" })}
+              >
+                {m.role === "exec" ? "Remove Exec" : "Make Exec"}
+              </Button>
+            )}
           </div>
           <div className="flex gap-1 flex-wrap items-center">
             {preview.map((t) => (
@@ -248,10 +258,9 @@ export default function RosterPage() {
           onChange={(e) => setCommittee(e.target.value)}
         >
           <option value="all">All committees</option>
-          <option value="Investment">Investment</option>
-          <option value="Recruiting">Recruiting</option>
-          <option value="Operations">Operations</option>
-          <option value="Marketing">Marketing</option>
+          {COMMITTEE_ORDER.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
         </select>
         <select
           className="h-10 rounded-md border px-3 text-sm bg-white dark:bg-card"

@@ -6,6 +6,7 @@ create table if not exists public.members (
   email text not null,
   role text not null default 'member' check (role in ('member', 'exec')),
   active boolean not null default true,
+  approval_status text not null default 'pending' check (approval_status in ('pending', 'approved', 'rejected')),
   pnl_tagged boolean not null default false,
   pnl_reason text,
   -- Everything else (firstName, lastName, phone, classYear, graduationYear,
@@ -64,10 +65,11 @@ as $$
 begin
   if (new.role is distinct from old.role
       or new.active is distinct from old.active
+      or new.approval_status is distinct from old.approval_status
       or new.pnl_tagged is distinct from old.pnl_tagged
       or new.pnl_reason is distinct from old.pnl_reason)
      and not public.is_exec(auth.uid()) then
-    raise exception 'Only an exec can change role, active, or PNL status.';
+    raise exception 'Only an exec can change role, active, approval status, or PNL status.';
   end if;
   return new;
 end;
@@ -77,6 +79,28 @@ drop trigger if exists protect_privileged_columns_trigger on public.members;
 create trigger protect_privileged_columns_trigger
   before update on public.members
   for each row execute function public.protect_privileged_columns();
+
+-- Forces role/approval_status/active to safe defaults on signup, no matter what the client
+-- sends — closes the same self-promotion gap that protect_privileged_columns closes for UPDATE,
+-- but for INSERT (a self-registering user could otherwise set role='exec' on their own row today).
+create or replace function public.enforce_signup_defaults()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  new.role := 'member';
+  new.approval_status := 'pending';
+  new.active := true;
+  return new;
+end;
+$$;
+
+drop trigger if exists enforce_signup_defaults_trigger on public.members;
+create trigger enforce_signup_defaults_trigger
+  before insert on public.members
+  for each row execute function public.enforce_signup_defaults();
 
 -- Only @crimson.ua.edu emails may register a profile row.
 create or replace function public.enforce_crimson_email()
@@ -105,4 +129,4 @@ alter publication supabase_realtime add table public.members;
 -- existing exec can promote anyone else after this, so this direct SQL path
 -- is the only way to create the first one.
 -- ─────────────────────────────────────────────────────────────────────────
--- update public.members set role = 'exec' where email = 'yourname@crimson.ua.edu';
+-- update public.members set role = 'exec', approval_status = 'approved' where email = 'yourname@crimson.ua.edu';

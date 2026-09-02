@@ -3,8 +3,8 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { User, Image, Star } from "lucide-react";
 import { APPLY_URL } from "../components/PublicShell";
-import mattRochford from "../../assets/execs/matt-rochford.png";
-import matthewWorthington from "../../assets/execs/matthew-worthington.png";
+import mattRochford from "../../assets/execs/matt-rochford.jpg";
+import matthewWorthington from "../../assets/execs/matthew-worthington.jpg";
 import phillipGorokhovich from "../../assets/execs/phillip-gorokhovich.jpg";
 import brianWilk from "../../assets/execs/brian-wilk.png";
 import hartwellForstman from "../../assets/execs/hartwell-forstman.png";
@@ -23,9 +23,10 @@ import wasteManagementLogo from "../../assets/logos/waste-management.jpg";
 import amazonLogo from "../../assets/logos/amazon.png";
 import nvidiaLogo from "../../assets/logos/nvidia.png";
 import appleLogo from "../../assets/logos/apple.png";
+import type { Committee } from "../data/mockData";
 
 interface CommitteeInfo {
-  name: "TMT" | "Contrarian" | "Financials" | "Consumer" | "Healthcare" | "Industrials & Energy";
+  name: Committee;
   /** Full spelled-out name for the header — falls back to `name` when not set. */
   displayName?: string;
   tagline: string;

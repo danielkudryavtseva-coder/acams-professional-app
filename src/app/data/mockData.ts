@@ -230,7 +230,9 @@ export const RECRUITING_TIMELINE = [
 
 // CAMS platform expansion models
 export type FinanceTrack = "IB" | "PE" | "VC" | "ER" | "AM" | "Consulting";
-export type Committee = "Investment" | "Recruiting" | "Operations" | "Marketing";
+// Kept in sync with the sector coverage teams on CommitteesPage.tsx — that page imports this
+// type instead of redefining its own list, so the two can't drift apart again.
+export type Committee = "TMT" | "Contrarian" | "Financials" | "Consumer" | "Healthcare" | "Industrials & Energy";
 export type MemberRole = "member" | "exec";
 export type RsvpStatus = "confirmed" | "denied" | "pending";
 export type ResourceCategory = "pitches" | "resumes" | "tools" | "links";
@@ -279,6 +281,13 @@ export interface Member {
    * persisted records without the field are treated as active by consumers.
    */
   active: boolean;
+  /**
+   * Exec-approval gate for new accounts. Every signup lands here as `pending`
+   * (enforced server-side by the `enforce_signup_defaults` DB trigger, not the
+   * client) and stays locked out of `/dashboard/*` until an exec approves it
+   * from `ExecApprovalsPage`. Only an exec can change this field.
+   */
+  approvalStatus: "pending" | "approved" | "rejected";
   cohort: string;
   joinedAt: string;
   pipelineActivityCount: number;
@@ -444,10 +453,10 @@ export interface Notification {
 // Only exec accounts are seeded here — they are required for the isExec privilege check
 // in AuthContext. Regular members are created via registration and persisted in localStorage.
 export const MOCK_MEMBERS: Member[] = [
-  { id: "m1", firstName: "Drew", lastName: "Whitfield", email: "dkwhitfield@crimson.ua.edu", phone: "205-555-0101", classYear: "Junior", graduationYear: 2027, committee: "Investment", interests: ["IB", "PE"], personalStatement: "Passionate about leveraged buyouts and capital structure optimization.", resumeFilename: "whitfield_resume.pdf", linkedin: "linkedin.com/in/drewwhitfield", role: "exec", gpa: "3.91", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 12, pitchesSubmitted: 3, coffeeChatsCompleted: 5, offers: 2 },
-  { id: "m4", firstName: "Marcus", lastName: "Davis", email: "mdavis@crimson.ua.edu", phone: "205-555-0104", classYear: "Senior", graduationYear: 2026, committee: "Operations", interests: ["IB", "Consulting"], personalStatement: "Focused on M&A and strategic advisory.", resumeFilename: "davis_resume.pdf", linkedin: "linkedin.com/in/marcusdavis", role: "exec", gpa: "3.62", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 15, pitchesSubmitted: 4, coffeeChatsCompleted: 7, offers: 3 },
+  { id: "m1", firstName: "Drew", lastName: "Whitfield", email: "dkwhitfield@crimson.ua.edu", phone: "205-555-0101", classYear: "Junior", graduationYear: 2027, committee: "Financials", interests: ["IB", "PE"], personalStatement: "Passionate about leveraged buyouts and capital structure optimization.", resumeFilename: "whitfield_resume.pdf", linkedin: "linkedin.com/in/drewwhitfield", role: "exec", gpa: "3.91", pnlTagged: false, active: true, approvalStatus: "approved", cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 12, pitchesSubmitted: 3, coffeeChatsCompleted: 5, offers: 2 },
+  { id: "m4", firstName: "Marcus", lastName: "Davis", email: "mdavis@crimson.ua.edu", phone: "205-555-0104", classYear: "Senior", graduationYear: 2026, committee: "Financials", interests: ["IB", "Consulting"], personalStatement: "Focused on M&A and strategic advisory.", resumeFilename: "davis_resume.pdf", linkedin: "linkedin.com/in/marcusdavis", role: "exec", gpa: "3.62", pnlTagged: false, active: true, approvalStatus: "approved", cohort: "Spring 2026", joinedAt: "2025-01-15", pipelineActivityCount: 15, pitchesSubmitted: 4, coffeeChatsCompleted: 7, offers: 3 },
   // Private admin account — sign-in uses its own hashed password (below), not the shared VITE_EXEC_PASSWORD.
-  { id: "m-admin", firstName: "Admin", lastName: "Account", email: "dkadmin4636@crimson.ua.edu", phone: "", classYear: "Senior", graduationYear: 2026, committee: "Operations", interests: [], personalStatement: "", resumeFilename: null, linkedin: "", role: "exec", password: "c1a2a585d76abc4b27283856a1199342e7b50d978c65cf17f302502f3dfa59c1", pnlTagged: false, active: true, cohort: "Spring 2026", joinedAt: "2026-08-26", pipelineActivityCount: 0, pitchesSubmitted: 0, coffeeChatsCompleted: 0, offers: 0 },
+  { id: "m-admin", firstName: "Admin", lastName: "Account", email: "dkadmin4636@crimson.ua.edu", phone: "", classYear: "Senior", graduationYear: 2026, committee: "Financials", interests: [], personalStatement: "", resumeFilename: null, linkedin: "", role: "exec", password: "c1a2a585d76abc4b27283856a1199342e7b50d978c65cf17f302502f3dfa59c1", pnlTagged: false, active: true, approvalStatus: "approved", cohort: "Spring 2026", joinedAt: "2026-08-26", pipelineActivityCount: 0, pitchesSubmitted: 0, coffeeChatsCompleted: 0, offers: 0 },
 ];
 
 /** Sourced from CAMS Alumni Rolodex spreadsheet; regenerate via `py -3 scripts/generate_alumni_rolodex.py`. */

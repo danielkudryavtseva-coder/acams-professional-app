@@ -29,16 +29,13 @@ import { Input } from "../components/ui/input";
 import { cn } from "../components/ui/utils";
 import { FirmIntelModal } from "../components/FirmIntelModal";
 import { MOCK_PROGRAMS, type Program, type ProgramCategory, type ProgramClassYear, type ProgramTrack } from "../data/mockData";
+import { GRAD_YEAR_LABEL } from "../data/constants";
 
 const TARGET_YEARS: ProgramClassYear[] = ["Senior", "Junior", "Sophomore", "Freshman"];
 
-// Maps the internal class-year label to the graduation year shown in the UI.
-const GRAD_YEAR: Record<ProgramClassYear, string> = {
-  Senior:    "Class of '27",
-  Junior:    "Class of '28",
-  Sophomore: "Class of '29",
-  Freshman:  "Class of '30",
-};
+// Maps the internal class-year label to the graduation year shown in the UI. Derived from
+// CURRENT_COHORT (constants.ts) so it self-updates each semester instead of going stale.
+const GRAD_YEAR: Record<ProgramClassYear, string> = GRAD_YEAR_LABEL;
 
 const TRACK_LABELS: Record<ProgramTrack, string> = {
   IB: "Investment Banking",

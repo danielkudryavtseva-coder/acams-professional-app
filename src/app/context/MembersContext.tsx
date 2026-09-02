@@ -16,13 +16,14 @@ interface MembersContextValue {
 const MembersContext = createContext<MembersContextValue | null>(null);
 
 /** Member fields stored as first-class columns (privilege-gated server-side); everything else lives in the `profile` jsonb blob. */
-const TOP_LEVEL_KEYS = new Set(["id", "email", "role", "active", "pnlTagged", "pnlReason"]);
+const TOP_LEVEL_KEYS = new Set(["id", "email", "role", "active", "approvalStatus", "pnlTagged", "pnlReason"]);
 
 interface MemberRow {
   id: string;
   email: string;
   role: string;
   active: boolean;
+  approval_status: string;
   pnl_tagged: boolean;
   pnl_reason: string | null;
   profile: Record<string, unknown>;
@@ -35,6 +36,7 @@ function rowToMember(row: MemberRow): Member {
     email: row.email,
     role: row.role as Member["role"],
     active: row.active,
+    approvalStatus: row.approval_status as Member["approvalStatus"],
     pnlTagged: row.pnl_tagged,
     pnlReason: row.pnl_reason ?? undefined,
   } as Member;
@@ -48,7 +50,8 @@ function splitMember(data: Partial<Member>) {
     if (key === "password") continue; // Supabase Auth owns credentials now.
     if (key === "id") continue; // never updated after insert.
     if (TOP_LEVEL_KEYS.has(key)) {
-      const column = key === "pnlTagged" ? "pnl_tagged" : key === "pnlReason" ? "pnl_reason" : key;
+      const column =
+        key === "pnlTagged" ? "pnl_tagged" : key === "pnlReason" ? "pnl_reason" : key === "approvalStatus" ? "approval_status" : key;
       top[column] = value;
     } else {
       profile[key] = value;

@@ -104,6 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       role: "member",
       pnlTagged: false,
       active: true,
+      approvalStatus: "pending",
       cohort: CURRENT_COHORT,
       joinedAt: new Date().toISOString(),
       pipelineActivityCount: 0,

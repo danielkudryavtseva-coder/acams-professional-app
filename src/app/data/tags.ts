@@ -18,7 +18,7 @@ export type TagCategory =
   | "grade" // Freshman, Sophomore, Junior, Senior
   | "career" // IB, PE, ER, VC, AM, Consulting, Other
   | "alumni" // Alumni — REQUIRES exec approval
-  | "committee" // Investment, Recruiting, Operations, Marketing
+  | "committee" // TMT, Contrarian, Financials, Consumer, Healthcare, Industrials & Energy
   | "custom"; // free-form, exec-created
 
 export type TagApprovalStatus = "approved" | "pending" | "rejected";
@@ -96,9 +96,9 @@ const CAREER_TAGS: Tag[] = (
 }));
 
 const COMMITTEE_TAGS: Tag[] = (
-  ["Investment", "Recruiting", "Operations", "Marketing"] as Committee[]
+  ["TMT", "Contrarian", "Financials", "Consumer", "Healthcare", "Industrials & Energy"] as Committee[]
 ).map((c) => ({
-  id: `committee-${c.toLowerCase()}`,
+  id: `committee-${c.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
   category: "committee" as const,
   label: c,
   requiresApproval: false,
@@ -126,4 +126,4 @@ export const tagIdForClassYear = (cy: Member["classYear"]) =>
   `grade-${cy.toLowerCase()}`;
 export const tagIdForCareer = (t: FinanceTrack) => `career-${t.toLowerCase()}`;
 export const tagIdForCommittee = (c: Committee) =>
-  `committee-${c.toLowerCase()}`;
+  `committee-${c.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
