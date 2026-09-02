@@ -75,6 +75,9 @@ export function MemberTagsCard({ memberId, editable = true }: Props) {
   const [open, setOpen] = React.useState(false);
   const [category, setCategory] = React.useState<TagCategory | "">("");
   const [tagId, setTagId] = React.useState<string>("");
+  // Career is the one category where picking several at once makes sense (e.g. IB + PE) —
+  // everything else (alumni/grade/committee/custom) stays a single pick per request.
+  const [careerTagIds, setCareerTagIds] = React.useState<string[]>([]);
   const [reason, setReason] = React.useState("");
   const [pendingRemoveAlumni, setPendingRemoveAlumni] = React.useState<Tag | null>(null);
 
@@ -101,17 +104,28 @@ export function MemberTagsCard({ memberId, editable = true }: Props) {
   }, [category, tags, approved, pending]);
 
   const selectedTag = tags.find((t) => t.id === tagId);
+  const isCareer = category === "career";
 
   const resetDialog = () => {
     setCategory("");
     setTagId("");
+    setCareerTagIds([]);
     setReason("");
   };
 
+  const toggleCareerTag = (id: string) => {
+    setCareerTagIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
   const submit = () => {
-    if (!selectedTag) return;
-    if (selectedTag.requiresApproval && reason.trim().length === 0) return;
-    requestTag(memberId, selectedTag.id, reason.trim() || undefined);
+    if (isCareer) {
+      if (careerTagIds.length === 0) return;
+      for (const id of careerTagIds) requestTag(memberId, id);
+    } else {
+      if (!selectedTag) return;
+      if (selectedTag.requiresApproval && reason.trim().length === 0) return;
+      requestTag(memberId, selectedTag.id, reason.trim() || undefined);
+    }
     setOpen(false);
     resetDialog();
   };
@@ -190,31 +204,56 @@ export function MemberTagsCard({ memberId, editable = true }: Props) {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground">Tag</label>
-                  <Select
-                    value={tagId}
-                    onValueChange={setTagId}
-                    disabled={!category || tagsForCategory.length === 0}
-                  >
-                    <SelectTrigger className="bg-white">
-                      <SelectValue
-                        placeholder={
-                          !category
-                            ? "Pick a category first"
-                            : tagsForCategory.length === 0
-                              ? "No tags available in this category"
-                              : "Select a tag"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {tagsForCategory.map((t) => (
-                        <SelectItem key={t.id} value={t.id}>
-                          {t.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <label className="text-xs text-muted-foreground">
+                    Tag{isCareer && tagsForCategory.length > 0 ? " (select all that apply)" : ""}
+                  </label>
+                  {isCareer ? (
+                    tagsForCategory.length === 0 ? (
+                      <p className="text-sm text-muted-foreground mt-1">No tags available in this category</p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {tagsForCategory.map((t) => (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => toggleCareerTag(t.id)}
+                            className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+                              careerTagIds.includes(t.id)
+                                ? "bg-crimson text-white border-crimson"
+                                : "bg-background text-foreground border-border hover:border-crimson"
+                            }`}
+                          >
+                            {t.label}
+                          </button>
+                        ))}
+                      </div>
+                    )
+                  ) : (
+                    <Select
+                      value={tagId}
+                      onValueChange={setTagId}
+                      disabled={!category || tagsForCategory.length === 0}
+                    >
+                      <SelectTrigger className="bg-white">
+                        <SelectValue
+                          placeholder={
+                            !category
+                              ? "Pick a category first"
+                              : tagsForCategory.length === 0
+                                ? "No tags available in this category"
+                                : "Select a tag"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {tagsForCategory.map((t) => (
+                          <SelectItem key={t.id} value={t.id}>
+                            {t.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 {selectedTag?.requiresApproval && (
                   <div>
@@ -237,12 +276,17 @@ export function MemberTagsCard({ memberId, editable = true }: Props) {
                 <Button
                   onClick={submit}
                   disabled={
-                    !selectedTag ||
-                    (selectedTag.requiresApproval && reason.trim().length === 0)
+                    isCareer
+                      ? careerTagIds.length === 0
+                      : !selectedTag || (selectedTag.requiresApproval && reason.trim().length === 0)
                   }
                   className="bg-crimson hover:bg-crimson-dark text-white"
                 >
-                  {selectedTag?.requiresApproval ? "Request" : "Add"}
+                  {isCareer
+                    ? `Add${careerTagIds.length > 1 ? ` (${careerTagIds.length})` : ""}`
+                    : selectedTag?.requiresApproval
+                      ? "Request"
+                      : "Add"}
                 </Button>
               </DialogFooter>
             </DialogContent>

@@ -7,6 +7,39 @@ import { supabase, supabaseConfigured } from "../lib/supabaseClient";
 const NOT_CONFIGURED_ERROR =
   "Accounts aren't set up yet — the site owner still needs to connect a backend.";
 
+// Registration can't always write the `members` profile row immediately: right after
+// `signUp()`, there's no session yet unless the project auto-confirms emails, and RLS
+// correctly rejects an unauthenticated insert. Rather than lose the submitted profile,
+// stash it here and finish creating the row on the user's first successful login, once a
+// real session exists. Keyed by the new auth user's id so it survives a page reload.
+const PENDING_PROFILE_PREFIX = "cams_pending_profile_";
+
+function stashPendingProfile(userId: string, member: Member) {
+  try {
+    localStorage.setItem(PENDING_PROFILE_PREFIX + userId, JSON.stringify(member));
+  } catch {
+    // Storage unavailable (private browsing, etc.) — nothing more we can do client-side;
+    // the "contact an exec" fallback still applies if this was also the auto-confirm path.
+  }
+}
+
+function peekPendingProfile(userId: string): Member | null {
+  try {
+    const raw = localStorage.getItem(PENDING_PROFILE_PREFIX + userId);
+    return raw ? (JSON.parse(raw) as Member) : null;
+  } catch {
+    return null;
+  }
+}
+
+function clearPendingProfile(userId: string) {
+  try {
+    localStorage.removeItem(PENDING_PROFILE_PREFIX + userId);
+  } catch {
+    // Best-effort cleanup — a leftover stash just gets retried (harmlessly, via upsert) next login.
+  }
+}
+
 export interface RegisterPayload {
   firstName: string;
   lastName: string;
@@ -69,8 +102,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!email.toLowerCase().endsWith(CRIMSON_EMAIL_DOMAIN))
       return { success: false, error: "Must use a @crimson.ua.edu email address." };
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { success: false, error: error.message };
+
+    // Finish a registration that couldn't write its profile row immediately (no session existed
+    // yet at signup time) — now that we have a real authenticated session, retry it.
+    const signedInId = signInData.user?.id;
+    if (signedInId) {
+      const pending = peekPendingProfile(signedInId);
+      if (pending) {
+        try {
+          // Only write if no row exists yet — an exec may have already approved/edited one
+          // in the meantime, and the stashed snapshot must never clobber that.
+          const { data: existing } = await supabase.from("members").select("id").eq("id", signedInId).maybeSingle();
+          if (!existing) await addMember(pending);
+          clearPendingProfile(signedInId);
+        } catch {
+          // Leave the stash in place — harmless, retried on the next login.
+        }
+      }
+    }
+
     return { success: true };
   };
 
@@ -113,13 +165,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       offers: 0,
     };
 
-    try {
-      await addMember(member);
-    } catch {
-      return { success: false, error: "Account created, but saving your profile failed. Contact an exec." };
+    if (signUpData.session) {
+      // Auto-confirm is on for this project, so we already have a real session — safe to
+      // write the profile row right now.
+      try {
+        await addMember(member);
+      } catch {
+        // Rare (network blip, etc.) — stash it so the next login retries automatically
+        // instead of leaving the account without a profile row.
+        stashPendingProfile(newUserId, member);
+      }
+    } else {
+      // No session yet (email confirmation required) — an insert attempt right now would be
+      // unauthenticated and RLS would correctly reject it. Finish creating the row on first
+      // login instead, once a real session exists (see login() above).
+      stashPendingProfile(newUserId, member);
     }
 
-    // If email confirmation is required, signUp() returns no session yet.
     return { success: true, needsEmailConfirmation: !signUpData.session };
   };
 

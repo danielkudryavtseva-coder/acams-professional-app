@@ -77,6 +77,17 @@ export function MembersProvider({ children }: { children: React.ReactNode }) {
     }
     load();
 
+    // RLS only lets `authenticated` requests see rows at all — the initial load() above can
+    // run while the auth session is still resolving (or before a login happens later in the
+    // same tab), leaving `members` permanently empty/stale for that whole session. Reload
+    // whenever auth state changes (login, logout, token refresh) so it always reflects who's
+    // actually signed in right now.
+    const {
+      data: { subscription: authSubscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      load();
+    });
+
     const channel = supabase
       .channel("members-changes")
       .on(
@@ -98,6 +109,7 @@ export function MembersProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       cancelled = true;
+      authSubscription.unsubscribe();
       supabase.removeChannel(channel);
     };
   }, []);
@@ -120,7 +132,10 @@ export function MembersProvider({ children }: { children: React.ReactNode }) {
 
   const addMember = async (member: Member) => {
     const { top, profile } = splitMember(member);
-    const { error } = await supabase.from("members").insert({ id: member.id, ...top, profile });
+    // Upsert, not insert: registration can retry this same call (once at signup, again on
+    // first login if signup couldn't write it yet — see AuthContext's pending-profile stash),
+    // so it must be safe to call twice for the same id without erroring on the second attempt.
+    const { error } = await supabase.from("members").upsert({ id: member.id, ...top, profile }, { onConflict: "id" });
     if (error) throw error;
     setMembers((prev) => [...prev, member]);
   };
