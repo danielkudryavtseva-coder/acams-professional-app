@@ -28,6 +28,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/
 import { Input } from "../components/ui/input";
 import { cn } from "../components/ui/utils";
 import { FirmIntelModal } from "../components/FirmIntelModal";
+import { PageHeader } from "../components/PageHeader";
 import { MOCK_PROGRAMS, type Program, type ProgramCategory, type ProgramClassYear, type ProgramTrack } from "../data/mockData";
 import { GRAD_YEAR_LABEL } from "../data/constants";
 
@@ -358,7 +359,7 @@ export default function RecruitingPage() {
     setSelectedStatusFilters((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
 
   return (
-    <div className="p-4 w-full bg-[#e1e7f74d] min-h-screen">
+    <div className="p-4 w-full bg-paper min-h-screen">
       <Tabs defaultValue="programs" className="space-y-4">
         <TabsList>
           <TabsTrigger value="programs">Programs</TabsTrigger>
@@ -429,9 +430,9 @@ export default function RecruitingPage() {
                       >
                         <Badge
                           className={cn(
-                            "hover:bg-[#c63f60]",
+                            "hover:bg-crimson",
                             selectedTargetYears.includes(year)
-                              ? "bg-[#c63f60] text-white"
+                              ? "bg-crimson text-white"
                               : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
                           )}
                         >
@@ -470,7 +471,7 @@ export default function RecruitingPage() {
                           type="checkbox"
                           checked={selectedTracks.includes(t)}
                           onChange={() => toggleTrack(t)}
-                          className="accent-[#c63f60]"
+                          className="accent-crimson"
                         />
                         <span
                           className="inline-block h-2 w-2 rounded-full flex-shrink-0"
@@ -508,9 +509,9 @@ export default function RecruitingPage() {
                       <button key={c} type="button" onClick={() => toggleCategory(c)}>
                         <Badge
                           className={cn(
-                            "hover:bg-[#c63f60] cursor-pointer",
+                            "hover:bg-crimson cursor-pointer",
                             selectedCategories.includes(c)
-                              ? "bg-[#c63f60] text-white"
+                              ? "bg-crimson text-white"
                               : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
                           )}
                         >
@@ -531,9 +532,9 @@ export default function RecruitingPage() {
                       type="checkbox"
                       checked={diversityOnly}
                       onChange={(e) => setDiversityOnly(e.target.checked)}
-                      className="accent-[#c63f60]"
+                      className="accent-crimson"
                     />
-                    <ShieldCheck className="h-3.5 w-3.5 text-[#c63f60]" />
+                    <ShieldCheck className="h-3.5 w-3.5 text-crimson" />
                     <span>Diversity / affinity programs only</span>
                   </label>
                 </FilterGroup>
@@ -574,7 +575,7 @@ export default function RecruitingPage() {
                               e.target.checked ? [...prev, f] : prev.filter((x) => x !== f),
                             )
                           }
-                          className="accent-[#c63f60]"
+                          className="accent-crimson"
                         />
                         <span className="truncate">{f}</span>
                       </label>
@@ -600,15 +601,11 @@ export default function RecruitingPage() {
                 </Button>
               )}
 
-              <div className="flex items-start justify-between flex-wrap gap-2">
-                <div>
-                  <h1 className="text-2xl font-bold">Recruiting & Programs</h1>
-                  <p className="text-sm text-muted-foreground">
-                    Capstone Asset Management Society · University of Alabama · {headlineCounts.total} tracked programs
-                  </p>
-                </div>
-                <p className="text-xs text-muted-foreground">Today: {today.toLocaleDateString()}</p>
-              </div>
+              <PageHeader
+                title="Recruiting & Programs"
+                description={`Capstone Asset Management Society · University of Alabama · ${headlineCounts.total} tracked programs`}
+                actions={<p className="text-xs text-muted-foreground">Today: {today.toLocaleDateString()}</p>}
+              />
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <SummaryStat label="Now Open" value={headlineCounts.now} icon={<Sparkles className="h-3.5 w-3.5" />} />
@@ -708,7 +705,7 @@ export default function RecruitingPage() {
                         {!isCurrentMonth && (
                           <button
                             type="button"
-                            className="text-[11px] text-[#c63f60] hover:underline"
+                            className="text-[11px] text-crimson hover:underline"
                             onClick={() => setDeadlineMonth(new Date())}
                           >
                             Today
@@ -725,8 +722,8 @@ export default function RecruitingPage() {
                         ))}
                         <div className="col-span-7 flex items-center gap-3 pb-1 pt-0.5 text-[10px] text-muted-foreground flex-wrap">
                           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#5a8ca8] inline-block" /> Opens</span>
-                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#c63f60] inline-block" /> Closes</span>
-                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#7d2c45] inline-block" /> Both</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-crimson inline-block" /> Closes</span>
+                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-crimson-dark inline-block" /> Both</span>
                           <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-muted-foreground/40 inline-block" /> Past open</span>
                         </div>
                         {deadlineCalendar.cells.map((day, i) => {
@@ -757,13 +754,13 @@ export default function RecruitingPage() {
                                 "h-8 rounded-md flex items-center justify-center border text-[11px] relative",
                                 (hasClose || hasOpen) ? "cursor-pointer hover:opacity-80" : "cursor-default",
                                 day === null && "border-transparent",
-                                hasClose && !hasOpen && "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold",
+                                hasClose && !hasOpen && "bg-crimson/10 border-crimson text-crimson font-semibold",
                                 hasOpenFuture && !hasClose && "bg-[#5a8ca8]/10 border-[#5a8ca8] text-[#5a8ca8] font-semibold",
-                                hasOpenFuture && hasClose && "bg-[#7d2c45]/10 border-[#7d2c45] text-[#7d2c45] font-semibold",
+                                hasOpenFuture && hasClose && "bg-crimson-dark/10 border-crimson-dark text-crimson-dark font-semibold",
                                 hasOpenPast && !hasClose && "bg-muted/60 border-muted-foreground/30 text-muted-foreground font-semibold",
-                                hasOpenPast && hasClose && "bg-[#c63f60]/10 border-[#c63f60] text-[#c63f60] font-semibold",
+                                hasOpenPast && hasClose && "bg-crimson/10 border-crimson text-crimson font-semibold",
                                 !hasClose && !hasOpen && day !== null && "border-border",
-                                isToday && "ring-1 ring-[#c63f60]",
+                                isToday && "ring-1 ring-crimson",
                               )}
                             >
                               {day ?? ""}
@@ -771,7 +768,7 @@ export default function RecruitingPage() {
                                 <span className="absolute bottom-0.5 left-0 right-0 flex justify-center gap-0.5">
                                   {hasOpenFuture && <span className="h-1 w-1 rounded-full bg-[#5a8ca8] inline-block" />}
                                   {hasOpenPast && !hasClose && <span className="h-1 w-1 rounded-full bg-muted-foreground/40 inline-block" />}
-                                  {hasClose && <span className="h-1 w-1 rounded-full bg-[#c63f60] inline-block" />}
+                                  {hasClose && <span className="h-1 w-1 rounded-full bg-crimson inline-block" />}
                                 </span>
                               )}
                               {(hasClose || hasOpen) && totalCount > 0 && (
@@ -811,11 +808,11 @@ export default function RecruitingPage() {
                           )}
                           {calDayDetail.closes.length > 0 && (
                             <div>
-                              <p className="text-[11px] font-semibold text-[#c63f60] mb-1.5 uppercase tracking-wide">Closes</p>
+                              <p className="text-[11px] font-semibold text-crimson mb-1.5 uppercase tracking-wide">Closes</p>
                               <ul className="space-y-1.5">
                                 {calDayDetail.closes.map((p) => (
                                   <li key={p.id} className="text-xs flex items-start gap-2">
-                                    <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 border-[#c63f60] text-[#c63f60]">{p.type}</Badge>
+                                    <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 border-crimson text-crimson">{p.type}</Badge>
                                     <span><span className="font-medium">{p.firm}</span> — {p.role}</span>
                                   </li>
                                 ))}
@@ -842,7 +839,7 @@ export default function RecruitingPage() {
                             <Tooltip />
                             <Legend wrapperStyle={{ fontSize: 10 }} />
                             <Bar dataKey="opening" name="Opening" fill="#5a8ca8" radius={[4, 4, 0, 0]} />
-                            <Bar dataKey="closing" name="Closing" fill="#c63f60" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="closing" name="Closing" fill="var(--crimson)" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         </ResponsiveContainer>
                       </div>
@@ -872,7 +869,7 @@ export default function RecruitingPage() {
                     <Button
                       variant={selectedStatusFilters.includes("now") ? "default" : "outline"}
                       size="sm"
-                      className={selectedStatusFilters.includes("now") ? "bg-[#c63f60] hover:bg-[#c63f60]" : ""}
+                      className={selectedStatusFilters.includes("now") ? "bg-crimson hover:bg-crimson" : ""}
                       onClick={() => toggleStatus("now")}
                     >
                       <Sparkles className="h-3.5 w-3.5 mr-1" /> Now Open
@@ -880,7 +877,7 @@ export default function RecruitingPage() {
                     <Button
                       variant={selectedStatusFilters.includes("opening") ? "default" : "outline"}
                       size="sm"
-                      className={selectedStatusFilters.includes("opening") ? "bg-[#c63f60] hover:bg-[#c63f60]" : ""}
+                      className={selectedStatusFilters.includes("opening") ? "bg-crimson hover:bg-crimson" : ""}
                       onClick={() => toggleStatus("opening")}
                     >
                       <Clock3 className="h-3.5 w-3.5 mr-1" /> Opening Soon
@@ -888,7 +885,7 @@ export default function RecruitingPage() {
                     <Button
                       variant={selectedStatusFilters.includes("closing") ? "default" : "outline"}
                       size="sm"
-                      className={selectedStatusFilters.includes("closing") ? "bg-[#c63f60] hover:bg-[#c63f60]" : ""}
+                      className={selectedStatusFilters.includes("closing") ? "bg-crimson hover:bg-crimson" : ""}
                       onClick={() => toggleStatus("closing")}
                     >
                       <CircleAlert className="h-3.5 w-3.5 mr-1" /> Closing Soon
@@ -967,16 +964,16 @@ export default function RecruitingPage() {
                       className={cn(
                         "min-h-[88px] border rounded-lg p-1.5 text-left text-xs overflow-hidden",
                         day === null && "border-transparent bg-transparent",
-                        matches.length > 0 && "border-[#c63f60]/40 bg-[#c63f60]/5",
-                        isToday && "ring-2 ring-[#c63f60]",
+                        matches.length > 0 && "border-crimson/40 bg-crimson/5",
+                        isToday && "ring-2 ring-crimson",
                       )}
                       title={matches.map((p) => `${p.firm} – ${p.role}`).join("\n") || undefined}
                     >
-                      <div className={cn("font-semibold mb-0.5", isToday && "text-[#c63f60]")}>{day ?? ""}</div>
+                      <div className={cn("font-semibold mb-0.5", isToday && "text-crimson")}>{day ?? ""}</div>
                       {matches.slice(0, 3).map((p) => (
                         <div
                           key={p.id}
-                          className="truncate text-[10px] text-[#c63f60] leading-snug"
+                          className="truncate text-[10px] text-crimson leading-snug"
                         >
                           {p.firm}
                         </div>
@@ -1147,11 +1144,11 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-[#e1e7f74d] transition-colors"
+        className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-paper transition-colors"
       >
         <div className="flex items-center gap-3 min-w-0">
-          <div className="h-9 w-9 rounded-lg bg-[#c63f60]/10 flex items-center justify-center flex-shrink-0">
-            <Lightbulb className="h-5 w-5 text-[#c63f60]" />
+          <div className="h-9 w-9 rounded-lg bg-crimson/10 flex items-center justify-center flex-shrink-0">
+            <Lightbulb className="h-5 w-5 text-crimson" />
           </div>
           <div className="min-w-0">
             <p className="font-semibold text-sm">Market Intel: why acceptance rates are under 1% — and what the top 0.8% do</p>
@@ -1167,10 +1164,10 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
         <div className="px-4 pb-4 space-y-4 border-t">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-4">
             {ACCEPTANCE_STATS.map((s) => (
-              <div key={`${s.firm}-${s.year}`} className="border rounded-lg p-3 bg-[#e1e7f74d]/40">
+              <div key={`${s.firm}-${s.year}`} className="border rounded-lg p-3 bg-paper/40">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{s.year}</p>
                 <p className="font-semibold text-sm truncate">{s.firm}</p>
-                <p className="text-2xl font-bold text-[#c63f60] tabular-nums mt-1">{s.rate}</p>
+                <p className="text-2xl font-bold text-crimson tabular-nums mt-1">{s.rate}</p>
                 <p className="text-[11px] text-muted-foreground mt-1">
                   {s.applications === "—" ? "Reference comparison" : `${s.applications} apps · ${s.spots} spots`}
                 </p>
@@ -1178,7 +1175,7 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
                   href={s.source.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[11px] text-[#c63f60] hover:underline inline-flex items-center gap-1 mt-1"
+                  className="text-[11px] text-crimson hover:underline inline-flex items-center gap-1 mt-1"
                 >
                   {s.source.label}
                   <ExternalLink className="h-2.5 w-2.5" />
@@ -1188,9 +1185,9 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="border rounded-lg p-4 bg-[#c63f60]/5">
+            <div className="border rounded-lg p-4 bg-crimson/5">
               <div className="flex items-center gap-2 mb-3">
-                <TrendingDown className="h-4 w-4 text-[#c63f60]" />
+                <TrendingDown className="h-4 w-4 text-crimson" />
                 <p className="font-semibold text-sm">Why the rates are this low</p>
               </div>
               <ul className="space-y-3">
@@ -1202,7 +1199,7 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
                       href={p.source.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#c63f60] hover:underline inline-flex items-center gap-1 mt-1"
+                      className="text-crimson hover:underline inline-flex items-center gap-1 mt-1"
                     >
                       {p.source.label}
                       <ExternalLink className="h-2.5 w-2.5" />
@@ -1212,9 +1209,9 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
               </ul>
             </div>
 
-            <div className="border rounded-lg p-4 bg-[#7d2c45]/5">
+            <div className="border rounded-lg p-4 bg-crimson-dark/5">
               <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="h-4 w-4 text-[#7d2c45]" />
+                <Sparkles className="h-4 w-4 text-crimson-dark" />
                 <p className="font-semibold text-sm">What the top 0.8% do differently</p>
               </div>
               <ul className="space-y-3">
@@ -1226,7 +1223,7 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
                       href={p.source.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[#7d2c45] hover:underline inline-flex items-center gap-1 mt-1"
+                      className="text-crimson-dark hover:underline inline-flex items-center gap-1 mt-1"
                     >
                       {p.source.label}
                       <ExternalLink className="h-2.5 w-2.5" />
@@ -1237,7 +1234,7 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
             </div>
           </div>
 
-          <p className="text-xs text-muted-foreground italic border-l-2 border-[#c63f60] pl-3">
+          <p className="text-xs text-muted-foreground italic border-l-2 border-crimson pl-3">
             Bottom line: the effective competition is a much smaller pool than 360,000 suggests. But at Superday the
             margin of differentiation is genuinely thin — which is where preparation over 18+ months pays off.
           </p>
@@ -1276,7 +1273,7 @@ function ProgramRow({
     <div
       className={cn(
         "border rounded-xl p-4 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3",
-        closingSoon && "border-[#c63f60]/60 bg-[#c63f60]/5",
+        closingSoon && "border-crimson/60 bg-crimson/5",
       )}
     >
       <div className="min-w-0 flex-1">
@@ -1294,7 +1291,7 @@ function ProgramRow({
             </Badge>
           )}
           {program.diversity && (
-            <Badge className="bg-[#7d2c45] text-white gap-1">
+            <Badge className="bg-crimson-dark text-white gap-1">
               <ShieldCheck className="h-3 w-3" />
               Diversity
             </Badge>
@@ -1305,13 +1302,13 @@ function ProgramRow({
             </Badge>
           )}
           {closingSoon && (
-            <Badge className="bg-[#c63f60] text-white gap-1">
+            <Badge className="bg-crimson text-white gap-1">
               <CircleAlert className="h-3 w-3" />
               Closes soon
             </Badge>
           )}
           {openingSoon && !isOpen && (
-            <Badge variant="outline" className="border-[#c63f60] text-[#c63f60]">
+            <Badge variant="outline" className="border-crimson text-crimson">
               Opening soon
             </Badge>
           )}
@@ -1321,7 +1318,7 @@ function ProgramRow({
           {program.division && ` · ${program.division}`}
         </p>
         {program.diversityTypes && program.diversityTypes.length > 0 && (
-          <p className="text-xs text-[#7d2c45] mt-1">
+          <p className="text-xs text-crimson-dark mt-1">
             Affinity: {program.diversityTypes.join(", ")}
           </p>
         )}
@@ -1351,13 +1348,13 @@ function ProgramRow({
           Firm Intel
         </Button>
         {program.applicationLink ? (
-          <Button size="sm" className="bg-[#c63f60] hover:bg-[#c63f60]" asChild>
+          <Button size="sm" className="bg-crimson hover:bg-crimson" asChild>
             <a href={program.applicationLink} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-3.5 w-3.5 mr-1" /> Apply
             </a>
           </Button>
         ) : (
-          <Button size="sm" className="bg-[#c63f60] hover:bg-[#c63f60]" disabled>
+          <Button size="sm" className="bg-crimson hover:bg-crimson" disabled>
             Apply
           </Button>
         )}

@@ -26,6 +26,7 @@ import { sortNewsPosts, useNews } from "../context/NewsContext";
 import { estimateReadMinutes, formatNewsShortDate, getNewsCoverSrc } from "../lib/newsDisplay";
 import { WeeklyCheckinModal } from "../components/WeeklyCheckinModal";
 import { cn } from "../components/ui/utils";
+import { PageHeader } from "../components/PageHeader";
 
 /** Coarse relative-time label ("2h ago", "3 days ago") for a past ISO timestamp. */
 function timeAgo(iso: string): string {
@@ -139,11 +140,11 @@ export default function DashboardHome() {
         : "Cached";
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto min-h-screen bg-[#e1e7f74d]">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground text-sm mt-0.5">Welcome back, {currentUser?.firstName ?? "Member"} — University of Alabama</p>
-      </div>
+    <div className="p-6 space-y-6 max-w-content mx-auto min-h-screen bg-paper">
+      <PageHeader
+        title="Dashboard"
+        description={`Welcome back, ${currentUser?.firstName ?? "Member"} — University of Alabama`}
+      />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <DashboardCell
@@ -280,7 +281,7 @@ export default function DashboardHome() {
                 <p className="text-sm font-semibold">Deal Pipeline</p>
                 <p className="text-xs text-muted-foreground mt-1">{activePipeline.length} active · {offerStageCount} offer stage</p>
                 <button
-                  className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1"
+                  className="mt-2 text-xs text-crimson inline-flex items-center gap-1"
                   onClick={() => navigate("/dashboard/pipeline")}
                 >
                   Manage Pipeline <ArrowUpRight className="h-3.5 w-3.5" />
@@ -292,7 +293,7 @@ export default function DashboardHome() {
                 <p className="text-sm font-semibold">CRM & Contacts</p>
                 <p className="text-xs text-muted-foreground mt-1">{pipelineContacts.length} contacts tracked</p>
                 <button
-                  className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1"
+                  className="mt-2 text-xs text-crimson inline-flex items-center gap-1"
                   onClick={() => navigate("/dashboard/contacts")}
                 >
                   View Network <ArrowUpRight className="h-3.5 w-3.5" />
@@ -304,7 +305,7 @@ export default function DashboardHome() {
                 <p className="text-sm font-semibold">Recruiting Portal</p>
                 <p className="text-xs text-muted-foreground mt-1">{openPrograms.length} programs open · {soonDeadlines} deadlines soon</p>
                 <button
-                  className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1"
+                  className="mt-2 text-xs text-crimson inline-flex items-center gap-1"
                   onClick={() => navigate("/dashboard/recruiting")}
                 >
                   Browse Programs <ArrowUpRight className="h-3.5 w-3.5" />
@@ -328,7 +329,7 @@ export default function DashboardHome() {
               ) : (
                 recentActivity.map((contact) => (
                   <div key={contact.id} className="flex gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#c63f60]" />
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-crimson" />
                     <div className="min-w-0">
                       <p className="text-sm font-medium">New contact added</p>
                       <p className="text-xs text-muted-foreground truncate">{contact.name}, {contact.firm}</p>
@@ -378,7 +379,7 @@ export default function DashboardHome() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium">Upcoming Deadlines</CardTitle>
-                <button className="text-xs text-[#c63f60]" onClick={() => navigate("/dashboard/recruiting")}>
+                <button className="text-xs text-crimson" onClick={() => navigate("/dashboard/recruiting")}>
                   View all
                 </button>
               </div>
@@ -393,7 +394,7 @@ export default function DashboardHome() {
                     <p className="text-sm font-medium truncate">{program.firm}</p>
                     <p className="text-xs text-muted-foreground truncate">{program.role}</p>
                   </div>
-                  <Badge variant="secondary" className="bg-[#c63f60]/10 text-[#c63f60]">
+                  <Badge variant="secondary" className="bg-crimson/10 text-crimson">
                     {new Date(program.deadline!).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                   </Badge>
                 </div>
@@ -422,7 +423,7 @@ export default function DashboardHome() {
         </div>
       </div>
       <button
-        className="fixed bottom-6 right-6 h-12 px-4 rounded-full bg-[#c63f60] text-white shadow-lg text-sm font-medium"
+        className="fixed bottom-6 right-6 h-12 px-4 rounded-full bg-crimson text-white shadow-lg text-sm font-medium"
         onClick={() => setCheckinOpen(true)}
       >
         Weekly Check-in {!hasCheckedInThisWeek(currentUser?.id ?? "") && <span className="ml-2 inline-block h-2 w-2 rounded-full bg-red-300" />}
