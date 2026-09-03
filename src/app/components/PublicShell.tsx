@@ -19,7 +19,7 @@ interface PublicShellProps {
 export function PublicShell({ children }: PublicShellProps) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="sticky top-0 z-50 border-b border-border/80 bg-card/95 shadow-header backdrop-blur-md supports-[backdrop-filter]:bg-card/80">
+      <header className="sticky top-0 z-50 border-b border-border/80 bg-card shadow-header">
         <div className="mx-auto flex h-16 max-w-content items-center justify-between gap-4 px-6">
           <Link
             to="/"
