@@ -126,7 +126,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
         <Separator />
 
-        <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-4">
+        <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-4" data-lenis-prevent>
           {/* Main nav */}
           <div className="space-y-0.5">
             {MAIN_NAV.map(renderNavItem)}
@@ -210,7 +210,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
+      {/* data-lenis-prevent: this is its own scroll container (not the window), and the
+          site-wide Lenis smooth-scroll (see SmoothScroll.tsx) hijacks wheel input for the
+          window by default — without this it swallows scroll events here entirely. */}
+      <main className="flex-1 overflow-y-auto" data-lenis-prevent>
         {children}
       </main>
     </div>
