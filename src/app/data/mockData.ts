@@ -197,6 +197,7 @@ export const MOCK_CONTACTS: Contact[] = [
  */
 import { RECRUITING_PROGRAMS } from "./recruitingPrograms";
 import { adaptInternships } from "./internshipAdapter";
+import { ADVENTIS_HISTORICAL_PROGRAMS } from "./adventisHistoricalPrograms";
 
 // Merge the curated recruiting calendar with the 522-entry internship dataset.
 // Deduplicate by firm+role so no program appears twice.
@@ -205,7 +206,7 @@ function mergePrograms(): Program[] {
   const seen = new Set<string>();
   const result: Program[] = [];
   const today = new Date().toISOString().split("T")[0];
-  for (const p of [...RECRUITING_PROGRAMS, ...adaptInternships()]) {
+  for (const p of [...RECRUITING_PROGRAMS, ...adaptInternships(), ...ADVENTIS_HISTORICAL_PROGRAMS]) {
     const key = `${p.firm.toLowerCase()}|${p.role.toLowerCase()}`;
     if (!seen.has(key)) {
       seen.add(key);
