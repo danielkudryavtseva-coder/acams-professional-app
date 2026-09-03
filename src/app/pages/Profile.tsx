@@ -66,6 +66,8 @@ export default function Profile() {
   const [draft, setDraft] = React.useState<ProfileData>(() =>
     currentUser ? profileDataFromMember(currentUser) : DEFAULT_PROFILE,
   );
+  const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!currentUser || isEditing) return;
@@ -74,27 +76,37 @@ export default function Profile() {
     setDraft(next);
   }, [currentUser, isEditing]);
 
-  const handleSave = () => {
-    setProfile(draft);
-    if (currentUser) {
-      const [firstName, ...rest] = draft.name.split(" ");
-      updateProfile({
-        firstName,
-        lastName: rest.join(" ") || "",
-        phone: draft.phone,
-        linkedin: draft.linkedin,
-        personalStatement: draft.bio,
-        interests: draft.targetRoles as never,
-        location: draft.location,
-        major: draft.major,
-        gpa: draft.gpa,
-      });
+  const handleSave = async () => {
+    if (!currentUser) {
+      setIsEditing(false);
+      return;
     }
+    setSaving(true);
+    setSaveError(null);
+    const [firstName, ...rest] = draft.name.split(" ");
+    const result = await updateProfile({
+      firstName,
+      lastName: rest.join(" ") || "",
+      phone: draft.phone,
+      linkedin: draft.linkedin,
+      personalStatement: draft.bio,
+      interests: draft.targetRoles as never,
+      location: draft.location,
+      major: draft.major,
+      gpa: draft.gpa,
+    });
+    setSaving(false);
+    if (!result.success) {
+      setSaveError(result.error ?? "Couldn't save your changes. Please try again.");
+      return; // Stay in editing mode with the draft intact — nothing was actually persisted.
+    }
+    setProfile(draft);
     setIsEditing(false);
   };
 
   const handleCancel = () => {
     setDraft(profile);
+    setSaveError(null);
     setIsEditing(false);
   };
 
@@ -115,11 +127,12 @@ export default function Profile() {
             Edit Profile
           </Button>
         ) : (
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={handleCancel}>Cancel</Button>
-            <Button size="sm" onClick={handleSave}>
+          <div className="flex items-center gap-2">
+            {saveError && <p className="text-xs text-destructive">{saveError}</p>}
+            <Button variant="outline" size="sm" onClick={handleCancel} disabled={saving}>Cancel</Button>
+            <Button size="sm" onClick={handleSave} disabled={saving}>
               <Save className="h-4 w-4 mr-1.5" />
-              Save
+              {saving ? "Saving…" : "Save"}
             </Button>
           </div>
         )}

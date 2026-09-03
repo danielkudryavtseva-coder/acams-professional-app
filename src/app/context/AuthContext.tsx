@@ -61,7 +61,7 @@ interface AuthContextValue {
   login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; error?: string }>;
   register: (data: RegisterPayload) => Promise<{ success: boolean; error?: string; needsEmailConfirmation?: boolean }>;
   logout: () => void;
-  updateProfile: (updates: Partial<Member>) => void;
+  updateProfile: (updates: Partial<Member>) => Promise<{ success: boolean; error?: string }>;
 }
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -189,12 +189,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void supabase.auth.signOut();
   };
 
-  const updateProfile = (updates: Partial<Member>) => {
-    if (!currentUser) return;
+  const updateProfile = async (updates: Partial<Member>) => {
+    if (!currentUser) return { success: false, error: "Not signed in." };
     // Strip fields that must never be self-modified — the DB trigger also blocks
     // these server-side, but stripping client-side avoids a rejected request.
     const { id: _id, role: _role, pnlTagged: _pnl, pnlReason: _pnlReason, active: _active, ...safeUpdates } = updates;
-    updateMember(currentUser.id, safeUpdates);
+    return updateMember(currentUser.id, safeUpdates);
   };
 
   return (

@@ -5,7 +5,7 @@ import { supabase, supabaseConfigured } from "../lib/supabaseClient";
 interface MembersContextValue {
   members: Member[];
   loading: boolean;
-  updateMember: (id: string, updates: Partial<Member>) => void;
+  updateMember: (id: string, updates: Partial<Member>) => Promise<{ success: boolean; error?: string }>;
   setPnlTag: (memberId: string, tagged: boolean, reason?: string) => void;
   addMember: (member: Member) => Promise<void>;
   /** Mark a member as inactive — they're hidden from public surfaces (Roster, Scoreboard) but still visible to execs. */
@@ -114,21 +114,25 @@ export function MembersProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const updateMember = (id: string, updates: Partial<Member>) => {
+  const updateMember = async (id: string, updates: Partial<Member>) => {
     const current = members.find((m) => m.id === id);
-    if (!current) return;
+    if (!current) return { success: false, error: "Member not loaded yet — try again in a moment." };
     const { top, profile } = splitMember(updates);
     const mergedProfile = { ...splitMember(current).profile, ...profile };
-    void supabase
+    const { error } = await supabase
       .from("members")
       .update({ ...top, profile: mergedProfile })
       .eq("id", id);
-    // Optimistic local update — the realtime subscription will reconcile shortly after.
+    if (error) return { success: false, error: error.message };
+    // Apply locally only once the write is confirmed — the realtime subscription will also
+    // reconcile shortly after, but callers (e.g. a Save button) need to know NOW whether it
+    // actually persisted, not just that the optimistic UI looks right until the next refresh.
     setMembers((prev) => prev.map((m) => (m.id === id ? { ...m, ...updates } : m)));
+    return { success: true };
   };
 
   const setPnlTag = (memberId: string, tagged: boolean, reason?: string) =>
-    updateMember(memberId, { pnlTagged: tagged, pnlReason: reason });
+    void updateMember(memberId, { pnlTagged: tagged, pnlReason: reason });
 
   const addMember = async (member: Member) => {
     const { top, profile } = splitMember(member);
@@ -140,8 +144,8 @@ export function MembersProvider({ children }: { children: React.ReactNode }) {
     setMembers((prev) => [...prev, member]);
   };
 
-  const deactivateMember = (memberId: string) => updateMember(memberId, { active: false });
-  const reactivateMember = (memberId: string) => updateMember(memberId, { active: true });
+  const deactivateMember = (memberId: string) => void updateMember(memberId, { active: false });
+  const reactivateMember = (memberId: string) => void updateMember(memberId, { active: true });
 
   return (
     <MembersContext.Provider
