@@ -30,7 +30,7 @@ interface Executive {
 
 // All 9 headshots are pre-cropped/centered identically in Photoshop, so a single flat
 // zoom factor (no per-photo position tweaking needed) applies evenly to all of them.
-const HEADSHOT_ZOOM = "scale(1.3)";
+const HEADSHOT_ZOOM = "scale(1.625)";
 
 const EXECUTIVES: Executive[] = [
   {
