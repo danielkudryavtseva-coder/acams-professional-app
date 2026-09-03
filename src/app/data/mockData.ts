@@ -12,6 +12,9 @@ function snapshotTags(tagIds: string[]): Tag[] {
   return DEFAULT_TAG_CATALOG.filter((t) => tagIds.includes(t.id)).map((t) => ({ ...t }));
 }
 
+export type ContactStage = "researching" | "reached_out" | "replied" | "coffee_chat" | "interviewing";
+export type ContactPriority = "high" | "medium" | "low";
+
 export interface Contact {
   id: string;
   name: string;
@@ -24,10 +27,22 @@ export interface Contact {
   school?: string;
   graduationYear?: number;
   status: "active" | "inactive" | "do_not_contact";
+  /** Where this relationship stands — set on add/edit, not derived. */
+  stage: ContactStage;
+  /** Outreach priority — set on add/edit, not derived. */
+  priority: ContactPriority;
   lastContacted?: string;
   notes?: string;
   tags: string[];
 }
+
+export const CONTACT_STAGE_LABEL: Record<ContactStage, string> = {
+  researching: "Researching",
+  reached_out: "Reached Out",
+  replied: "Replied",
+  coffee_chat: "Coffee Chat",
+  interviewing: "Interviewing",
+};
 
 export type ProgramTrack =
   | "IB"
@@ -117,6 +132,8 @@ export const MOCK_CONTACTS: Contact[] = [
     email: "j.liu@gs.com",
     location: "New York, NY",
     status: "active",
+    stage: "coffee_chat",
+    priority: "high",
     lastContacted: "2026-03-15",
     tags: ["IB", "mentor", "alumni"],
   },
@@ -128,6 +145,8 @@ export const MOCK_CONTACTS: Contact[] = [
     email: "r.kim@blackstone.com",
     location: "New York, NY",
     status: "active",
+    stage: "replied",
+    priority: "high",
     lastContacted: "2026-04-01",
     tags: ["PE", "networking"],
   },
@@ -139,6 +158,8 @@ export const MOCK_CONTACTS: Contact[] = [
     email: "d.torres@citadel.com",
     location: "Chicago, IL",
     status: "active",
+    stage: "reached_out",
+    priority: "medium",
     lastContacted: "2026-02-20",
     tags: ["HF", "quant"],
   },
@@ -150,6 +171,8 @@ export const MOCK_CONTACTS: Contact[] = [
     email: "e.zhang@ms.com",
     location: "New York, NY",
     status: "active",
+    stage: "interviewing",
+    priority: "high",
     lastContacted: "2026-04-10",
     tags: ["recruiter", "IB"],
   },
@@ -161,6 +184,8 @@ export const MOCK_CONTACTS: Contact[] = [
     email: "m.brown@kkr.com",
     location: "New York, NY",
     status: "active",
+    stage: "researching",
+    priority: "medium",
     tags: ["PE"],
   },
 ];

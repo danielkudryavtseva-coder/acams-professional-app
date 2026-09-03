@@ -10,7 +10,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import type { Contact } from "../data/mockData";
+import { CONTACT_STAGE_LABEL, type Contact, type ContactStage } from "../data/mockData";
 
 const contactSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -21,6 +21,8 @@ const contactSchema = z.object({
   phone: z.string().optional(),
   notes: z.string().optional(),
   status: z.enum(["active", "inactive", "do_not_contact"]),
+  stage: z.enum(["researching", "reached_out", "replied", "coffee_chat", "interviewing"]),
+  priority: z.enum(["high", "medium", "low"]),
 });
 
 type ContactFormValues = z.infer<typeof contactSchema>;
@@ -35,7 +37,7 @@ interface AddContactModalProps {
 export function AddContactModal({ open, onOpenChange, onSave, defaultValues }: AddContactModalProps) {
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
-    defaultValues: { status: "active", ...defaultValues },
+    defaultValues: { status: "active", stage: "researching", priority: "medium", ...defaultValues },
   });
 
   React.useEffect(() => {
@@ -94,18 +96,52 @@ export function AddContactModal({ open, onOpenChange, onSave, defaultValues }: A
             <Input id="linkedin" {...register("linkedin")} placeholder="https://linkedin.com/in/..." />
             {errors.linkedin && <p className="text-xs text-destructive">{errors.linkedin.message}</p>}
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="status">Status</Label>
-            <Select defaultValue="active" onValueChange={(v) => setValue("status", v as ContactFormValues["status"])}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="do_not_contact">Do Not Contact</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="status">Status</Label>
+              <Select defaultValue="active" onValueChange={(v) => setValue("status", v as ContactFormValues["status"])}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="do_not_contact">Do Not Contact</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="stage">Stage</Label>
+              <Select
+                defaultValue="researching"
+                onValueChange={(v) => setValue("stage", v as ContactStage)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(CONTACT_STAGE_LABEL) as ContactStage[]).map((s) => (
+                    <SelectItem key={s} value={s}>{CONTACT_STAGE_LABEL[s]}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="priority">Priority</Label>
+              <Select
+                defaultValue="medium"
+                onValueChange={(v) => setValue("priority", v as ContactFormValues["priority"])}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="notes">Notes</Label>

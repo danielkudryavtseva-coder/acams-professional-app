@@ -8,8 +8,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "../components/ui/dropdown-menu";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { AddContactModal, DeleteContactModal } from "../components/ContactModals";
-import { MOCK_CONTACTS, type Contact } from "../data/mockData";
+import { MOCK_CONTACTS, CONTACT_STAGE_LABEL, type Contact, type ContactStage, type ContactPriority } from "../data/mockData";
 import { usePipeline } from "../context/PipelineContext";
 
 function getInitials(name: string): string {
@@ -55,8 +56,11 @@ export default function ContactsPage() {
     setDeleteTarget(null);
   };
 
+  const updateContact = (id: string, updates: Partial<Contact>) =>
+    setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+
   const exportCsv = () => {
-    const cols: (keyof Contact)[] = ["name", "firm", "role", "email", "linkedin", "phone", "location", "status", "lastContacted", "notes"];
+    const cols: (keyof Contact)[] = ["name", "firm", "role", "email", "linkedin", "phone", "location", "stage", "priority", "status", "lastContacted", "notes"];
     const escapeCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
     const rows = [cols.join(","), ...filtered.map((c) => cols.map((col) => escapeCell(c[col])).join(","))];
     const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
@@ -66,17 +70,6 @@ export default function ContactsPage() {
     a.download = `cams-contacts-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const getStage = (index: number) => {
-    const stages = ["Researching", "Reached Out", "Replied", "Coffee Chat", "Interviewing"];
-    return stages[index % stages.length];
-  };
-
-  const getPriority = (index: number): "High" | "Medium" | "Low" => {
-    if (index % 3 === 0) return "High";
-    if (index % 3 === 1) return "Medium";
-    return "Low";
   };
 
   const isAlreadyInPipeline = React.useCallback(
@@ -163,10 +156,8 @@ export default function ContactsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filtered.map((contact, index) => {
+            {filtered.map((contact) => {
               const status = STATUS_BADGE[contact.status];
-              const stage = getStage(index);
-              const priority = getPriority(index);
               return (
                 <TableRow key={contact.id}>
                   <TableCell>
@@ -185,21 +176,43 @@ export default function ContactsPage() {
                   <TableCell className="text-sm">{contact.firm}</TableCell>
                   <TableCell className="text-sm text-muted-foreground">{contact.role}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="text-xs">{stage}</Badge>
+                    <Select
+                      value={contact.stage}
+                      onValueChange={(v) => updateContact(contact.id, { stage: v as ContactStage })}
+                    >
+                      <SelectTrigger className="h-7 w-[9.5rem] text-xs border-none bg-transparent px-0 shadow-none">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(Object.keys(CONTACT_STAGE_LABEL) as ContactStage[]).map((s) => (
+                          <SelectItem key={s} value={s}>{CONTACT_STAGE_LABEL[s]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={
-                        priority === "High"
-                          ? "text-xs border-[#c63f60] text-[#c63f60]"
-                          : priority === "Medium"
-                            ? "text-xs border-amber-500 text-amber-600"
-                            : "text-xs"
-                      }
+                    <Select
+                      value={contact.priority}
+                      onValueChange={(v) => updateContact(contact.id, { priority: v as ContactPriority })}
                     >
-                      {priority}
-                    </Badge>
+                      <SelectTrigger
+                        className={
+                          "h-7 w-[6.5rem] text-xs border-none bg-transparent px-0 shadow-none " +
+                          (contact.priority === "high"
+                            ? "text-[#c63f60]"
+                            : contact.priority === "medium"
+                              ? "text-amber-600"
+                              : "")
+                        }
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell>
                     <Badge variant={status.variant} className="text-xs inline-flex items-center gap-1">
@@ -208,8 +221,8 @@ export default function ContactsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-sm">{contact.email || "—"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{contact.phone || "+1 (212) 555-0468"}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{contact.location || "New York, NY"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{contact.phone || "—"}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{contact.location || "—"}</TableCell>
                   <TableCell>
                     <div className="flex flex-wrap gap-1">
                       {contact.tags.slice(0, 3).map((tag) => (
