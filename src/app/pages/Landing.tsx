@@ -28,51 +28,64 @@ interface Executive {
   imageTransform?: string;
 }
 
+// All 9 headshots are pre-cropped/centered identically in Photoshop, so a single flat
+// zoom factor (no per-photo position tweaking needed) applies evenly to all of them.
+const HEADSHOT_ZOOM = "scale(1.3)";
+
 const EXECUTIVES: Executive[] = [
   {
     name: "Alex Wylie",
     title: "President",
     image: alexWylie,
+    imageTransform: HEADSHOT_ZOOM,
   },
   {
     name: "Luke Lacke",
     title: "Vice President",
     image: lukeLacke,
+    imageTransform: HEADSHOT_ZOOM,
   },
   {
     name: "Matthew Worthington",
     title: "Portfolio Manager",
     image: matthewWorthington,
+    imageTransform: HEADSHOT_ZOOM,
   },
   {
     name: "William Hessler",
     title: "Director of New Member Education",
     image: williamHessler,
+    imageTransform: HEADSHOT_ZOOM,
   },
   {
     name: "Ford Alderdice",
     title: "Director of Recruitment",
     image: fordAlderice,
+    imageTransform: HEADSHOT_ZOOM,
   },
   {
     name: "Matt Rochford",
     title: "Co-Director of Professional Development",
     image: mattRochford,
+    imageTransform: HEADSHOT_ZOOM,
   },
   {
     name: "Brady Belden",
     title: "Co-Director of Professional Development",
     image: bradyBelden,
+    imageTransform: HEADSHOT_ZOOM,
   },
   {
     name: "Cade Andrews",
     title: "Co-Director of Professional Development",
     image: cadeAndrews,
+    imageTransform: HEADSHOT_ZOOM,
   },
   {
     name: "Lucy Petrus",
     title: "Director of Media",
     image: lucyPetrus,
+    imageTransform: HEADSHOT_ZOOM,
   },
 ];
 
