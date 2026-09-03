@@ -2,15 +2,15 @@ import { useRef, useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { APPLY_URL } from "../components/PublicShell";
 import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
-import bradyBelden from "../../assets/execs/brady-belden.jpg";
-import cadeAndrews from "../../assets/execs/cade-andrews.jpg";
-import alexWylie from "../../assets/execs/alex-wylie.jpg";
-import lukeLacke from "../../assets/execs/luke-lacke.jpg";
-import fordAlderice from "../../assets/execs/ford-alderice.jpg";
-import matthewWorthington from "../../assets/execs/matthew-worthington.jpg";
-import williamHessler from "../../assets/execs/william-hessler.jpg";
-import mattRochford from "../../assets/execs/matt-rochford.jpg";
-import lucyPetrus from "../../assets/execs/lucy-petrus.jpg";
+import bradyBelden from "../../assets/execs/brady-belden.png";
+import cadeAndrews from "../../assets/execs/cade-andrews.png";
+import alexWylie from "../../assets/execs/alex-wylie.png";
+import lukeLacke from "../../assets/execs/luke-lacke.png";
+import fordAlderice from "../../assets/execs/ford-alderice.png";
+import matthewWorthington from "../../assets/execs/matthew-worthington.png";
+import williamHessler from "../../assets/execs/william-hessler.png";
+import mattRochford from "../../assets/execs/matt-rochford.png";
+import lucyPetrus from "../../assets/execs/lucy-petrus.png";
 import landingHero from "../../assets/landing-hero-mansion.jpg";
 
 interface Executive {
@@ -33,55 +33,46 @@ const EXECUTIVES: Executive[] = [
     name: "Alex Wylie",
     title: "President",
     image: alexWylie,
-    imageTransform: "translate(-0.8%, 4%) scale(1.6)",
   },
   {
     name: "Luke Lacke",
     title: "Vice President",
     image: lukeLacke,
-    imageTransform: "translate(-3.2%, 18.8%) scale(1.6)",
   },
   {
     name: "Matthew Worthington",
     title: "Portfolio Manager",
     image: matthewWorthington,
-    imageTransform: "translate(1.9%, 27.6%) scale(1.85)",
   },
   {
     name: "William Hessler",
     title: "Director of New Member Education",
     image: williamHessler,
-    imageTransform: "translate(0%, 10.2%) scale(1.7)",
   },
   {
     name: "Ford Alderdice",
     title: "Director of Recruitment",
     image: fordAlderice,
-    imageTransform: "translate(0%, -18.7%) scale(1.9)",
   },
   {
     name: "Matt Rochford",
     title: "Co-Director of Professional Development",
     image: mattRochford,
-    imageTransform: "translate(-0.8%, 24%) scale(1.6)",
   },
   {
     name: "Brady Belden",
     title: "Co-Director of Professional Development",
     image: bradyBelden,
-    imageTransform: "translate(0%, 25%) scale(1.7)",
   },
   {
     name: "Cade Andrews",
     title: "Co-Director of Professional Development",
     image: cadeAndrews,
-    imageTransform: "translate(0%, 6.2%) scale(1.7)",
   },
   {
     name: "Lucy Petrus",
     title: "Director of Media",
     image: lucyPetrus,
-    imageTransform: "translate(0%, -18%) scale(1.6)",
   },
 ];
 

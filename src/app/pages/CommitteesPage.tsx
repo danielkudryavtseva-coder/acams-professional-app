@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { User, Image, Star } from "lucide-react";
-import mattRochford from "../../assets/execs/matt-rochford.jpg";
-import matthewWorthington from "../../assets/execs/matthew-worthington.jpg";
+import mattRochford from "../../assets/execs/matt-rochford.png";
+import matthewWorthington from "../../assets/execs/matthew-worthington.png";
 import phillipGorokhovich from "../../assets/execs/phillip-gorokhovich.jpg";
 import brianWilk from "../../assets/execs/brian-wilk.png";
 import hartwellForstman from "../../assets/execs/hartwell-forstman.png";
