@@ -6,6 +6,7 @@ import { Badge } from "../components/ui/badge";
 import { useEvents } from "../context/EventsContext";
 import { useMembers } from "../context/MembersContext";
 import { AddEventModal } from "../components/AddEventModal";
+import { PageHeader } from "../components/PageHeader";
 
 export default function AttendancePage() {
   const { events, attendance, markAttended, addEvent, getConsecutiveMisses } = useEvents();
@@ -23,12 +24,9 @@ export default function AttendancePage() {
   }, [attendance, members, getConsecutiveMisses, setPnlTag]);
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Attendance</h1>
-        <Button onClick={() => setOpen(true)}>Add Event</Button>
-      </div>
-      <Card className="bg-white">
+    <div className="p-6 space-y-4 max-w-content mx-auto">
+      <PageHeader title="Attendance" actions={<Button onClick={() => setOpen(true)}>Add Event</Button>} />
+      <Card className="bg-white dark:bg-card">
         <CardContent className="p-4 overflow-x-auto">
           <table className="min-w-[900px] w-full text-sm">
             <thead>

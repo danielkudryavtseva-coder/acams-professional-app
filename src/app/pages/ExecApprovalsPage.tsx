@@ -5,6 +5,7 @@ import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useMembers } from "../context/MembersContext";
 import { COMMITTEE_COLORS } from "../data/constants";
+import { PageHeader } from "../components/PageHeader";
 
 export default function ExecApprovalsPage() {
   const { members, updateMember } = useMembers();
@@ -22,18 +23,15 @@ export default function ExecApprovalsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold flex items-center gap-2">
-          <UserCheck className="h-6 w-6" /> Pending Approvals
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          New accounts land here until an exec approves them. Rejected accounts stay locked out.
-        </p>
-      </div>
+    <div className="p-6 space-y-6 max-w-content mx-auto">
+      <PageHeader
+        title="Pending Approvals"
+        icon={<UserCheck className="h-6 w-6 text-crimson" />}
+        description="New accounts land here until an exec approves them. Rejected accounts stay locked out."
+      />
 
       {pending.length === 0 ? (
-        <Card>
+        <Card className="bg-white dark:bg-card">
           <CardContent className="py-10 text-center text-sm text-muted-foreground">
             No accounts waiting on approval.
           </CardContent>
@@ -41,7 +39,7 @@ export default function ExecApprovalsPage() {
       ) : (
         <div className="grid gap-3">
           {pending.map((m) => (
-            <Card key={m.id}>
+            <Card key={m.id} className="bg-white dark:bg-card">
               <CardHeader className="pb-2">
                 <div className="flex items-start justify-between gap-3">
                   <div>

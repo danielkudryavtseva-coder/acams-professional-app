@@ -29,6 +29,7 @@ import { cn } from "../components/ui/utils";
 import { useMembers } from "../context/MembersContext";
 import { MOCK_PORTFOLIO_DECISIONS } from "../data/mockData";
 import { TaggedMembersRow } from "../components/TaggedMembersRow";
+import { PageHeader } from "../components/PageHeader";
 
 const SECTOR_CHART_FILLS = [
   "hsl(var(--chart-1))",
@@ -300,11 +301,11 @@ export default function Portfolio() {
   })();
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold">Portfolio</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
+      <PageHeader
+        title="Portfolio"
+        description={
+          <>
             {holdings.length} equities · {PORTFOLIO_BONDS.length} bonds ·{" "}
             {PORTFOLIO_MUTUAL_FUNDS.length} funds ·{" "}
             {status === "live" ? (
@@ -312,15 +313,17 @@ export default function Portfolio() {
             ) : (
               <span>Seed values as of {PORTFOLIO_AS_OF}</span>
             )}
-          </p>
-        </div>
-        <Button asChild size="sm" variant="outline" className="h-8 shrink-0">
-          <a href={EXCEL_PORTFOLIO_URL} target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-            Excel Portfolio
-          </a>
-        </Button>
-      </div>
+          </>
+        }
+        actions={
+          <Button asChild size="sm" variant="outline" className="h-8 shrink-0">
+            <a href={EXCEL_PORTFOLIO_URL} target="_blank" rel="noopener noreferrer">
+              <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+              Excel Portfolio
+            </a>
+          </Button>
+        }
+      />
 
       {rateLimited && (
         <Alert>
@@ -456,7 +459,7 @@ export default function Portfolio() {
         />
       </div>
 
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card">
         <CardHeader>
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-4 flex-wrap">
@@ -533,7 +536,7 @@ export default function Portfolio() {
                     className={cn(
                       "px-2.5 h-7 text-xs font-medium rounded transition-colors",
                       active
-                        ? "bg-white text-foreground shadow-sm border border-border"
+                        ? "bg-white dark:bg-card text-foreground shadow-sm border border-border"
                         : "text-muted-foreground hover:text-foreground",
                     )}
                   >
@@ -575,7 +578,7 @@ export default function Portfolio() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Holdings Table */}
         <div className="lg:col-span-2">
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <CardTitle>Long Equities</CardTitle>
               <CardDescription>
@@ -647,7 +650,7 @@ export default function Portfolio() {
         {/* Sector allocation, then fixed income and mutual funds (stacked below on all breakpoints) */}
         <div className="flex flex-col gap-6">
           {/* Sector Allocation */}
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <PieChartIcon className="h-4 w-4" />
@@ -686,7 +689,7 @@ export default function Portfolio() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <CardTitle>Fixed Income</CardTitle>
               <CardDescription>
@@ -734,7 +737,7 @@ export default function Portfolio() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <CardTitle>Mutual Funds & ETFs</CardTitle>
               <CardDescription>
@@ -787,7 +790,7 @@ export default function Portfolio() {
         </div>
       </div>
 
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card">
         <CardHeader>
           <CardTitle>Committee decisions</CardTitle>
           <CardDescription>

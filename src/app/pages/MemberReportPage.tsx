@@ -17,6 +17,7 @@ import { useEvents } from "../context/EventsContext";
 import { useConnect } from "../context/ConnectContext";
 import { cn } from "../components/ui/utils";
 import type { Member } from "../data/mockData";
+import { PageHeader } from "../components/PageHeader";
 
 export default function MemberReportPage() {
   const { members, deactivateMember, reactivateMember } = useMembers();
@@ -64,14 +65,14 @@ export default function MemberReportPage() {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Member Reports</h1>
-      <Input placeholder="Search members..." value={search} onChange={(e) => setSearch(e.target.value)} className="bg-white" />
+    <div className="p-6 space-y-4 max-w-content mx-auto">
+      <PageHeader title="Member Reports" />
+      <Input placeholder="Search members..." value={search} onChange={(e) => setSearch(e.target.value)} className="bg-white dark:bg-card" />
       <div className="space-y-2">
         {filtered.map((m) => {
           const isActive = m.active !== false;
           return (
-            <Card key={m.id} className={cn("bg-white transition-opacity", !isActive && "opacity-60")}>
+            <Card key={m.id} className={cn("bg-white dark:bg-card transition-opacity", !isActive && "opacity-60")}>
               <CardContent className="p-4 space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <div>

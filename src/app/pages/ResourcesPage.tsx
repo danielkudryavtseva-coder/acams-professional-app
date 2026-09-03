@@ -14,6 +14,7 @@ import { MOCK_RESOURCES, type Resource } from "../data/mockData";
 import { DropboxEmbed } from "../components/DropboxEmbed";
 import { BoxEmbed } from "../components/BoxEmbed";
 import { TaggedMembersRow } from "../components/TaggedMembersRow";
+import { PageHeader } from "../components/PageHeader";
 
 export default function ResourcesPage() {
   const { isExec, currentUser } = useAuth();
@@ -70,23 +71,25 @@ export default function ResourcesPage() {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Resources</h1>
-        {isExec && (
-          <Button
-            onClick={() => {
-              setTitle("");
-              setDescription("");
-              setTaggedMemberIds([]);
-              setCategory("pitches");
-              setOpen(true);
-            }}
-          >
-            Upload Resource
-          </Button>
-        )}
-      </div>
+    <div className="p-6 space-y-4 max-w-content mx-auto">
+      <PageHeader
+        title="Resources"
+        actions={
+          isExec && (
+            <Button
+              onClick={() => {
+                setTitle("");
+                setDescription("");
+                setTaggedMemberIds([]);
+                setCategory("pitches");
+                setOpen(true);
+              }}
+            >
+              Upload Resource
+            </Button>
+          )
+        }
+      />
       <Tabs defaultValue="box">
         <TabsList>
           <TabsTrigger value="box">Box</TabsTrigger>
@@ -104,11 +107,16 @@ export default function ResourcesPage() {
         </TabsContent>
         {(["pitches", "resumes", "tools", "links"] as const).map((cat) => (
           <TabsContent key={cat} value={cat}>
+            {resources.filter((r) => r.category === cat).length === 0 && (
+              <p className="text-sm text-muted-foreground py-8 text-center">
+                Nothing here yet{isExec ? " — use Upload Resource to add one." : "."}
+              </p>
+            )}
             <div className="grid md:grid-cols-2 gap-3">
               {resources
                 .filter((r) => r.category === cat)
                 .map((r) => (
-                  <Card key={r.id} className="bg-white">
+                  <Card key={r.id} className="bg-white dark:bg-card">
                     <CardContent className="p-4 space-y-2">
                       <p className="font-semibold flex items-center gap-2">
                         <FileText className="h-4 w-4" /> {r.title}

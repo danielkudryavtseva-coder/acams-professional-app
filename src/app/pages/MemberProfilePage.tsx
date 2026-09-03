@@ -5,6 +5,7 @@ import { MemberTagsCard } from "../components/MemberTagsCard";
 import { MemberDecisionsCard } from "../components/MemberDecisionsCard";
 import { useMembers } from "../context/MembersContext";
 import { useAuth } from "../context/AuthContext";
+import { PageHeader } from "../components/PageHeader";
 
 export default function MemberProfilePage() {
   const { memberId = "" } = useParams();
@@ -19,7 +20,7 @@ export default function MemberProfilePage() {
   const editable = currentUser?.id === member.id || isExec;
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" asChild className="h-8 -ml-2">
           <Link to="/roster">
@@ -29,14 +30,10 @@ export default function MemberProfilePage() {
         </Button>
       </div>
 
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">
-          {member.firstName} {member.lastName}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {member.committee} · Class of {member.graduationYear}
-        </p>
-      </div>
+      <PageHeader
+        title={`${member.firstName} ${member.lastName}`}
+        description={`${member.committee} · Class of ${member.graduationYear}`}
+      />
 
       <MemberTagsCard memberId={member.id} editable={editable} />
       <MemberDecisionsCard memberId={member.id} />

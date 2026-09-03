@@ -6,6 +6,7 @@ import { Badge } from "../components/ui/badge";
 import { Input } from "../components/ui/input";
 import { MOCK_ALUMNI, MOCK_JOB_POSTINGS } from "../data/mockData";
 import { CoffeeChatModal } from "../components/CoffeeChatModal";
+import { PageHeader } from "../components/PageHeader";
 
 export default function JobsPage() {
   const [search, setSearch] = React.useState("");
@@ -23,30 +24,35 @@ export default function JobsPage() {
   const toggle = (v: string, set: React.Dispatch<React.SetStateAction<string[]>>) => set((prev) => prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]);
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Jobs</h1>
+    <div className="p-6 space-y-4 max-w-content mx-auto">
+      <PageHeader title="Jobs" />
       <div className="grid xl:grid-cols-[280px_1fr] gap-4">
-        <Card className="bg-white h-fit">
+        <Card className="bg-white dark:bg-card h-fit">
           <CardContent className="p-4 space-y-3">
             <p className="text-sm font-semibold">Filters</p>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Track</p>
-              <div className="flex flex-wrap gap-1">{["IB", "PE", "VC", "ER", "AM", "Consulting"].map((t) => <Button key={t} size="sm" variant={selectedTrack.includes(t) ? "default" : "outline"} className={selectedTrack.includes(t) ? "bg-[#c63f60] hover:bg-[#c63f60]" : ""} onClick={() => toggle(t, setSelectedTrack)}>{t}</Button>)}</div>
+              <div className="flex flex-wrap gap-1">{["IB", "PE", "VC", "ER", "AM", "Consulting"].map((t) => <Button key={t} size="sm" variant={selectedTrack.includes(t) ? "default" : "outline"} className={selectedTrack.includes(t) ? "bg-crimson hover:bg-crimson" : ""} onClick={() => toggle(t, setSelectedTrack)}>{t}</Button>)}</div>
             </div>
             <div>
               <p className="text-xs text-muted-foreground mb-1">Posted By</p>
-              <div className="flex gap-1">{["cams", "alumni"].map((p) => <Button key={p} size="sm" variant={selectedPoster.includes(p) ? "default" : "outline"} className={selectedPoster.includes(p) ? "bg-[#c63f60] hover:bg-[#c63f60]" : ""} onClick={() => toggle(p, setSelectedPoster)}>{p.toUpperCase()}</Button>)}</div>
+              <div className="flex gap-1">{["cams", "alumni"].map((p) => <Button key={p} size="sm" variant={selectedPoster.includes(p) ? "default" : "outline"} className={selectedPoster.includes(p) ? "bg-crimson hover:bg-crimson" : ""} onClick={() => toggle(p, setSelectedPoster)}>{p.toUpperCase()}</Button>)}</div>
             </div>
           </CardContent>
         </Card>
         <div className="space-y-3">
-          <Input placeholder="Search by firm or role..." value={search} onChange={(e) => setSearch(e.target.value)} className="bg-white" />
+          <Input placeholder="Search by firm or role..." value={search} onChange={(e) => setSearch(e.target.value)} className="bg-white dark:bg-card" />
+          {jobs.length === 0 && (
+            <p className="text-sm text-muted-foreground py-8 text-center">
+              No jobs match your filters right now — try clearing a filter or check back soon.
+            </p>
+          )}
           {jobs.map((job) => {
             const days = differenceInDays(new Date(job.deadline), new Date());
             const urgency = days <= 7 ? "bg-red-100 text-red-700" : days <= 21 ? "bg-amber-100 text-amber-700" : "bg-green-100 text-green-700";
             const ref = MOCK_ALUMNI.find((a) => a.id === job.alumniReferralId);
             return (
-              <Card key={job.id} className="bg-white">
+              <Card key={job.id} className="bg-white dark:bg-card">
                 <CardContent className="p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div className="space-y-1">
                     <p className="font-semibold">{job.firm}</p>
