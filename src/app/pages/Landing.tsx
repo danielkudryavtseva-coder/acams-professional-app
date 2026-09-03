@@ -18,12 +18,14 @@ interface Executive {
   title: string;
   bio?: string;
   image?: string;
-  /** object-position for the headshot circle — tunes per-photo framing so every face lands
-   * center; defaults to "center" when omitted. */
-  imagePosition?: string;
-  /** Extra zoom (CSS transform: scale, centered) so every face reads as roughly the same
-   * size regardless of how close/far the subject stood from the camera. Defaults to 1. */
-  imageScale?: number;
+  /**
+   * CSS transform (translate% + scale, centered) that lands this exact face at the
+   * container's center at a consistent size. Computed offline per-photo — see
+   * scripts/headshot-crop notes in git history — by measuring each subject's actual
+   * face position/size in their source photo (photos aren't shot at the same distance
+   * or framing), rather than guessed. Defaults to no transform when omitted.
+   */
+  imageTransform?: string;
 }
 
 const EXECUTIVES: Executive[] = [
@@ -31,64 +33,55 @@ const EXECUTIVES: Executive[] = [
     name: "Alex Wylie",
     title: "President",
     image: alexWylie,
-    imagePosition: "center 40%",
-    imageScale: 1.3,
+    imageTransform: "translate(-0.8%, -4.8%) scale(1.6)",
   },
   {
     name: "Luke Lacke",
     title: "Vice President",
     image: lukeLacke,
-    imagePosition: "58% 48%",
-    imageScale: 1.25,
+    imageTransform: "translate(-3.2%, 18.8%) scale(1.6)",
   },
   {
     name: "Matthew Worthington",
     title: "Portfolio Manager",
     image: matthewWorthington,
-    imagePosition: "center 42%",
-    imageScale: 1.65,
+    imageTransform: "translate(1.9%, 27.6%) scale(1.85)",
   },
   {
     name: "William Hessler",
     title: "Director of New Member Education",
     image: williamHessler,
-    imagePosition: "center 45%",
-    imageScale: 1.35,
+    imageTransform: "translate(0%, 10.2%) scale(1.7)",
   },
   {
     name: "Ford Alderdice",
     title: "Director of Recruitment",
     image: fordAlderice,
-    imagePosition: "center 52%",
-    imageScale: 1.7,
+    imageTransform: "translate(0%, -25.6%) scale(2.6)",
   },
   {
     name: "Matt Rochford",
     title: "Co-Director of Professional Development",
     image: mattRochford,
-    imagePosition: "center 42%",
-    imageScale: 1.55,
+    imageTransform: "translate(-0.8%, 16.7%) scale(1.6)",
   },
   {
     name: "Brady Belden",
     title: "Co-Director of Professional Development",
     image: bradyBelden,
-    imagePosition: "center 52%",
-    imageScale: 1.3,
+    imageTransform: "translate(0%, 12.8%) scale(1.7)",
   },
   {
     name: "Cade Andrews",
     title: "Co-Director of Professional Development",
     image: cadeAndrews,
-    imagePosition: "center 58%",
-    imageScale: 1.6,
+    imageTransform: "translate(0%, 8.8%) scale(2.4)",
   },
   {
     name: "Lucy Petrus",
     title: "Director of Media",
     image: lucyPetrus,
-    imagePosition: "center 46%",
-    imageScale: 1.25,
+    imageTransform: "translate(0%, -18%) scale(1.6)",
   },
 ];
 
@@ -116,11 +109,10 @@ interface ExecCardProps {
   title: string;
   image?: string;
   bio?: string;
-  imagePosition?: string;
-  imageScale?: number;
+  imageTransform?: string;
 }
 
-function ExecCard({ name, title, image, bio, imagePosition, imageScale }: ExecCardProps) {
+function ExecCard({ name, title, image, bio, imageTransform }: ExecCardProps) {
   const [expanded, setExpanded] = useState(false);
   const initials = name
     .split(" ")
@@ -146,10 +138,7 @@ function ExecCard({ name, title, image, bio, imagePosition, imageScale }: ExecCa
             src={image}
             alt={`${name} headshot`}
             className="h-full w-full object-cover"
-            style={{
-              objectPosition: imagePosition ?? "center",
-              transform: `scale(${imageScale ?? 1})`,
-            }}
+            style={{ transform: imageTransform }}
             loading="lazy"
           />
         ) : (
