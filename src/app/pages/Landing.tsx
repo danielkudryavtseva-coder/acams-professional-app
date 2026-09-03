@@ -33,7 +33,7 @@ const EXECUTIVES: Executive[] = [
     name: "Alex Wylie",
     title: "President",
     image: alexWylie,
-    imageTransform: "translate(-0.8%, 40%) scale(1.6)",
+    imageTransform: "translate(-0.8%, 4%) scale(1.6)",
   },
   {
     name: "Luke Lacke",
