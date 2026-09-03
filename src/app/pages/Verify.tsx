@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
-import { Mail } from "lucide-react";
+import { CheckCircle2, Mail, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Button } from "../components/ui/button";
 import { supabase, supabaseConfigured } from "../lib/supabaseClient";
@@ -23,9 +23,23 @@ export default function Verify() {
             <Mail className="h-7 w-7 text-primary" />
           </div>
           <CardTitle>Check your email</CardTitle>
-          <CardDescription>
-            We sent a confirmation link to your Crimson email address. Click
-            it to activate your account, then come back and log in.
+          <CardDescription className="space-y-3 text-left">
+            <span className="flex items-start gap-2">
+              <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-emerald-600" />
+              <span>Your account was created successfully.</span>
+            </span>
+            <span className="block">
+              We sent a confirmation link to your Crimson email address. Click
+              it to activate your account, then come back and log in.
+            </span>
+            <span className="flex items-start gap-2">
+              <ShieldCheck className="h-4 w-4 mt-0.5 shrink-0 text-amber-600" />
+              <span>
+                After that, an exec board member still needs to approve your
+                account before you can access the dashboard. You'll see a
+                pending-approval screen when you log in until then.
+              </span>
+            </span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
