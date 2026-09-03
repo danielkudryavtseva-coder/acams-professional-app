@@ -33,7 +33,7 @@ const EXECUTIVES: Executive[] = [
     name: "Alex Wylie",
     title: "President",
     image: alexWylie,
-    imageTransform: "translate(-0.8%, -4.8%) scale(1.6)",
+    imageTransform: "translate(-0.8%, -18%) scale(1.6)",
   },
   {
     name: "Luke Lacke",
@@ -57,7 +57,7 @@ const EXECUTIVES: Executive[] = [
     name: "Ford Alderdice",
     title: "Director of Recruitment",
     image: fordAlderice,
-    imageTransform: "translate(0%, -25.6%) scale(2.6)",
+    imageTransform: "translate(0%, -18.7%) scale(1.9)",
   },
   {
     name: "Matt Rochford",
@@ -69,13 +69,13 @@ const EXECUTIVES: Executive[] = [
     name: "Brady Belden",
     title: "Co-Director of Professional Development",
     image: bradyBelden,
-    imageTransform: "translate(0%, 12.8%) scale(1.7)",
+    imageTransform: "translate(0%, 0%) scale(1.7)",
   },
   {
     name: "Cade Andrews",
     title: "Co-Director of Professional Development",
     image: cadeAndrews,
-    imageTransform: "translate(0%, 8.8%) scale(2.4)",
+    imageTransform: "translate(0%, 6.2%) scale(1.7)",
   },
   {
     name: "Lucy Petrus",
