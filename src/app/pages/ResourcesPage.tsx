@@ -136,7 +136,9 @@ export default function ResourcesPage() {
                             </a>
                           </Button>
                         ) : (
-                          <Button variant="outline">Download</Button>
+                          <Button variant="outline" disabled title="No file attached to this resource">
+                            No file attached
+                          </Button>
                         )}
                       </div>
                     </CardContent>

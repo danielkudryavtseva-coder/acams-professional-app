@@ -30,6 +30,39 @@ export default function MemberReportPage() {
 
   const filtered = members.filter((m) => `${m.firstName} ${m.lastName}`.toLowerCase().includes(search.toLowerCase()));
 
+  // No PDF library in the app — opens a clean, minimal report in a new tab and hands off
+  // to the browser's native print dialog, where "Save as PDF" produces a real PDF with
+  // zero added dependencies.
+  const exportToPdf = (m: Member) => {
+    const esc = (s: string) =>
+      s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const attendance = getMemberAttendance(m.id);
+    const attended = attendance.filter((a) => a.attended).length;
+    const coffeeChats = bookings.filter((b) => b.memberId === m.id).length;
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(`
+      <!doctype html><html><head><title>${esc(m.firstName)} ${esc(m.lastName)} — Member Report</title>
+      <style>body{font-family:system-ui,sans-serif;padding:2rem;color:#1a1a1a}h1{font-size:1.25rem}
+      dl{display:grid;grid-template-columns:auto 1fr;gap:0.4rem 1rem;max-width:32rem}
+      dt{font-weight:600}p.statement{margin-top:1.5rem;white-space:pre-wrap}</style></head>
+      <body>
+        <h1>${esc(m.firstName)} ${esc(m.lastName)}</h1>
+        <p>${esc(m.email)}</p>
+        <dl>
+          <dt>Events attended</dt><dd>${attended}/${attendance.length}</dd>
+          <dt>Pitches submitted</dt><dd>${m.pitchesSubmitted}</dd>
+          <dt>Coffee chats</dt><dd>${coffeeChats}</dd>
+          <dt>Pipeline activity</dt><dd>${m.pipelineActivityCount}</dd>
+        </dl>
+        <p class="statement">${esc(m.personalStatement ?? "")}</p>
+      </body></html>
+    `);
+    win.document.close();
+    win.focus();
+    win.print();
+  };
+
   return (
     <div className="p-6 space-y-4">
       <h1 className="text-2xl font-bold">Member Reports</h1>
@@ -53,7 +86,7 @@ export default function MemberReportPage() {
                         onClick={() => setPendingDeactivate(m)}
                         className="bg-emerald-600 text-white hover:bg-crimson hover:text-white border border-emerald-700"
                       >
-                        Automatically Active
+                        Active · Deactivate
                       </Button>
                     ) : (
                       <Button
@@ -76,7 +109,7 @@ export default function MemberReportPage() {
                     <p>Coffee chats: {bookings.filter((b) => b.memberId === m.id).length}</p>
                     <p>Pipeline activity: {m.pipelineActivityCount}</p>
                     <p className="text-muted-foreground">{m.personalStatement}</p>
-                    <Button size="sm" variant="outline">Export to PDF</Button>
+                    <Button size="sm" variant="outline" onClick={() => exportToPdf(m)}>Export to PDF</Button>
                   </div>
                 )}
               </CardContent>

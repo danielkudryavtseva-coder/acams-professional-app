@@ -55,6 +55,19 @@ export default function ContactsPage() {
     setDeleteTarget(null);
   };
 
+  const exportCsv = () => {
+    const cols: (keyof Contact)[] = ["name", "firm", "role", "email", "linkedin", "phone", "location", "status", "lastContacted", "notes"];
+    const escapeCell = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const rows = [cols.join(","), ...filtered.map((c) => cols.map((col) => escapeCell(c[col])).join(","))];
+    const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cams-contacts-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const getStage = (index: number) => {
     const stages = ["Researching", "Reached Out", "Replied", "Coffee Chat", "Interviewing"];
     return stages[index % stages.length];
@@ -104,8 +117,17 @@ export default function ContactsPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button size="sm" variant="outline"><Download className="h-4 w-4 mr-1.5" /> Export</Button>
-          <Button size="sm" className="bg-[#c63f60] hover:bg-[#c63f60]"><Upload className="h-4 w-4 mr-1.5" /> Import CSV/Excel</Button>
+          <Button size="sm" variant="outline" onClick={exportCsv}>
+            <Download className="h-4 w-4 mr-1.5" /> Export
+          </Button>
+          <Button
+            size="sm"
+            className="bg-[#c63f60] hover:bg-[#c63f60]"
+            disabled
+            title="CSV/Excel import is coming soon"
+          >
+            <Upload className="h-4 w-4 mr-1.5" /> Import CSV/Excel
+          </Button>
           <Button size="sm" onClick={() => setAddOpen(true)}>
             <Plus className="h-4 w-4 mr-1.5" />
             Add Contact

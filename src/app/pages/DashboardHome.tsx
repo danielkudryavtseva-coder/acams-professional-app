@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { TrendingUp, Users, Activity, Calendar, ArrowUpRight, ArrowUp, ArrowDown } from "lucide-react";
 import { DashboardCell } from "../components/ui/DashboardCell";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
@@ -27,20 +27,45 @@ import { estimateReadMinutes, formatNewsShortDate, getNewsCoverSrc } from "../li
 import { WeeklyCheckinModal } from "../components/WeeklyCheckinModal";
 import { cn } from "../components/ui/utils";
 
-const RECENT_ACTIVITY = [
-  { title: "Portfolio updated", subtitle: "NVDA position adjusted", age: "2h ago" },
-  { title: "New contact added", subtitle: "Emily Rodriguez, JPMorgan", age: "5h ago" },
-  { title: "Coffee chat scheduled", subtitle: "Sarah Johnson, Goldman Sachs", age: "1 day ago" },
-  { title: "Application submitted", subtitle: "Goldman Sachs Summer Analyst", age: "2 days ago" },
-];
+/** Coarse relative-time label ("2h ago", "3 days ago") for a past ISO timestamp. */
+function timeAgo(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const hours = Math.floor(diffMs / 3_600_000);
+  if (hours < 1) return "just now";
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
 
 export default function DashboardHome() {
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { posts } = useNews();
   const { events, attendance } = useEvents();
   const { hasCheckedInThisWeek } = useCheckin();
   const { contacts: pipelineContacts } = usePipeline();
   const [checkinOpen, setCheckinOpen] = React.useState(false);
+
+  // Real recent activity — most recently added pipeline contacts. (There's no broader
+  // activity log in the app yet; this reflects the one thing we actually track a
+  // timestamp for, rather than showing made-up sample events.)
+  const recentActivity = React.useMemo(
+    () =>
+      [...pipelineContacts]
+        .sort((a, b) => new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime())
+        .slice(0, 4),
+    [pipelineContacts],
+  );
+
+  const now = Date.now();
+  const upcomingEvents = React.useMemo(
+    () =>
+      events
+        .filter((e) => new Date(e.date).getTime() >= now)
+        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+        .slice(0, 3),
+    [events, now],
+  );
 
   const openPrograms = React.useMemo(
     () => MOCK_PROGRAMS.filter((p) => p.status === "open"),
@@ -242,28 +267,48 @@ export default function DashboardHome() {
                 <p className="text-xs text-muted-foreground mt-1 tabular">
                   {totalPositions} positions · ${totalValue.toLocaleString()} total value
                 </p>
-                <button className="mt-2 text-xs text-crimson inline-flex items-center gap-1">View Portfolio <ArrowUpRight className="h-3.5 w-3.5" /></button>
+                <button
+                  className="mt-2 text-xs text-crimson inline-flex items-center gap-1"
+                  onClick={() => navigate("/dashboard/portfolio")}
+                >
+                  View Portfolio <ArrowUpRight className="h-3.5 w-3.5" />
+                </button>
               </CardContent>
             </Card>
             <Card className="bg-white">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">Deal Pipeline</p>
                 <p className="text-xs text-muted-foreground mt-1">{activePipeline.length} active · {offerStageCount} offer stage</p>
-                <button className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1">Manage Pipeline <ArrowUpRight className="h-3.5 w-3.5" /></button>
+                <button
+                  className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1"
+                  onClick={() => navigate("/dashboard/pipeline")}
+                >
+                  Manage Pipeline <ArrowUpRight className="h-3.5 w-3.5" />
+                </button>
               </CardContent>
             </Card>
             <Card className="bg-white">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">CRM & Contacts</p>
                 <p className="text-xs text-muted-foreground mt-1">{pipelineContacts.length} contacts tracked</p>
-                <button className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1">View Network <ArrowUpRight className="h-3.5 w-3.5" /></button>
+                <button
+                  className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1"
+                  onClick={() => navigate("/dashboard/contacts")}
+                >
+                  View Network <ArrowUpRight className="h-3.5 w-3.5" />
+                </button>
               </CardContent>
             </Card>
             <Card className="bg-white">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">Recruiting Portal</p>
                 <p className="text-xs text-muted-foreground mt-1">{openPrograms.length} programs open · {soonDeadlines} deadlines soon</p>
-                <button className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1">Browse Programs <ArrowUpRight className="h-3.5 w-3.5" /></button>
+                <button
+                  className="mt-2 text-xs text-[#c63f60] inline-flex items-center gap-1"
+                  onClick={() => navigate("/dashboard/recruiting")}
+                >
+                  Browse Programs <ArrowUpRight className="h-3.5 w-3.5" />
+                </button>
               </CardContent>
             </Card>
           </div>
@@ -276,16 +321,22 @@ export default function DashboardHome() {
               <CardDescription>Last 7 days</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {RECENT_ACTIVITY.map((item) => (
-                <div key={item.title} className="flex gap-2">
-                  <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#c63f60]" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
-                    <p className="text-[11px] text-muted-foreground">{item.age}</p>
+              {recentActivity.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No recent activity yet — add a contact to your pipeline to see it here.
+                </p>
+              ) : (
+                recentActivity.map((contact) => (
+                  <div key={contact.id} className="flex gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#c63f60]" />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">New contact added</p>
+                      <p className="text-xs text-muted-foreground truncate">{contact.name}, {contact.firm}</p>
+                      <p className="text-[11px] text-muted-foreground">{timeAgo(contact.addedAt)}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </CardContent>
           </Card>
 
@@ -295,6 +346,9 @@ export default function DashboardHome() {
               <CardDescription>Latest club news</CardDescription>
             </CardHeader>
             <CardContent className="space-y-1">
+              {posts.length === 0 && (
+                <p className="text-sm text-muted-foreground">No news posted yet.</p>
+              )}
               {sortNewsPosts(posts).slice(0, 3).map((item) => {
                 const readMin = estimateReadMinutes(item.body);
                 const meta = `${formatNewsShortDate(item.publishedAt)} \u2022 ${readMin} min read`;
@@ -324,10 +378,15 @@ export default function DashboardHome() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium">Upcoming Deadlines</CardTitle>
-                <button className="text-xs text-[#c63f60]">View all</button>
+                <button className="text-xs text-[#c63f60]" onClick={() => navigate("/dashboard/recruiting")}>
+                  View all
+                </button>
               </div>
             </CardHeader>
             <CardContent className="space-y-2">
+              {upcomingDeadlines.length === 0 && (
+                <p className="text-sm text-muted-foreground">No upcoming deadlines right now.</p>
+              )}
               {upcomingDeadlines.map((program) => (
                 <div key={program.id} className="flex items-center justify-between gap-2 border-b last:border-b-0 py-2">
                   <div className="min-w-0">
@@ -345,7 +404,10 @@ export default function DashboardHome() {
           <Card className="bg-white">
             <CardHeader><CardTitle className="text-sm font-medium">Upcoming Events</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              {events.slice(0, 3).map((e) => {
+              {upcomingEvents.length === 0 && (
+                <p className="text-sm text-muted-foreground">No upcoming events on the calendar yet.</p>
+              )}
+              {upcomingEvents.map((e) => {
                 const rec = currentUser ? attendance.find((a) => a.memberId === currentUser.id && a.eventId === e.id) : undefined;
                 return (
                   <div key={e.id} className="border-b last:border-b-0 pb-2 last:pb-0">
