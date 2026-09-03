@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { AddContactModal, DeleteContactModal } from "../components/ContactModals";
 import { MOCK_CONTACTS, CONTACT_STAGE_LABEL, type Contact, type ContactStage, type ContactPriority } from "../data/mockData";
 import { usePipeline } from "../context/PipelineContext";
+import { PageHeader } from "../components/PageHeader";
 
 function getInitials(name: string): string {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
@@ -101,32 +102,30 @@ export default function ContactsPage() {
   );
 
   return (
-    <div className="p-6 space-y-4 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Contacts</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Manage your professional network of {contacts.length} contacts
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button size="sm" variant="outline" onClick={exportCsv}>
-            <Download className="h-4 w-4 mr-1.5" /> Export
-          </Button>
-          <Button
-            size="sm"
-            className="bg-[#c63f60] hover:bg-[#c63f60]"
-            disabled
-            title="CSV/Excel import is coming soon"
-          >
-            <Upload className="h-4 w-4 mr-1.5" /> Import CSV/Excel
-          </Button>
-          <Button size="sm" onClick={() => setAddOpen(true)}>
-            <Plus className="h-4 w-4 mr-1.5" />
-            Add Contact
-          </Button>
-        </div>
-      </div>
+    <div className="p-6 space-y-4 max-w-content mx-auto">
+      <PageHeader
+        title="Contacts"
+        description={`Manage your professional network of ${contacts.length} contacts`}
+        actions={
+          <>
+            <Button size="sm" variant="outline" onClick={exportCsv}>
+              <Download className="h-4 w-4 mr-1.5" /> Export
+            </Button>
+            <Button
+              size="sm"
+              className="bg-crimson hover:bg-crimson"
+              disabled
+              title="CSV/Excel import is coming soon"
+            >
+              <Upload className="h-4 w-4 mr-1.5" /> Import CSV/Excel
+            </Button>
+            <Button size="sm" onClick={() => setAddOpen(true)}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              Add Contact
+            </Button>
+          </>
+        }
+      />
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -138,7 +137,7 @@ export default function ContactsPage() {
         />
       </div>
 
-      <div className="border rounded-lg overflow-hidden bg-white">
+      <div className="border rounded-lg overflow-hidden bg-white dark:bg-card">
         <Table>
           <TableHeader>
             <TableRow>
@@ -199,7 +198,7 @@ export default function ContactsPage() {
                         className={
                           "h-7 w-[6.5rem] text-xs border-none bg-transparent px-0 shadow-none " +
                           (contact.priority === "high"
-                            ? "text-[#c63f60]"
+                            ? "text-crimson"
                             : contact.priority === "medium"
                               ? "text-amber-600"
                               : "")
@@ -234,7 +233,7 @@ export default function ContactsPage() {
                     <Button
                       size="sm"
                       variant={isAlreadyInPipeline(contact) ? "outline" : "default"}
-                      className={!isAlreadyInPipeline(contact) ? "bg-[#c63f60] hover:bg-[#c63f60]" : ""}
+                      className={!isAlreadyInPipeline(contact) ? "bg-crimson hover:bg-crimson" : ""}
                       disabled={isAlreadyInPipeline(contact)}
                       onClick={() => moveToPipeline(contact)}
                     >

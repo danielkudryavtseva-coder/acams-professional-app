@@ -9,6 +9,7 @@ import { useNews } from "../context/NewsContext";
 import { CoffeeChatModal } from "../components/CoffeeChatModal";
 import type { AlumniProfile } from "../data/mockData";
 import { TRACK_COLORS } from "../data/constants";
+import { PageHeader } from "../components/PageHeader";
 
 const AlumniRolodexGraph = React.lazy(() => import("../components/AlumniRolodexGraph"));
 const AlumniMap = React.lazy(() => import("../components/AlumniMap"));
@@ -37,8 +38,8 @@ export default function ConnectPage() {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Connect</h1>
+    <div className="p-6 space-y-4 max-w-content mx-auto">
+      <PageHeader title="Connect" />
       <Tabs defaultValue="rolodex">
         <TabsList>
           <TabsTrigger value="rolodex">Alumni Rolodex</TabsTrigger>
@@ -46,20 +47,20 @@ export default function ConnectPage() {
           <TabsTrigger value="community">Community</TabsTrigger>
         </TabsList>
         <TabsContent value="rolodex" className="mt-4 space-y-0">
-          <div className="flex min-h-[calc(100vh-11rem)] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-            <header className="flex flex-col gap-1 border-b border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-h-[calc(100vh-11rem)] flex-col overflow-hidden rounded-lg border border-border bg-white dark:bg-card shadow-sm">
+            <header className="flex flex-col gap-1 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="text-sm font-semibold tracking-wide text-slate-900">Alumni network</h2>
+                <h2 className="text-sm font-semibold tracking-wide text-foreground">Alumni network</h2>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Input
                   placeholder="Search name, firm, city..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="h-9 w-full border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 sm:w-56"
+                  className="h-9 w-full sm:w-56"
                 />
                 <select
-                  className="h-9 rounded-md border border-slate-200 bg-white px-3 text-xs text-slate-900"
+                  className="h-9 rounded-md border border-input bg-background px-3 text-xs text-foreground"
                   value={track}
                   onChange={(e) => setTrack(e.target.value)}
                 >
@@ -75,8 +76,8 @@ export default function ConnectPage() {
             </header>
 
             <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-              <aside className="flex max-h-[min(42vh,360px)] w-full flex-col border-slate-200 bg-slate-50 lg:max-h-none lg:w-[300px] lg:shrink-0 lg:border-r lg:border-b-0 border-b">
-                <div className="border-b border-slate-200 px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-slate-500">
+              <aside className="flex max-h-[min(42vh,360px)] w-full flex-col border-border bg-muted/40 lg:max-h-none lg:w-[300px] lg:shrink-0 lg:border-r lg:border-b-0 border-b">
+                <div className="border-b border-border px-3 py-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                   Vault / alumni ({filtered.length})
                 </div>
                 <div className="min-h-0 flex-1 overflow-y-auto">
@@ -85,23 +86,23 @@ export default function ConnectPage() {
                       key={a.id}
                       type="button"
                       onClick={() => focusAlumniOnGraph(a)}
-                      className={`flex w-full flex-col gap-1 border-b border-slate-200 px-3 py-2.5 text-left transition-colors hover:bg-white ${
+                      className={`flex w-full flex-col gap-1 border-b border-border px-3 py-2.5 text-left transition-colors hover:bg-white dark:hover:bg-card ${
                         activeAlumniId === a.id
-                          ? "bg-[#fdecf1] ring-1 ring-inset ring-[#c73867]/40"
+                          ? "bg-crimson/10 ring-1 ring-inset ring-crimson/40"
                           : ""
                       }`}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <span className="text-sm font-medium text-slate-900">
+                        <span className="text-sm font-medium text-foreground">
                           {a.firstName} {a.lastName}
                         </span>
-                        <span className="shrink-0 text-[10px] text-slate-500">{a.graduationYear}</span>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">{a.graduationYear}</span>
                       </div>
-                      <div className="flex items-center gap-1 text-[11px] text-slate-600">
-                        <MapPin className="h-3 w-3 shrink-0 text-[#c73867]" />
+                      <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <MapPin className="h-3 w-3 shrink-0 text-crimson" />
                         <span className="truncate">{a.mapCity}</span>
                       </div>
-                      <p className="truncate text-[11px] text-slate-500">
+                      <p className="truncate text-[11px] text-muted-foreground">
                         {a.firm} · {a.role}
                       </p>
                       <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
@@ -111,7 +112,7 @@ export default function ConnectPage() {
                             href={`https://${a.linkedin.replace(/^https?:\/\//, "")}`}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-0.5 text-[10px] text-[#c73867] hover:underline"
+                            className="inline-flex items-center gap-0.5 text-[10px] text-crimson hover:underline"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <ExternalLink className="h-3 w-3" />
@@ -119,19 +120,19 @@ export default function ConnectPage() {
                           </a>
                         ) : null}
                         {a.email ? (
-                          <span className="truncate text-[10px] text-slate-500" title={a.email}>
+                          <span className="truncate text-[10px] text-muted-foreground" title={a.email}>
                             {a.email}
                           </span>
                         ) : null}
                         {a.phone ? (
-                          <span className="text-[10px] text-slate-500" title={a.phone}>
+                          <span className="text-[10px] text-muted-foreground" title={a.phone}>
                             {a.phone}
                           </span>
                         ) : null}
                         {a.availableForChat && (
                           <button
                             type="button"
-                            className="text-[10px] font-medium text-[#c73867] hover:underline"
+                            className="text-[10px] font-medium text-crimson hover:underline"
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelected({ id: a.id, name: `${a.firstName} ${a.lastName}` });
@@ -147,12 +148,12 @@ export default function ConnectPage() {
               </aside>
 
               <div
-                className="flex-1 bg-white p-2"
+                className="flex-1 bg-white dark:bg-card p-2"
                 style={{ height: "min(72vh, 760px)", minHeight: 420 }}
               >
                 <React.Suspense
                   fallback={
-                    <div className="flex h-full w-full items-center justify-center rounded-md border border-slate-200 bg-white text-sm text-slate-500">
+                    <div className="flex h-full w-full items-center justify-center rounded-md border border-border bg-white dark:bg-card text-sm text-muted-foreground">
                       Loading network graph…
                     </div>
                   }
@@ -171,7 +172,7 @@ export default function ConnectPage() {
           <div style={{ height: "min(78vh, 800px)", minHeight: 480 }}>
             <React.Suspense
               fallback={
-                <div className="flex h-full w-full items-center justify-center rounded-lg border border-[#2e3348] bg-[#0b0d15] text-sm text-slate-400">
+                <div className="flex h-full w-full items-center justify-center rounded-lg border border-border bg-muted text-sm text-muted-foreground">
                   Loading alumni map…
                 </div>
               }
@@ -185,7 +186,7 @@ export default function ConnectPage() {
           </div>
         </TabsContent>
         <TabsContent value="community">
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardContent className="p-4 space-y-2">
               <h3 className="font-semibold">Announcements</h3>
               {posts.filter((n) => n.category === "announcement").map((n) => (

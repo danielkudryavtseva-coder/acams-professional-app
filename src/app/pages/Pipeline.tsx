@@ -22,6 +22,7 @@ import {
 } from "../components/ui/select";
 import { usePipeline, type PipelineStage, type PipelineContact } from "../context/PipelineContext";
 import { cn } from "../components/ui/utils";
+import { PageHeader } from "../components/PageHeader";
 
 const STAGES: { id: PipelineStage; label: string; color: string }[] = [
   { id: "wishlist", label: "Wishlist", color: "border-gray-300" },
@@ -33,7 +34,7 @@ const STAGES: { id: PipelineStage; label: string; color: string }[] = [
 ];
 
 const PRIORITY_COLORS: Record<PipelineContact["priority"], string> = {
-  high: "bg-[#c63f60] text-white",
+  high: "bg-crimson text-white",
   medium: "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
   low: "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
 };
@@ -52,7 +53,7 @@ function ContactCard({
       draggable
       onDragStart={() => onDragStart(contact.id)}
       onDragEnd={onDragEnd}
-      className="group cursor-grab active:cursor-grabbing bg-white hover:shadow-md transition-shadow"
+      className="group cursor-grab active:cursor-grabbing bg-white dark:bg-card hover:shadow-md transition-shadow"
     >
       <CardContent className="p-3">
         <div className="flex items-start justify-between gap-1">
@@ -283,19 +284,17 @@ export default function Pipeline() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Pipeline</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            {contacts.length} contacts across {STAGES.length} stages
-          </p>
-        </div>
-        <Button size="sm" onClick={() => openAddDialog("wishlist")}>
-          <Plus className="h-4 w-4 mr-1.5" />
-          Add Contact
-        </Button>
-      </div>
+    <div className="p-6 space-y-6 max-w-content mx-auto">
+      <PageHeader
+        title="Pipeline"
+        description={`${contacts.length} contacts across ${STAGES.length} stages`}
+        actions={
+          <Button size="sm" onClick={() => openAddDialog("wishlist")}>
+            <Plus className="h-4 w-4 mr-1.5" />
+            Add Contact
+          </Button>
+        }
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {STAGES.map((stage) => {
@@ -315,7 +314,7 @@ export default function Pipeline() {
                   handleDrop(stage.id);
                 }}
                 className={cn(
-                  "rounded-lg border-t-2 bg-white p-3 transition-colors",
+                  "rounded-lg border-t-2 bg-white dark:bg-card p-3 transition-colors",
                   stage.color,
                   dragOverStage === stage.id && "ring-2 ring-primary/60"
                 )}

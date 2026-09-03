@@ -12,6 +12,7 @@ import { COMMITTEE_COLORS, TRACK_COLORS, GRAD_YEAR_LABEL } from "../data/constan
 import type { Member, Committee } from "../data/mockData";
 import type { Tag } from "../data/tags";
 import { TAG_CATEGORY_COLORS, type TagCategory } from "../data/tags";
+import { PageHeader } from "../components/PageHeader";
 
 // ─── GROUP PHOTOS ─────────────────────────────────────────────────────────────
 // Add photos here. Place image files in /public/photos/ and reference as
@@ -206,7 +207,8 @@ export default function RosterPage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
+      <PageHeader title="Roster" />
       {/* Group photos */}
       {ROSTER_PHOTOS.length > 0 && (
         <div className="space-y-3">
@@ -240,7 +242,7 @@ export default function RosterPage() {
       )}
 
       {/* Announcement banner */}
-      <Card className="bg-white border-[#c63f60] dark:bg-card">
+      <Card className="bg-white border-crimson dark:bg-card">
         <CardContent className="p-4 font-medium">Congratulations, Spring 2026 Class!</CardContent>
       </Card>
 
