@@ -9,6 +9,7 @@ import {
   type FmpQuote,
 } from "../lib/fmp";
 import {
+  FMP_FREE_TIER_UNAVAILABLE,
   FMP_SYMBOL_OVERRIDES,
   PORTFOLIO_HOLDINGS,
 } from "../data/portfolioHoldings";
@@ -152,8 +153,15 @@ function remapDividends(
 
 export function usePortfolioLiveData(): PortfolioLiveData {
   const reverseMap = React.useMemo(buildReverseMap, []);
+  // Skip symbols FMP's free plan won't serve at all — calling anyway would just guarantee a
+  // 402 on every refresh (and the browser logs that to the console itself, unsuppressable
+  // from JS). They fall back to their static seed values in portfolioHoldings.ts, same as any
+  // symbol with no live quote.
   const tickers = React.useMemo(
-    () => PORTFOLIO_HOLDINGS.map((h) => fmpSymbolFor(h.ticker)),
+    () =>
+      PORTFOLIO_HOLDINGS.map((h) => fmpSymbolFor(h.ticker)).filter(
+        (sym) => !FMP_FREE_TIER_UNAVAILABLE.has(sym),
+      ),
     [],
   );
 

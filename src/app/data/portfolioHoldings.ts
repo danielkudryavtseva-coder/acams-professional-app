@@ -48,6 +48,23 @@ export const FMP_SYMBOL_OVERRIDES: Record<string, string> = {
   MC: "MC.PA",
 };
 
+/**
+ * FMP symbols (post-`FMP_SYMBOL_OVERRIDES`) confirmed unavailable on the free plan — FMP
+ * returns HTTP 402 "not available under your current subscription" for these on quote,
+ * historical-price, and dividends alike (verified directly against the live API on
+ * 2026-09-04, not assumed). No paid plan is in use, so rather than hit FMP for a guaranteed
+ * 402 on every refresh — which the browser logs to the console itself and JS can't suppress,
+ * since it's not an application-level error — these are filtered out of the live-fetch list
+ * entirely in usePortfolioLiveData.ts. They fall back to their static seed values below (the
+ * same fallback path already used for any symbol with no live quote), same as before, just
+ * without spamming the console every refresh. FMP's free-tier whitelist could change
+ * independently of this list.
+ */
+export const FMP_FREE_TIER_UNAVAILABLE = new Set([
+  "VRTX", "APO", "LLY", "MA", "WM", "NVO", "GTBIF", "WMS", "ACN", "SG",
+  "ISRG", "CVE", "UNM", "ULTA", "RDNT", "MC.PA", "CMG", "CCJ", "VST",
+]);
+
 export const PORTFOLIO_AS_OF = "2026-05-05";
 export const PORTFOLIO_CASH = 177155;
 
