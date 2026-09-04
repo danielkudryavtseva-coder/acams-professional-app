@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import type { FinanceTrack, Member } from "../data/mockData";
 import { CRIMSON_EMAIL_DOMAIN, CURRENT_COHORT } from "../data/constants";
 import { useMembers } from "./MembersContext";
-import { supabase, supabaseConfigured } from "../lib/supabaseClient";
+import { setRememberMePreference, supabase, supabaseConfigured } from "../lib/supabaseClient";
 
 const NOT_CONFIGURED_ERROR =
   "Accounts aren't set up yet — the site owner still needs to connect a backend.";
@@ -97,11 +97,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // by a Postgres trigger — so trusting the live `members` row here is safe.
   const isExec = currentUser?.role === "exec";
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe = true) => {
     if (!supabaseConfigured) return { success: false, error: NOT_CONFIGURED_ERROR };
     if (!email.toLowerCase().endsWith(CRIMSON_EMAIL_DOMAIN))
       return { success: false, error: "Must use a @crimson.ua.edu email address." };
 
+    // Must be set before signInWithPassword() writes the session — the storage adapter
+    // reads this preference at write time to decide localStorage vs sessionStorage.
+    setRememberMePreference(rememberMe);
     const { data: signInData, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { success: false, error: error.message };
 

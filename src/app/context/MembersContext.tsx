@@ -70,6 +70,14 @@ export function MembersProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
 
     async function load() {
+      // Flip back to loading on every call, not just the first — otherwise a reload
+      // triggered by a later auth-state change (e.g. login completing after the initial
+      // anonymous fetch already resolved) leaves `loading` stuck at false while `members`
+      // is still the stale/empty pre-login list. RequireAuth reads both `authReady` and
+      // this `loading` flag together specifically to avoid rendering off a half-updated
+      // state; without this, a real, valid login can get bounced back to /login because
+      // authReady flips true before this second fetch has actually finished.
+      setLoading(true);
       const { data, error } = await supabase.from("members").select("*");
       if (cancelled) return;
       if (!error && data) setMembers((data as MemberRow[]).map(rowToMember));
