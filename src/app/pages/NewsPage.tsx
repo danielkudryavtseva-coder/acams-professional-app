@@ -13,7 +13,8 @@ const TOP_SLOTS = 5;
 
 export default function NewsPage() {
   const { events } = useEvents();
-  const { posts } = useNews();
+  const { visiblePosts } = useNews();
+  const posts = React.useMemo(() => visiblePosts(null), [visiblePosts]);
   const sorted = React.useMemo(() => sortNewsPosts(posts), [posts]);
 
   const totalPages = React.useMemo(
@@ -79,21 +80,15 @@ export default function NewsPage() {
           </>
         )}
 
-        <div className="mt-14 grid gap-4 border-t border-border pt-10 md:grid-cols-2">
-          <Card className="rounded-[1.25rem] bg-card shadow-soft ring-1 ring-border/35 md:rounded-3xl">
-            <CardHeader>
-              <CardTitle className="text-sm">Portfolio Widget</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="font-semibold">$811,594</p>
-              <p className="text-sm text-crimson">+10.13% YTD</p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[1.25rem] bg-card shadow-soft ring-1 ring-border/35 md:rounded-3xl">
+        <div className="mt-14 border-t border-border pt-10">
+          <Card className="max-w-sm rounded-[1.25rem] bg-card shadow-soft ring-1 ring-border/35 md:rounded-3xl">
             <CardHeader>
               <CardTitle className="text-sm">Upcoming Events</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
+              {events.length === 0 && (
+                <p className="text-sm text-muted-foreground">No upcoming events on the calendar yet.</p>
+              )}
               {events.slice(0, 3).map((e) => (
                 <div key={e.id}>
                   <p className="text-sm font-medium">{e.title}</p>

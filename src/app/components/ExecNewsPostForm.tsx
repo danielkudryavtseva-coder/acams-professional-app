@@ -4,7 +4,12 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
-import { NEWS_CATEGORY_LABELS, type NewsCategory } from "../data/mockData";
+import {
+  NEWS_AUDIENCE_LABELS,
+  NEWS_CATEGORY_LABELS,
+  type NewsAudience,
+  type NewsCategory,
+} from "../data/mockData";
 import { useNews } from "../context/NewsContext";
 
 export interface ExecNewsPostFormProps {
@@ -26,12 +31,14 @@ export function ExecNewsPostForm({
   const [postBody, setPostBody] = React.useState("");
   const [postCategory, setPostCategory] = React.useState<NewsCategory>("announcement");
   const [postExcerpt, setPostExcerpt] = React.useState("");
+  const [postAudience, setPostAudience] = React.useState<NewsAudience>("all");
 
   const reset = React.useCallback(() => {
     setPostTitle("");
     setPostBody("");
     setPostCategory("announcement");
     setPostExcerpt("");
+    setPostAudience("all");
   }, []);
 
   return (
@@ -44,6 +51,7 @@ export function ExecNewsPostForm({
           body: postBody,
           category: postCategory,
           excerpt: postExcerpt.trim() || undefined,
+          audience: postAudience,
         });
         if (created) {
           toast.success("Post published");
@@ -73,13 +81,30 @@ export function ExecNewsPostForm({
         </Label>
         <select
           id={`${idPrefix}-category`}
-          className="mt-1 h-10 w-full rounded-md border border-input bg-white px-3 text-sm"
+          className="mt-1 h-10 w-full rounded-md border border-input bg-white dark:bg-card px-3 text-sm"
           value={postCategory}
           onChange={(e) => setPostCategory(e.target.value as NewsCategory)}
         >
           {(Object.keys(NEWS_CATEGORY_LABELS) as NewsCategory[]).map((c) => (
             <option key={c} value={c}>
               {NEWS_CATEGORY_LABELS[c]}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="min-w-0">
+        <Label htmlFor={`${idPrefix}-audience`} className="text-xs">
+          Audience
+        </Label>
+        <select
+          id={`${idPrefix}-audience`}
+          className="mt-1 h-10 w-full rounded-md border border-input bg-white dark:bg-card px-3 text-sm"
+          value={postAudience}
+          onChange={(e) => setPostAudience(e.target.value as NewsAudience)}
+        >
+          {(Object.keys(NEWS_AUDIENCE_LABELS) as NewsAudience[]).map((a) => (
+            <option key={a} value={a}>
+              {NEWS_AUDIENCE_LABELS[a]}
             </option>
           ))}
         </select>

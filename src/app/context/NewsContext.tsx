@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import {
   MOCK_NEWS,
+  type NewsAudience,
   type NewsCategory,
   type NewsPost,
 } from "../data/mockData";
@@ -67,11 +68,18 @@ export interface AddNewsPostInput {
   body: string;
   category: NewsCategory;
   excerpt?: string;
+  /** Defaults to "all" (public) when omitted. */
+  audience?: NewsAudience;
 }
 
 interface NewsContextValue {
   posts: NewsPost[];
   addPost: (input: AddNewsPostInput) => NewsPost | null;
+  /**
+   * Posts a given viewer is actually allowed to see, honoring `audience`.
+   * `viewer: null` (or omitted) is the anonymous/public case — only "all".
+   */
+  visiblePosts: (viewer?: { isExec: boolean } | null) => NewsPost[];
 }
 
 const NewsContext = createContext<NewsContextValue | null>(null);
@@ -112,6 +120,7 @@ export function NewsProvider({ children }: { children: React.ReactNode }) {
         author: `${currentUser.firstName} ${currentUser.lastName}`,
         publishedAt: new Date().toISOString(),
         pinned: false,
+        audience: input.audience ?? "all",
       };
       setPosts((prev) => [...prev, post]);
       return post;
@@ -119,9 +128,21 @@ export function NewsProvider({ children }: { children: React.ReactNode }) {
     [currentUser, isExec],
   );
 
+  const visiblePosts = useCallback(
+    (viewer?: { isExec: boolean } | null) =>
+      posts.filter((p) => {
+        const audience = p.audience ?? "all";
+        if (audience === "all") return true;
+        if (!viewer) return false; // anonymous/public visitor
+        if (audience === "members") return true; // any signed-in viewer
+        return viewer.isExec; // audience === "exec"
+      }),
+    [posts],
+  );
+
   const value = useMemo<NewsContextValue>(
-    () => ({ posts, addPost }),
-    [posts, addPost],
+    () => ({ posts, addPost, visiblePosts }),
+    [posts, addPost, visiblePosts],
   );
 
   return (

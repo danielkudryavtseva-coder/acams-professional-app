@@ -8,7 +8,10 @@ import { estimateReadMinutes, formatNewsShortDate, resolveNewsCover } from "../l
 
 export default function NewsPostPage() {
   const { postId } = useParams<{ postId: string }>();
-  const { posts } = useNews();
+  const { visiblePosts } = useNews();
+  // Public route, anonymous viewer — only ever resolves "all"-audience posts,
+  // so a member/exec-only post's direct link doesn't leak its content here.
+  const posts = React.useMemo(() => visiblePosts(null), [visiblePosts]);
   const post = React.useMemo(
     () => posts.find((p) => p.id === postId),
     [posts, postId],

@@ -40,8 +40,12 @@ function timeAgo(iso: string): string {
 
 export default function DashboardHome() {
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
-  const { posts } = useNews();
+  const { currentUser, isExec } = useAuth();
+  const { visiblePosts } = useNews();
+  const posts = React.useMemo(
+    () => visiblePosts({ isExec }),
+    [visiblePosts, isExec],
+  );
   const { events, attendance } = useEvents();
   const { hasCheckedInThisWeek } = useCheckin();
   const { contacts: pipelineContacts } = usePipeline();

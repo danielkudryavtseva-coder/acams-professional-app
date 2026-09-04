@@ -13,6 +13,9 @@ import { useAuth } from "../context/AuthContext";
 import { useMembers } from "../context/MembersContext";
 import { useEvents } from "../context/EventsContext";
 import { useTags } from "../context/TagsContext";
+import { sortNewsPosts, useNews } from "../context/NewsContext";
+import { NEWS_AUDIENCE_LABELS } from "../data/mockData";
+import { ExecNewsPostForm } from "../components/ExecNewsPostForm";
 import {
   TAG_CATEGORY_LABELS,
   type TagCategory,
@@ -29,6 +32,7 @@ export default function ExecToolsPage() {
     rejectTag,
     createCustomTag,
   } = useTags();
+  const { posts } = useNews();
   const [password, setPassword] = React.useState("");
   const [unlocked, setUnlocked] = React.useState(isExec);
   const [reason, setReason] = React.useState("");
@@ -72,7 +76,7 @@ export default function ExecToolsPage() {
   if (!unlocked) {
     return (
       <div className="p-6">
-        <Card className="max-w-md mx-auto bg-white">
+        <Card className="max-w-md mx-auto bg-white dark:bg-card">
           <CardContent className="p-6 space-y-3">
             <p className="font-semibold">Exec Access Required</p>
             <Input
@@ -123,7 +127,7 @@ export default function ExecToolsPage() {
           </CardContent>
         </Card>
       )}
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card">
         <CardHeader>
           <CardTitle>Cohort Health Score: {score}</CardTitle>
         </CardHeader>
@@ -136,11 +140,10 @@ export default function ExecToolsPage() {
           <TabsTrigger value="members">Members Overview</TabsTrigger>
           <TabsTrigger value="tags">Alumni &amp; tag approvals</TabsTrigger>
           <TabsTrigger value="notifications">Mass Notifications</TabsTrigger>
-          <TabsTrigger value="ai">AI Recruiter Suite</TabsTrigger>
         </TabsList>
         <TabsContent value="members" className="space-y-2">
           {members.map((m) => (
-            <Card key={m.id} className="bg-white">
+            <Card key={m.id} className="bg-white dark:bg-card">
               <CardContent className="p-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                 <div>
                   <p className="font-medium">
@@ -176,7 +179,7 @@ export default function ExecToolsPage() {
 
         <TabsContent value="tags" className="space-y-4">
           {!isExec ? (
-            <Card className="bg-white">
+            <Card className="bg-white dark:bg-card">
               <CardContent className="p-6">
                 <p className="text-sm text-muted-foreground">
                   Alumni &amp; tag approvals are restricted to executive board members.
@@ -185,7 +188,7 @@ export default function ExecToolsPage() {
             </Card>
           ) : (
             <>
-              <Card className="bg-white">
+              <Card className="bg-white dark:bg-card">
             <CardHeader>
               <CardTitle className="text-base">Pending tag requests</CardTitle>
             </CardHeader>
@@ -249,7 +252,7 @@ export default function ExecToolsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <CardTitle className="text-base">Tag catalog (custom)</CardTitle>
             </CardHeader>
@@ -266,7 +269,7 @@ export default function ExecToolsPage() {
               <div>
                 <Label className="text-xs">Category</Label>
                 <select
-                  className="mt-1 h-10 w-full rounded-md border px-3 text-sm bg-white"
+                  className="mt-1 h-10 w-full rounded-md border px-3 text-sm bg-white dark:bg-card"
                   value={customCategory}
                   onChange={(e) => setCustomCategory(e.target.value as TagCategory)}
                 >
@@ -324,19 +327,59 @@ export default function ExecToolsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="notifications">
-          <Card className="bg-white">
-            <CardContent className="p-4">
-              Notification composer available for all/spring2026/alumni/exec audiences.
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="ai">
-          <Card className="bg-white">
-            <CardContent className="p-4">
-              Outreach template suite with copy/customize actions.
-            </CardContent>
-          </Card>
+        <TabsContent value="notifications" className="space-y-4">
+          {!isExec ? (
+            <Card className="bg-white dark:bg-card">
+              <CardContent className="p-6">
+                <p className="text-sm text-muted-foreground">
+                  Mass notifications are restricted to executive board members.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <>
+              <Card className="bg-white dark:bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base">Send a notification</CardTitle>
+                  <p className="text-sm text-muted-foreground">
+                    Publishes to <span className="text-crimson font-medium">/news</span> and
+                    the relevant home surfaces, scoped to the audience you pick below.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ExecNewsPostForm idPrefix="mass-notify" />
+                </CardContent>
+              </Card>
+
+              <Card className="bg-white dark:bg-card">
+                <CardHeader>
+                  <CardTitle className="text-base">Recently sent</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {posts.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Nothing published yet.</p>
+                  ) : (
+                    sortNewsPosts(posts).slice(0, 8).map((p) => (
+                      <div
+                        key={p.id}
+                        className="flex items-center justify-between gap-2 border-b pb-2 last:border-0 last:pb-0"
+                      >
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{p.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {new Date(p.publishedAt).toLocaleString()} · {p.author}
+                          </p>
+                        </div>
+                        <Badge variant="outline" className="shrink-0 text-xs">
+                          {NEWS_AUDIENCE_LABELS[p.audience ?? "all"]}
+                        </Badge>
+                      </div>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
         </TabsContent>
       </Tabs>
     </div>

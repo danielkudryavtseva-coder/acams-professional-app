@@ -424,6 +424,21 @@ export interface PortfolioDecision {
   unrealizedPnl?: number;
 }
 
+/**
+ * Who a post is visible to. Maps directly to the app's real auth boundaries —
+ * "all" is the public /news page and homepage (no login needed), "members" is
+ * anyone signed in, "exec" is exec board only. No "alumni" tier: alumni don't
+ * have accounts or a dashboard, so there's nowhere to actually deliver or gate
+ * alumni-only content — an option like that would look real but do nothing.
+ */
+export type NewsAudience = "all" | "members" | "exec";
+
+export const NEWS_AUDIENCE_LABELS: Record<NewsAudience, string> = {
+  all: "Everyone (public + members)",
+  members: "Members only (signed in)",
+  exec: "Exec board only",
+};
+
 export interface NewsPost {
   id: string;
   title: string;
@@ -436,6 +451,8 @@ export interface NewsPost {
   pinned: boolean;
   /** Optional real cover photo. Falls back to a placeholder image when omitted. */
   coverImage?: string;
+  /** Defaults to "all" for posts that predate this field. */
+  audience?: NewsAudience;
 }
 
 export interface WeeklyCheckin {

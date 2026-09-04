@@ -6,6 +6,7 @@ import { Input } from "../components/ui/input";
 import { Badge } from "../components/ui/badge";
 import { MOCK_ALUMNI } from "../data/mockData";
 import { useNews } from "../context/NewsContext";
+import { useAuth } from "../context/AuthContext";
 import { CoffeeChatModal } from "../components/CoffeeChatModal";
 import type { AlumniProfile } from "../data/mockData";
 import { TRACK_COLORS } from "../data/constants";
@@ -15,7 +16,9 @@ const AlumniRolodexGraph = React.lazy(() => import("../components/AlumniRolodexG
 const AlumniMap = React.lazy(() => import("../components/AlumniMap"));
 
 export default function ConnectPage() {
-  const { posts } = useNews();
+  const { visiblePosts } = useNews();
+  const { isExec } = useAuth();
+  const posts = React.useMemo(() => visiblePosts({ isExec }), [visiblePosts, isExec]);
   const [search, setSearch] = React.useState("");
   const [track, setTrack] = React.useState("all");
   const [selected, setSelected] = React.useState<{ id: string; name: string } | null>(null);
