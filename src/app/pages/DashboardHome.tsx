@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { TrendingUp, Users, Activity, Calendar, ArrowUpRight, ArrowUp, ArrowDown } from "lucide-react";
+import { TrendingUp, Users, Activity, Calendar, ArrowUpRight, ArrowUp, ArrowDown, X, Sparkles } from "lucide-react";
 import { DashboardCell } from "../components/ui/DashboardCell";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -50,6 +50,32 @@ export default function DashboardHome() {
   const { hasCheckedInThisWeek } = useCheckin();
   const { contacts: pipelineContacts } = usePipeline();
   const [checkinOpen, setCheckinOpen] = React.useState(false);
+
+  // New/low-activity members land on a page full of club-wide data (portfolio, recruiting
+  // stats) with nothing oriented to them personally. A dismissible "getting started" nudge
+  // gives them somewhere concrete to go first instead of a blank slate.
+  const GETTING_STARTED_KEY = currentUser ? `cams.gettingStartedDismissed.${currentUser.id}` : null;
+  const [gettingStartedDismissed, setGettingStartedDismissed] = React.useState(() => {
+    if (!GETTING_STARTED_KEY) return true;
+    try {
+      return localStorage.getItem(GETTING_STARTED_KEY) === "1";
+    } catch {
+      return false;
+    }
+  });
+  const isLowActivity =
+    !!currentUser && !currentUser.personalStatement?.trim() && pipelineContacts.length === 0;
+  const showGettingStarted = isLowActivity && !gettingStartedDismissed;
+  const dismissGettingStarted = () => {
+    setGettingStartedDismissed(true);
+    if (GETTING_STARTED_KEY) {
+      try {
+        localStorage.setItem(GETTING_STARTED_KEY, "1");
+      } catch {
+        // Storage unavailable — dismissal just won't persist across reloads, harmless.
+      }
+    }
+  };
 
   // Real recent activity — most recently added pipeline contacts. (There's no broader
   // activity log in the app yet; this reflects the one thing we actually track a
@@ -149,6 +175,56 @@ export default function DashboardHome() {
         title="Dashboard"
         description={`Welcome back, ${currentUser?.firstName ?? "Member"} — University of Alabama`}
       />
+
+      {showGettingStarted && (
+        <Card className="bg-white border-crimson/30">
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-crimson shrink-0" />
+                <p className="text-sm font-semibold">Getting started with CAMS</p>
+              </div>
+              <button
+                onClick={dismissGettingStarted}
+                className="text-muted-foreground hover:text-foreground shrink-0"
+                aria-label="Dismiss"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 mt-3">
+              <button
+                className="text-left rounded-lg border p-3 hover:border-crimson hover:bg-crimson/5 transition-colors"
+                onClick={() => navigate("/dashboard/profile")}
+              >
+                <p className="text-sm font-medium">Complete your profile</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Add a bio and target roles</p>
+              </button>
+              <button
+                className="text-left rounded-lg border p-3 hover:border-crimson hover:bg-crimson/5 transition-colors"
+                onClick={() => navigate("/dashboard/recruiting")}
+              >
+                <p className="text-sm font-medium">Browse Recruiting</p>
+                <p className="text-xs text-muted-foreground mt-0.5">See open programs for your class year</p>
+              </button>
+              <button
+                className="text-left rounded-lg border p-3 hover:border-crimson hover:bg-crimson/5 transition-colors"
+                onClick={() => navigate("/dashboard/roster")}
+              >
+                <p className="text-sm font-medium">Check the Roster</p>
+                <p className="text-xs text-muted-foreground mt-0.5">See who else is in your committee</p>
+              </button>
+              <button
+                className="text-left rounded-lg border p-3 hover:border-crimson hover:bg-crimson/5 transition-colors"
+                onClick={() => setCheckinOpen(true)}
+              >
+                <p className="text-sm font-medium">Do a Weekly Check-in</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Log your recruiting progress</p>
+              </button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <DashboardCell
