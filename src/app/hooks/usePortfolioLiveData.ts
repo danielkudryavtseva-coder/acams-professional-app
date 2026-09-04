@@ -34,17 +34,28 @@ export interface PortfolioLiveData {
   refresh: () => void;
 }
 
-// Free-tier daily quota is ~250 calls. Each holding is 1 call per fetch
-// (no batching), so we cache aggressively. Quotes are 15-min delayed
-// upstream so a 10-min cache is effectively transparent.
-const QUOTE_CACHE_TTL_MS = 10 * 60_000;
+// Free-tier daily quota is ~250 calls, and FMP's free tier rejects any
+// multi-symbol request (one symbol per call, confirmed by hand — there's no
+// batch endpoint to move to on this plan) — see the module doc in lib/fmp.ts.
+// With ~33 holdings, one full refresh already costs ~33 calls per data type,
+// so the only real lever without a paid plan is spending fewer of them:
+// cache TTLs matched to the data's actual staleness, and a background poll
+// cadence well below the cache TTL (a poll that fires as often as the cache
+// itself expires defeats the point of caching at all).
+// Quotes are 15-min delayed upstream, so a cache shorter than that buys
+// nothing.
+const QUOTE_CACHE_TTL_MS = 15 * 60_000;
 const HISTORY_CACHE_TTL_MS = 6 * 60 * 60_000;
 // Dividend payments almost never change same-day, so this can outlive
 // even the price-history cache to keep the extra per-ticker call rare.
 const DIVIDEND_CACHE_TTL_MS = 24 * 60 * 60_000;
-// Auto-refresh slowest of the two TTLs so background ticks don't burn
-// the daily quota while the user is just leaving the tab open.
-const AUTO_REFRESH_INTERVAL_MS = QUOTE_CACHE_TTL_MS;
+// Deliberately slower than QUOTE_CACHE_TTL_MS: this is a background poll
+// while the tab is open, on top of (not instead of) the cache-freshness
+// check that already runs on every mount/refresh. Polling at exactly the
+// cache TTL just re-spends the same ~33 calls the moment they'd have been
+// spent anyway; every viewer with the dashboard open all afternoon was
+// quietly burning the shared daily quota for everyone.
+const AUTO_REFRESH_INTERVAL_MS = 45 * 60_000;
 
 const QUOTES_CACHE_KEY = "cams.portfolio.quotes.v2";
 const HISTORY_CACHE_KEY = "cams.portfolio.history.v2";
