@@ -310,7 +310,7 @@ export default function Landing() {
             >
               <div className="min-h-0">
                 <p className="max-w-2xl text-lg leading-relaxed text-white [text-shadow:0_1px_22px_rgba(0,0,0,0.55)] sm:mt-5 md:text-xl">
-                  Cultivating future leaders in finance through real-world asset
+                  Cultivating future leaders in finance through hands-on asset
                   management, investment research, and recruiting support at The
                   University of Alabama.
                 </p>
