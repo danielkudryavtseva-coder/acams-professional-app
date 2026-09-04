@@ -1,3 +1,4 @@
+import * as React from "react";
 import type { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -5,11 +6,13 @@ import {
   ChevronRight, Lock, Handshake, BookOpen,
   Calendar, ClipboardList, BarChart2, Wrench,
   BriefcaseBusiness, LogOut, Award, Trophy, PenLine, UserSquare2, UserCheck,
+  Menu,
 } from "lucide-react";
 import { cn } from "./ui/utils";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Separator } from "./ui/separator";
 import { Button } from "./ui/button";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "./ui/sheet";
 import { useAuth } from "../context/AuthContext";
 import { useMembers } from "../context/MembersContext";
 import camsLogo from "../../assets/cams-logo.png";
@@ -61,6 +64,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const { currentUser, isExec, logout } = useAuth();
   const { members } = useMembers();
   const pendingCount = members.filter((m) => m.approvalStatus === "pending").length;
+  // Below lg: the fixed sidebar has nowhere to go (390-1024px has no room for a 240px rail
+  // plus content), so it lives in a slide-in Sheet instead, triggered from a small top bar.
+  const [mobileNavOpen, setMobileNavOpen] = React.useState(false);
 
   const execNav: NavItemConfig[] = [
     ...EXEC_NAV,
@@ -86,6 +92,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
       <Link
         key={href}
         to={href}
+        onClick={() => setMobileNavOpen(false)}
         className={cn(
           "flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors",
           isActive
@@ -114,106 +121,142 @@ export function DashboardShell({ children }: DashboardShellProps) {
     ? `${String(currentUser.graduationYear).slice(-2)}'`
     : "XX'";
 
-  return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-60 flex-shrink-0 border-r bg-card flex flex-col">
-        <Link to="/" className="px-4 py-5 flex items-center gap-2 hover:bg-muted/40 transition-colors">
-          <img src={camsLogo} alt="CAMS logo" className="h-9 w-9 rounded-md object-cover" />
-          <span className="font-semibold text-sm">CAMS</span>
-          <span className="text-xs text-muted-foreground">{classBadge}</span>
-        </Link>
+  // Shared between the desktop <aside> and the mobile Sheet drawer — same nav, same footer,
+  // just a different container so the two never drift out of sync with each other.
+  const sidebarBody = (
+    <>
+      <Link
+        to="/"
+        onClick={() => setMobileNavOpen(false)}
+        className="px-4 py-5 flex items-center gap-2 hover:bg-muted/40 transition-colors"
+      >
+        <img src={camsLogo} alt="CAMS logo" className="h-9 w-9 rounded-md object-cover" />
+        <span className="font-semibold text-sm">CAMS</span>
+        <span className="text-xs text-muted-foreground">{classBadge}</span>
+      </Link>
+
+      <Separator />
+
+      <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-4" data-lenis-prevent>
+        {/* Main nav */}
+        <div className="space-y-0.5">
+          {MAIN_NAV.map(renderNavItem)}
+        </div>
 
         <Separator />
 
-        <nav className="flex-1 px-2 py-3 overflow-y-auto space-y-4" data-lenis-prevent>
-          {/* Main nav */}
+        {/* Community nav */}
+        <div>
+          <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Community
+          </p>
           <div className="space-y-0.5">
-            {MAIN_NAV.map(renderNavItem)}
-          </div>
-
-          <Separator />
-
-          {/* Community nav */}
-          <div>
-            <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              Community
-            </p>
-            <div className="space-y-0.5">
-              {COMMUNITY_NAV.map(renderNavItem)}
-            </div>
-          </div>
-
-          {/* Exec nav — only shown to exec users */}
-          {isExec && (
-            <>
-              <Separator />
-              <div>
-                <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
-                  <Lock className="h-3 w-3" /> Exec
-                </p>
-                <div className="space-y-0.5">
-                  {execNav.map(renderNavItem)}
-                </div>
-              </div>
-            </>
-          )}
-        </nav>
-
-        <Separator />
-
-        <div className="p-2 pb-3 flex flex-col gap-2 bg-card/30">
-          <Link
-            to="/dashboard/profile"
-            className={cn(
-              "group flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5",
-              "text-left transition-colors hover:bg-muted/80",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            )}
-            aria-label={
-              currentUser
-                ? `Edit profile: ${currentUser.firstName} ${currentUser.lastName}`
-                : "Edit profile"
-            }
-          >
-            <Avatar className="h-8 w-8 ring-offset-background group-hover:ring-2 group-hover:ring-muted">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate leading-tight">
-                {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Demo User"}
-              </p>
-              <p className="text-xs text-muted-foreground truncate leading-tight">
-                {currentUser?.email ?? "user@school.edu"}
-              </p>
-            </div>
-            <span className="hidden min-w-0 max-w-[5.5rem] text-right text-[10px] font-medium text-muted-foreground group-hover:text-crimson sm:inline">
-              Edit profile
-            </span>
-            <ChevronRight
-              className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-crimson"
-              aria-hidden
-            />
-          </Link>
-          <div className="flex items-center justify-end gap-1 px-1">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7"
-              onClick={handleLogout}
-              aria-label="Log out"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-            </Button>
+            {COMMUNITY_NAV.map(renderNavItem)}
           </div>
         </div>
+
+        {/* Exec nav — only shown to exec users */}
+        {isExec && (
+          <>
+            <Separator />
+            <div>
+              <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1">
+                <Lock className="h-3 w-3" /> Exec
+              </p>
+              <div className="space-y-0.5">
+                {execNav.map(renderNavItem)}
+              </div>
+            </div>
+          </>
+        )}
+      </nav>
+
+      <Separator />
+
+      <div className="p-2 pb-3 flex flex-col gap-2 bg-card/30">
+        <Link
+          to="/dashboard/profile"
+          onClick={() => setMobileNavOpen(false)}
+          className={cn(
+            "group flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5",
+            "text-left transition-colors hover:bg-muted/80",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          )}
+          aria-label={
+            currentUser
+              ? `Edit profile: ${currentUser.firstName} ${currentUser.lastName}`
+              : "Edit profile"
+          }
+        >
+          <Avatar className="h-8 w-8 ring-offset-background group-hover:ring-2 group-hover:ring-muted">
+            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium truncate leading-tight">
+              {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : "Demo User"}
+            </p>
+            <p className="text-xs text-muted-foreground truncate leading-tight">
+              {currentUser?.email ?? "user@school.edu"}
+            </p>
+          </div>
+          <span className="hidden min-w-0 max-w-[5.5rem] text-right text-[10px] font-medium text-muted-foreground group-hover:text-crimson sm:inline">
+            Edit profile
+          </span>
+          <ChevronRight
+            className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-hover:text-crimson"
+            aria-hidden
+          />
+        </Link>
+        <div className="flex items-center justify-end gap-1 px-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={handleLogout}
+            aria-label="Log out"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="flex flex-col lg:flex-row h-screen bg-background overflow-hidden">
+      {/* Mobile top bar — hidden at lg: and up, where the fixed sidebar takes over */}
+      <div className="lg:hidden flex items-center justify-between border-b bg-card px-3 py-2 flex-shrink-0">
+        <Link to="/" className="flex items-center gap-2">
+          <img src={camsLogo} alt="CAMS logo" className="h-8 w-8 rounded-md object-cover" />
+          <span className="font-semibold text-sm">CAMS</span>
+        </Link>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setMobileNavOpen(true)}
+          aria-label="Open navigation menu"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+      </div>
+      <Sheet open={mobileNavOpen} onOpenChange={setMobileNavOpen}>
+        <SheetContent side="left" className="p-0 w-72 flex flex-col">
+          <SheetTitle className="sr-only">Navigation menu</SheetTitle>
+          <SheetDescription className="sr-only">Dashboard navigation links</SheetDescription>
+          {sidebarBody}
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-60 flex-shrink-0 border-r bg-card flex-col">
+        {sidebarBody}
       </aside>
 
       {/* Main content */}
       {/* data-lenis-prevent: this is its own scroll container (not the window), and the
           site-wide Lenis smooth-scroll (see SmoothScroll.tsx) hijacks wheel input for the
           window by default — without this it swallows scroll events here entirely. */}
-      <main className="flex-1 overflow-y-auto" data-lenis-prevent>
+      <main className="flex-1 overflow-y-auto min-w-0" data-lenis-prevent>
         {children}
       </main>
     </div>
