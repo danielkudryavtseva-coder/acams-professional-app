@@ -253,23 +253,38 @@ export default function Profile() {
       <Card className="bg-white dark:bg-card">
         <CardHeader><CardTitle className="font-display text-base">Finance Interests</CardTitle></CardHeader>
         <CardContent className="flex flex-wrap gap-2">
-          {FINANCE_TRACKS.map((track) => (
-            <button
-              key={track}
-              type="button"
-              onClick={() =>
-                setDraft((prev) => ({
-                  ...prev,
-                  targetRoles: prev.targetRoles.includes(track)
-                    ? prev.targetRoles.filter((t) => t !== track)
-                    : [...prev.targetRoles, track],
-                }))
-              }
-              className={`px-3 py-1 rounded-full text-xs border ${draft.targetRoles.includes(track) ? "bg-primary text-primary-foreground" : "bg-white dark:bg-card"}`}
-            >
-              {track}
-            </button>
-          ))}
+          {/*
+            Was clickable regardless of isEditing, silently mutating `draft` even outside edit
+            mode with no way to actually commit it — clicking "Edit Profile" resets draft from
+            profile and discards it, so a click here looked like it worked (button visibly went
+            active) but was always lost. Every other field on this page is read-only outside
+            edit mode; this now matches that instead of being a dead-end trap.
+          */}
+          {isEditing ? (
+            FINANCE_TRACKS.map((track) => (
+              <button
+                key={track}
+                type="button"
+                onClick={() =>
+                  setDraft((prev) => ({
+                    ...prev,
+                    targetRoles: prev.targetRoles.includes(track)
+                      ? prev.targetRoles.filter((t) => t !== track)
+                      : [...prev.targetRoles, track],
+                  }))
+                }
+                className={`px-3 py-1 rounded-full text-xs border ${draft.targetRoles.includes(track) ? "bg-primary text-primary-foreground" : "bg-white dark:bg-card"}`}
+              >
+                {track}
+              </button>
+            ))
+          ) : profile.targetRoles.length === 0 ? (
+            <p className="text-sm text-muted-foreground">None selected yet — click Edit Profile to add some.</p>
+          ) : (
+            FINANCE_TRACKS.filter((track) => profile.targetRoles.includes(track)).map((track) => (
+              <Badge key={track} variant="secondary">{track}</Badge>
+            ))
+          )}
         </CardContent>
       </Card>
     </div>
