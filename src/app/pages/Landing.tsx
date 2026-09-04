@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { APPLY_URL } from "../components/PublicShell";
-import { usePortfolioMarkToMarket } from "../hooks/usePortfolioMarkToMarket";
 import bradyBelden from "../../assets/execs/brady-belden.png";
 import cadeAndrews from "../../assets/execs/cade-andrews.png";
 import alexWylie from "../../assets/execs/alex-wylie.png";
@@ -184,7 +183,6 @@ export default function Landing() {
   const heroBackgroundImgRef = useRef<HTMLImageElement>(null);
   const [missionOpen, setMissionOpen] = useState(false);
   const [heroDescOpen, setHeroDescOpen] = useState(false);
-  const { totalValue } = usePortfolioMarkToMarket({});
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -359,15 +357,6 @@ export default function Landing() {
               className={`h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-base ease-smooth ${missionOpen ? "rotate-180" : ""}`}
             />
           </button>
-
-          {totalValue > 0 && (
-            <p className="mt-1 text-center text-[2rem] font-medium text-muted-foreground md:mt-1.5 md:text-[2.25rem]">
-              Total AUM:{" "}
-              <span className="font-semibold text-crimson">
-                ${totalValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}
-              </span>
-            </p>
-          )}
 
           <div
             className={`grid overflow-hidden transition-all duration-base ease-smooth ${
