@@ -14,8 +14,8 @@ import { useEvents } from "../context/EventsContext";
 import { useTags } from "../context/TagsContext";
 import { sortNewsPosts, useNews } from "../context/NewsContext";
 import { NEWS_AUDIENCE_LABELS } from "../data/mockData";
-import { ExecNewsPostForm } from "../components/ExecNewsPostForm";
 import { usePnlAutoTagging } from "../hooks/usePnlAutoTagging";
+import { PageHeader } from "../components/PageHeader";
 import {
   TAG_CATEGORY_LABELS,
   type TagCategory,
@@ -77,20 +77,8 @@ export default function ExecToolsPage() {
   };
 
   return (
-    <div className="p-6 space-y-4">
-      <Card className="sticky top-0 z-10 bg-paper border-border shadow-sm">
-        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="space-y-1 min-w-0">
-            <h2 className="font-display text-xl font-semibold tracking-tight">Publish update</h2>
-            <p className="text-sm text-muted-foreground">
-              Society news appears on <span className="text-crimson font-medium">/news</span> and the home page.
-            </p>
-          </div>
-          <Button className="bg-crimson text-white hover:bg-crimson/90 shrink-0 w-full sm:w-auto" asChild>
-            <Link to="/dashboard/exec/new-post">New post</Link>
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="p-6 space-y-4 max-w-content mx-auto">
+      <PageHeader title="Exec Tools" description="Member standing, tag approvals, and society-wide notifications." />
       <Card className="bg-white dark:bg-card">
         <CardHeader>
           <CardTitle>Cohort Health Score: {score}</CardTitle>
@@ -282,20 +270,17 @@ export default function ExecToolsPage() {
         <TabsContent value="notifications" className="space-y-4">
           <Card className="bg-white dark:bg-card">
             <CardHeader>
-              <CardTitle className="text-base">Send a notification</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Publishes to <span className="text-crimson font-medium">/news</span> and
-                the relevant home surfaces, scoped to the audience you pick below.
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ExecNewsPostForm idPrefix="mass-notify" />
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white dark:bg-card">
-            <CardHeader>
-              <CardTitle className="text-base">Recently sent</CardTitle>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <CardTitle className="text-base">Recently sent</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Every audience-scoped update sent to <span className="text-crimson font-medium">/news</span> and the home page.
+                  </p>
+                </div>
+                <Button className="bg-crimson text-white hover:bg-crimson/90 shrink-0" asChild>
+                  <Link to="/dashboard/exec/new-post">New post</Link>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-2">
               {posts.length === 0 ? (

@@ -24,7 +24,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs"
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { Input } from "../components/ui/input";
 import { cn } from "../components/ui/utils";
 import { FirmIntelModal } from "../components/FirmIntelModal";
@@ -188,9 +187,7 @@ export default function RecruitingPage() {
   const [selectedFirms, setSelectedFirms] = React.useState<string[]>(allFirms);
   const [intelFirm, setIntelFirm] = React.useState<string | null>(null);
   const [month, setMonth] = React.useState(new Date());
-  const [deadlineMonth, setDeadlineMonth] = React.useState(new Date());
   const [briefingOpen, setBriefingOpen] = React.useState(false);
-  const [calDayDetail, setCalDayDetail] = React.useState<{ day: number; opens: Program[]; closes: Program[] } | null>(null);
 
   const today = React.useMemo(() => new Date(), []);
 
@@ -281,52 +278,15 @@ export default function RecruitingPage() {
     });
   }, [filteredPrograms, today]);
 
-  // Deadline + opening mini-calendar — uses filteredPrograms so it respects active filters.
-  const deadlineCalendar = React.useMemo(() => {
-    const start = startOfMonth(deadlineMonth);
-    const daysInMonth = endOfMonth(deadlineMonth).getDate();
-    const offset = start.getDay();
-    const cells = Array.from({ length: 42 }).map((_, idx) => {
-      const day = idx - offset + 1;
-      return day > 0 && day <= daysInMonth ? day : null;
-    });
-    const byDay = new Map<number, Program[]>();
-    const byOpenDay = new Map<number, Program[]>();
-    const y = deadlineMonth.getFullYear();
-    const m = deadlineMonth.getMonth();
-    for (const p of filteredPrograms) {
-      if (p.deadline) {
-        const d = parseLocalDate(p.deadline);
-        if (!isNaN(d.getTime()) && d.getFullYear() === y && d.getMonth() === m) {
-          const day = d.getDate();
-          const arr = byDay.get(day) ?? [];
-          arr.push(p);
-          byDay.set(day, arr);
-        }
-      }
-      if (p.openDate) {
-        const d = parseLocalDate(p.openDate);
-        if (!isNaN(d.getTime()) && d.getFullYear() === y && d.getMonth() === m) {
-          const day = d.getDate();
-          const arr = byOpenDay.get(day) ?? [];
-          arr.push(p);
-          byOpenDay.set(day, arr);
-        }
-      }
-    }
-    return { cells, byDay, byOpenDay };
-  }, [deadlineMonth, filteredPrograms]);
-
-  const deadlineCount = React.useMemo(() => {
-    let closing = 0;
-    let opening = 0;
-    for (const arr of deadlineCalendar.byDay.values()) closing += arr.length;
-    for (const arr of deadlineCalendar.byOpenDay.values()) opening += arr.length;
-    return { closing, opening, total: closing + opening };
-  }, [deadlineCalendar]);
-
-  const isCurrentMonth =
-    deadlineMonth.getFullYear() === today.getFullYear() && deadlineMonth.getMonth() === today.getMonth();
+  // Compact "what's coming up" list — respects active filters, replaces what used to be a
+  // second full mini-calendar duplicating the "Calendar" tab below with the same data in a
+  // different shape. Only the closest upcoming deadlines, not a month grid.
+  const upcomingDeadlines = React.useMemo(() => {
+    return filteredPrograms
+      .filter((p) => p.deadline && parseLocalDate(p.deadline).getTime() >= today.getTime())
+      .sort((a, b) => parseLocalDate(a.deadline!).getTime() - parseLocalDate(b.deadline!).getTime())
+      .slice(0, 8);
+  }, [filteredPrograms, today]);
 
   const calendarCells = React.useMemo(() => {
     const start = startOfMonth(month);
@@ -668,161 +628,34 @@ export default function RecruitingPage() {
 
                   <Card className="bg-white h-full flex flex-col">
                     <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <CardTitle className="text-sm">Deadline Calendar</CardTitle>
-                        <div className="flex items-center gap-1">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0"
-                            onClick={() => setDeadlineMonth((m) => addMonths(m, -1))}
-                            aria-label="Previous month"
-                          >
-                            <ChevronLeft className="h-3.5 w-3.5" />
-                          </Button>
-                          <span className="text-xs font-medium min-w-[88px] text-center">
-                            {format(deadlineMonth, "MMM yyyy")}
-                          </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0"
-                            onClick={() => setDeadlineMonth((m) => addMonths(m, 1))}
-                            aria-label="Next month"
-                          >
-                            <ChevronRight className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-[11px] text-muted-foreground">
-                          {deadlineCount.total === 0
-                            ? "No events this month"
-                            : `${deadlineCount.opening} opening · ${deadlineCount.closing} closing (filtered)`}
-                        </p>
-                        {!isCurrentMonth && (
-                          <button
-                            type="button"
-                            className="text-[11px] text-crimson hover:underline"
-                            onClick={() => setDeadlineMonth(new Date())}
-                          >
-                            Today
-                          </button>
-                        )}
-                      </div>
+                      <CardTitle className="text-sm">Upcoming Deadlines</CardTitle>
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        Next {upcomingDeadlines.length} closing, filtered · full month view in the
+                        Calendar tab above
+                      </p>
                     </CardHeader>
                     <CardContent className="pt-0 flex-1">
-                      <div className="grid grid-cols-7 gap-1 text-center text-xs w-full">
-                        {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
-                          <div key={`dow-${i}`} className="text-muted-foreground py-1 font-medium">
-                            {d}
-                          </div>
-                        ))}
-                        <div className="col-span-7 flex items-center gap-3 pb-1 pt-0.5 text-[10px] text-muted-foreground flex-wrap">
-                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-[#5a8ca8] inline-block" /> Opens</span>
-                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-crimson inline-block" /> Closes</span>
-                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-crimson-dark inline-block" /> Both</span>
-                          <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-muted-foreground/40 inline-block" /> Past open</span>
-                        </div>
-                        {deadlineCalendar.cells.map((day, i) => {
-                          const closePrograms = day ? deadlineCalendar.byDay.get(day) : undefined;
-                          const openPrograms = day ? deadlineCalendar.byOpenDay.get(day) : undefined;
-                          const hasClose = !!closePrograms?.length;
-                          const hasOpen = !!openPrograms?.length;
-                          const isToday = day != null && isCurrentMonth && day === today.getDate();
-                          // Past open dates (open date already passed) rendered in muted grey
-                          const isPastDay = day != null && isCurrentMonth && day < today.getDate();
-                          const hasOpenPast = hasOpen && isPastDay;
-                          const hasOpenFuture = hasOpen && !isPastDay;
-                          const totalCount = (closePrograms?.length ?? 0) + (openPrograms?.length ?? 0);
-                          const titleLines = [
-                            ...(openPrograms ?? []).map((p) => `↑ Opens: ${p.firm} — ${p.role}`),
-                            ...(closePrograms ?? []).map((p) => `✕ Closes: ${p.firm} — ${p.role}`),
-                          ];
-                          return (
-                            <div
-                              key={i}
-                              title={titleLines.length ? titleLines.join("\n") : undefined}
-                              onClick={() => {
-                                if (day && (hasClose || hasOpen)) {
-                                  setCalDayDetail({ day, opens: openPrograms ?? [], closes: closePrograms ?? [] });
-                                }
-                              }}
-                              className={cn(
-                                "h-8 rounded-md flex items-center justify-center border text-[11px] relative",
-                                (hasClose || hasOpen) ? "cursor-pointer hover:opacity-80" : "cursor-default",
-                                day === null && "border-transparent",
-                                hasClose && !hasOpen && "bg-crimson/10 border-crimson text-crimson font-semibold",
-                                hasOpenFuture && !hasClose && "bg-[#5a8ca8]/10 border-[#5a8ca8] text-[#5a8ca8] font-semibold",
-                                hasOpenFuture && hasClose && "bg-crimson-dark/10 border-crimson-dark text-crimson-dark font-semibold",
-                                hasOpenPast && !hasClose && "bg-muted/60 border-muted-foreground/30 text-muted-foreground font-semibold",
-                                hasOpenPast && hasClose && "bg-crimson/10 border-crimson text-crimson font-semibold",
-                                !hasClose && !hasOpen && day !== null && "border-border",
-                                isToday && "ring-1 ring-crimson",
-                              )}
-                            >
-                              {day ?? ""}
-                              {(hasClose || hasOpen) && (
-                                <span className="absolute bottom-0.5 left-0 right-0 flex justify-center gap-0.5">
-                                  {hasOpenFuture && <span className="h-1 w-1 rounded-full bg-[#5a8ca8] inline-block" />}
-                                  {hasOpenPast && !hasClose && <span className="h-1 w-1 rounded-full bg-muted-foreground/40 inline-block" />}
-                                  {hasClose && <span className="h-1 w-1 rounded-full bg-crimson inline-block" />}
-                                </span>
-                              )}
-                              {(hasClose || hasOpen) && totalCount > 0 && (
-                                <span className="absolute top-0.5 right-0.5 text-[8px] leading-none font-bold">
-                                  {totalCount}
-                                </span>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
+                      {upcomingDeadlines.length === 0 ? (
+                        <p className="text-xs text-muted-foreground py-4 text-center">
+                          No upcoming deadlines match your filters.
+                        </p>
+                      ) : (
+                        <ul className="space-y-2">
+                          {upcomingDeadlines.map((p) => (
+                            <li key={p.id} className="flex items-center justify-between gap-2 text-xs">
+                              <span className="min-w-0 truncate">
+                                <span className="font-medium">{p.firm}</span>
+                                <span className="text-muted-foreground"> — {p.role}</span>
+                              </span>
+                              <Badge variant="outline" className="shrink-0 text-[10px] border-crimson text-crimson">
+                                {format(parseLocalDate(p.deadline!), "MMM d")}
+                              </Badge>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </CardContent>
                   </Card>
-
-                  {/* Day-detail dialog */}
-                  <Dialog open={!!calDayDetail} onOpenChange={(o) => { if (!o) setCalDayDetail(null); }}>
-                    <DialogContent className="max-w-sm">
-                      <DialogHeader>
-                        <DialogTitle className="text-sm">
-                          {calDayDetail && format(new Date(deadlineMonth.getFullYear(), deadlineMonth.getMonth(), calDayDetail.day), "MMMM d, yyyy")}
-                        </DialogTitle>
-                      </DialogHeader>
-                      {calDayDetail && (
-                        <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
-                          {calDayDetail.opens.length > 0 && (
-                            <div>
-                              <p className="text-[11px] font-semibold text-[#5a8ca8] mb-1.5 uppercase tracking-wide">Opens</p>
-                              <ul className="space-y-1.5">
-                                {calDayDetail.opens.map((p) => (
-                                  <li key={p.id} className="text-xs flex items-start gap-2">
-                                    <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 border-[#5a8ca8] text-[#5a8ca8]">{p.type}</Badge>
-                                    <span><span className="font-medium">{p.firm}</span> — {p.role}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {calDayDetail.closes.length > 0 && (
-                            <div>
-                              <p className="text-[11px] font-semibold text-crimson mb-1.5 uppercase tracking-wide">Closes</p>
-                              <ul className="space-y-1.5">
-                                {calDayDetail.closes.map((p) => (
-                                  <li key={p.id} className="text-xs flex items-start gap-2">
-                                    <Badge variant="outline" className="text-[9px] px-1 py-0 shrink-0 border-crimson text-crimson">{p.type}</Badge>
-                                    <span><span className="font-medium">{p.firm}</span> — {p.role}</span>
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
 
                   <Card className="bg-white h-full flex flex-col">
                     <CardHeader className="pb-2">
