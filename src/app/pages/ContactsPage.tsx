@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Search, Plus, Mail, Linkedin, MoreHorizontal, Trash2, Download, Upload, CircleDot } from "lucide-react";
+import { toast } from "sonner";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
@@ -13,6 +14,7 @@ import { AddContactModal, DeleteContactModal } from "../components/ContactModals
 import { MOCK_CONTACTS, CONTACT_STAGE_LABEL, type Contact, type ContactStage, type ContactPriority } from "../data/mockData";
 import { usePipeline } from "../context/PipelineContext";
 import { PageHeader } from "../components/PageHeader";
+import { parseContactsFile } from "../lib/parseContactsFile";
 
 function getInitials(name: string): string {
   return name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
@@ -29,6 +31,8 @@ export default function ContactsPage() {
   const [search, setSearch] = React.useState("");
   const [addOpen, setAddOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState<Contact | null>(null);
+  const [importing, setImporting] = React.useState(false);
+  const importInputRef = React.useRef<HTMLInputElement>(null);
   const { contacts: pipelineContacts, addContact: addPipelineContact } = usePipeline();
 
   const filtered = contacts.filter((c) => {
@@ -59,6 +63,62 @@ export default function ContactsPage() {
 
   const updateContact = (id: string, updates: Partial<Contact>) =>
     setContacts((prev) => prev.map((c) => (c.id === id ? { ...c, ...updates } : c)));
+
+  const isDuplicateOfExisting = React.useCallback(
+    (imported: { name: string; firm: string; email?: string }, existing: Contact[]) =>
+      existing.some(
+        (c) =>
+          (imported.email && c.email && c.email.toLowerCase() === imported.email.toLowerCase()) ||
+          (c.name.toLowerCase() === imported.name.toLowerCase() && c.firm.toLowerCase() === imported.firm.toLowerCase()),
+      ),
+    [],
+  );
+
+  const handleImportFile = async (file: File) => {
+    setImporting(true);
+    try {
+      const result = await parseContactsFile(file);
+      if (result.contacts.length === 0 && result.errors.length === 0) {
+        toast.error("Nothing to import — the file looked empty.");
+        return;
+      }
+
+      let added = 0;
+      let duplicates = 0;
+      setContacts((prev) => {
+        const next = [...prev];
+        for (const imported of result.contacts) {
+          if (isDuplicateOfExisting(imported, next)) {
+            duplicates += 1;
+            continue;
+          }
+          next.unshift({ ...imported, id: crypto.randomUUID(), tags: [] });
+          added += 1;
+        }
+        return next;
+      });
+
+      const parts = [`${added} contact${added === 1 ? "" : "s"} imported`];
+      if (duplicates > 0) parts.push(`${duplicates} duplicate${duplicates === 1 ? "" : "s"} skipped`);
+      if (result.errors.length > 0) parts.push(`${result.errors.length} row${result.errors.length === 1 ? "" : "s"} had problems`);
+      const summary = parts.join(" · ");
+
+      if (added > 0) {
+        toast.success(summary, {
+          description: result.errors.length > 0 ? result.errors.slice(0, 3).join(" ") : undefined,
+        });
+      } else {
+        toast.error(summary || "No contacts could be imported.", {
+          description: result.errors.slice(0, 3).join(" ") || undefined,
+        });
+      }
+    } catch (err) {
+      toast.error("Couldn't read that file — make sure it's a .csv, .xlsx, or .xls export.");
+      console.error("Contact import failed:", err);
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const exportCsv = () => {
     const cols: (keyof Contact)[] = ["name", "firm", "role", "email", "linkedin", "phone", "location", "stage", "priority", "status", "lastContacted", "notes"];
@@ -111,13 +171,24 @@ export default function ContactsPage() {
             <Button size="sm" variant="outline" onClick={exportCsv}>
               <Download className="h-4 w-4 mr-1.5" /> Export
             </Button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".csv,.xlsx,.xls,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                e.target.value = ""; // allow re-selecting the same file after a failed import
+                if (file) void handleImportFile(file);
+              }}
+            />
             <Button
               size="sm"
-              className="bg-crimson hover:bg-crimson"
-              disabled
-              title="CSV/Excel import is coming soon"
+              variant="outline"
+              disabled={importing}
+              onClick={() => importInputRef.current?.click()}
             >
-              <Upload className="h-4 w-4 mr-1.5" /> Import CSV/Excel
+              <Upload className="h-4 w-4 mr-1.5" /> {importing ? "Importing..." : "Import CSV/Excel"}
             </Button>
             <Button size="sm" onClick={() => setAddOpen(true)}>
               <Plus className="h-4 w-4 mr-1.5" />
