@@ -30,6 +30,7 @@ import { useMembers } from "../context/MembersContext";
 import { MOCK_PORTFOLIO_DECISIONS } from "../data/mockData";
 import { TaggedMembersRow } from "../components/TaggedMembersRow";
 import { PageHeader } from "../components/PageHeader";
+import { useAuth } from "../context/AuthContext";
 
 const SECTOR_CHART_FILLS = [
   "hsl(var(--chart-1))",
@@ -210,6 +211,9 @@ function formatRelative(d: Date | null): string {
 }
 
 export default function Portfolio() {
+  // This page is also rendered publicly at /portfolio (routes.tsx), so the personal
+  // SharePoint download link below is gated to signed-in members only.
+  const { currentUser } = useAuth();
   const { quotes, history, dividends, status, lastUpdated, error, refresh } = usePortfolioLiveData();
   const {
     liveHoldings: holdings,
@@ -316,12 +320,14 @@ export default function Portfolio() {
           </>
         }
         actions={
-          <Button asChild size="sm" variant="outline" className="h-8 shrink-0">
-            <a href={EXCEL_PORTFOLIO_URL} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-              Excel Portfolio
-            </a>
-          </Button>
+          currentUser && (
+            <Button asChild size="sm" variant="outline" className="h-8 shrink-0">
+              <a href={EXCEL_PORTFOLIO_URL} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                Excel Portfolio
+              </a>
+            </Button>
+          )
         }
       />
 
