@@ -91,7 +91,7 @@ const EXECUTIVES: Executive[] = [
 const PILLARS = [
   {
     title: "Investment Management",
-    body: "Members manage a real-money portfolio, conducting equity research and presenting investment pitches to the full committee each semester.",
+    body: "Members manage the club portfolio, conducting equity research and presenting investment pitches to the full committee each semester.",
   },
   {
     title: "Recruiting Support",

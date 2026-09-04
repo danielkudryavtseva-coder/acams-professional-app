@@ -12,7 +12,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { AddContactModal, DeleteContactModal } from "../components/ContactModals";
 import { MOCK_CONTACTS, CONTACT_STAGE_LABEL, type Contact, type ContactStage, type ContactPriority } from "../data/mockData";
-import { usePipeline } from "../context/PipelineContext";
+import { usePipeline, type PipelineStage } from "../context/PipelineContext";
 import { PageHeader } from "../components/PageHeader";
 import { parseContactsFile } from "../lib/parseContactsFile";
 
@@ -24,6 +24,19 @@ const STATUS_BADGE: Record<Contact["status"], { label: string; variant: "default
   active: { label: "Active", variant: "default" },
   inactive: { label: "Inactive", variant: "secondary" },
   do_not_contact: { label: "DNC", variant: "destructive" },
+};
+
+// A contact's stage tracks relationship progress (researching a firm through interviewing);
+// Pipeline's stage tracks an actual application funnel. They're deliberately separate systems
+// (see PipelineContext.tsx), so this is a one-time best-effort mapping at the moment of the
+// move, not a live sync — "interviewing" is the one contact stage strong enough to skip past
+// "networking" and land straight on Pipeline's "interview".
+const CONTACT_TO_PIPELINE_STAGE: Record<ContactStage, PipelineStage> = {
+  researching: "wishlist",
+  reached_out: "networking",
+  replied: "networking",
+  coffee_chat: "networking",
+  interviewing: "interview",
 };
 
 export default function ContactsPage() {
@@ -150,12 +163,12 @@ export default function ContactsPage() {
         name: contact.name,
         firm: contact.firm,
         role: contact.role,
-        stage: "networking",
+        stage: CONTACT_TO_PIPELINE_STAGE[contact.stage],
         lastContact: contact.lastContacted,
         notes: contact.notes,
         email: contact.email,
         linkedin: contact.linkedin,
-        priority: "medium",
+        priority: contact.priority,
       });
     },
     [addPipelineContact, isAlreadyInPipeline]

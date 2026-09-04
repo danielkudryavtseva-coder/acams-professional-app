@@ -15,6 +15,7 @@ import { useTags } from "../context/TagsContext";
 import { sortNewsPosts, useNews } from "../context/NewsContext";
 import { NEWS_AUDIENCE_LABELS } from "../data/mockData";
 import { ExecNewsPostForm } from "../components/ExecNewsPostForm";
+import { usePnlAutoTagging } from "../hooks/usePnlAutoTagging";
 import {
   TAG_CATEGORY_LABELS,
   type TagCategory,
@@ -26,6 +27,7 @@ export default function ExecToolsPage() {
   const { currentUser } = useAuth();
   const { members, setPnlTag } = useMembers();
   const { getConsecutiveMisses, events, attendance } = useEvents();
+  usePnlAutoTagging();
   const {
     tags,
     assignments,
@@ -34,7 +36,9 @@ export default function ExecToolsPage() {
     createCustomTag,
   } = useTags();
   const { posts } = useNews();
-  const [reason, setReason] = React.useState("");
+  // Keyed by member id — a single shared string here would let typing a reason
+  // for one member's row leak into whichever row's "Tag PNL" gets clicked next.
+  const [reasons, setReasons] = React.useState<Record<string, string>>({});
 
   const [customLabel, setCustomLabel] = React.useState("");
   const [customCategory, setCustomCategory] = React.useState<TagCategory>("custom");
@@ -120,14 +124,14 @@ export default function ExecToolsPage() {
                     <Badge className="bg-green-100 text-green-700">Active</Badge>
                   )}
                   <Input
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
+                    value={reasons[m.id] ?? ""}
+                    onChange={(e) => setReasons((prev) => ({ ...prev, [m.id]: e.target.value }))}
                     placeholder="Reason"
                     className="h-8 w-44"
                   />
                   <Button
                     size="sm"
-                    onClick={() => setPnlTag(m.id, !m.pnlTagged, reason || undefined)}
+                    onClick={() => setPnlTag(m.id, !m.pnlTagged, reasons[m.id] || undefined)}
                   >
                     {m.pnlTagged ? "Remove PNL" : "Tag PNL"}
                   </Button>

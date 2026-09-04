@@ -14,7 +14,7 @@ export default function MemberProfilePage() {
   const member = members.find((m) => m.id === memberId);
 
   if (!member) {
-    return <Navigate to="/roster" replace />;
+    return <Navigate to="/dashboard/roster" replace />;
   }
 
   const editable = currentUser?.id === member.id || isExec;
@@ -23,7 +23,7 @@ export default function MemberProfilePage() {
     <div className="p-6 space-y-6 max-w-content mx-auto">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" asChild className="h-8 -ml-2">
-          <Link to="/roster">
+          <Link to="/dashboard/roster">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back to roster
           </Link>

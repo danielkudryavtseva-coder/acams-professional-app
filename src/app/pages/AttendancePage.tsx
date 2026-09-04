@@ -7,21 +7,14 @@ import { useEvents } from "../context/EventsContext";
 import { useMembers } from "../context/MembersContext";
 import { AddEventModal } from "../components/AddEventModal";
 import { PageHeader } from "../components/PageHeader";
+import { usePnlAutoTagging } from "../hooks/usePnlAutoTagging";
 
 export default function AttendancePage() {
   const { events, attendance, markAttended, addEvent, getConsecutiveMisses } = useEvents();
-  const { members, setPnlTag } = useMembers();
+  const { members } = useMembers();
   const [open, setOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    // Skip already-tagged members; otherwise `setPnlTag` always returns a fresh
-    // members array (see MembersContext.save), which retriggers this effect →
-    // "Maximum update depth exceeded".
-    members.forEach((m) => {
-      if (m.pnlTagged) return;
-      if (getConsecutiveMisses(m.id) >= 3) setPnlTag(m.id, true, "3 consecutive mandatory event misses");
-    });
-  }, [attendance, members, getConsecutiveMisses, setPnlTag]);
+  usePnlAutoTagging();
 
   return (
     <div className="p-6 space-y-4 max-w-content mx-auto">
