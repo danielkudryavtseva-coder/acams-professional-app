@@ -58,7 +58,7 @@ export function MemberDecisionsCard({ memberId }: Props) {
   }, [memberId]);
 
   return (
-    <Card className="bg-white">
+    <Card className="bg-white dark:bg-card shadow-soft">
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <LineChart className="h-4 w-4 text-crimson" />

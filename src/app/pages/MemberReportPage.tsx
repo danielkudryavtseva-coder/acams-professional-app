@@ -65,7 +65,7 @@ export default function MemberReportPage() {
   };
 
   return (
-    <div className="p-6 space-y-4 max-w-content mx-auto">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
       <PageHeader title="Member Reports" />
       <Input placeholder="Search members..." value={search} onChange={(e) => setSearch(e.target.value)} className="bg-white dark:bg-card" />
       <div className="space-y-2">

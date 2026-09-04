@@ -25,7 +25,7 @@ export default function JobsPage() {
   const toggle = (v: string, set: React.Dispatch<React.SetStateAction<string[]>>) => set((prev) => prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]);
 
   return (
-    <div className="p-6 space-y-4 max-w-content mx-auto">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
       <PageHeader title="Jobs" />
       <p className="text-xs text-muted-foreground -mt-2">
         Member/alumni-posted openings only. Looking for structured internship or full-time

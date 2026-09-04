@@ -36,6 +36,16 @@
 }
 
 .dark {
+  /* `--paper`/`--ink` never had a dark override, so every `bg-paper`/`text-ink`
+     usage (10 files, public and dashboard alike — Landing.tsx, NewsPage.tsx,
+     DashboardHome.tsx, ScoreboardPage.tsx, etc.) stayed stuck at their light-mode
+     values with dark mode on: a light-grey page background behind now-dark cards,
+     and near-black heading text on that same near-black surface. Matched to the
+     shadcn --background/--foreground dark values (default_shadcn_theme.css) so
+     `bg-paper` reads as the same surface as `bg-background` in dark mode. */
+  --paper: #141414;
+  --ink: #f2f2f2;
+
   --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.35);
   --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.45),
     0 1px 2px -1px hsl(0 0% 0% / 0.35);

@@ -71,7 +71,7 @@ export default function ResourcesPage() {
   };
 
   return (
-    <div className="p-6 space-y-4 max-w-content mx-auto">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
       <PageHeader
         title="Resources"
         actions={
@@ -167,7 +167,7 @@ export default function ResourcesPage() {
             placeholder="Title"
           />
           <select
-            className="h-10 rounded-md border px-3 text-sm bg-white"
+            className="h-10 rounded-md border px-3 text-sm bg-white dark:bg-card"
             value={category}
             onChange={(e) => setCategory(e.target.value as Resource["category"])}
           >

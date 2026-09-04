@@ -73,7 +73,7 @@ export function CoffeeChatModal({ open, onOpenChange, alumniId, alumniName }: Co
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button className="bg-[#c63f60] hover:bg-[#c63f60]" disabled={!date || !time} onClick={submit}>Submit</Button>
+          <Button className="bg-crimson hover:bg-crimson" disabled={!date || !time} onClick={submit}>Submit</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -111,7 +111,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-4xl mx-auto">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl font-semibold text-crimson tracking-tight">Profile</h1>
         {!isEditing ? (
@@ -138,7 +138,7 @@ export default function Profile() {
         )}
       </div>
 
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card">
         <CardContent className="pt-6">
           <div className="flex items-start gap-6">
             <Avatar className="h-20 w-20 flex-shrink-0">
@@ -167,7 +167,7 @@ export default function Profile() {
       </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="bg-white">
+        <Card className="bg-white dark:bg-card">
           <CardHeader><CardTitle className="font-display text-base">Personal Info</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {([
@@ -195,7 +195,7 @@ export default function Profile() {
           </CardContent>
         </Card>
 
-        <Card className="bg-white">
+        <Card className="bg-white dark:bg-card">
           <CardHeader><CardTitle className="font-display text-base">Education</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {([
@@ -221,7 +221,7 @@ export default function Profile() {
         </Card>
       </div>
 
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card">
         <CardHeader><CardTitle className="font-display text-base">Bio</CardTitle></CardHeader>
         <CardContent>
           {isEditing ? (
@@ -240,7 +240,7 @@ export default function Profile() {
 
       {currentUser && <MemberDecisionsCard memberId={currentUser.id} />}
 
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card">
         <CardHeader><CardTitle className="font-display text-base">CAMS Info</CardTitle></CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p><span className="text-muted-foreground">Committee:</span> {currentUser?.committee}</p>
@@ -250,7 +250,7 @@ export default function Profile() {
         </CardContent>
       </Card>
 
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card">
         <CardHeader><CardTitle className="font-display text-base">Finance Interests</CardTitle></CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           {FINANCE_TRACKS.map((track) => (
@@ -265,7 +265,7 @@ export default function Profile() {
                     : [...prev.targetRoles, track],
                 }))
               }
-              className={`px-3 py-1 rounded-full text-xs border ${draft.targetRoles.includes(track) ? "bg-primary text-primary-foreground" : "bg-white"}`}
+              className={`px-3 py-1 rounded-full text-xs border ${draft.targetRoles.includes(track) ? "bg-primary text-primary-foreground" : "bg-white dark:bg-card"}`}
             >
               {track}
             </button>

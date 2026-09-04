@@ -70,7 +70,7 @@ export function BoxEmbed() {
   return (
     <div className="space-y-3">
       {isExec && (
-        <Card className="bg-white">
+        <Card className="bg-white dark:bg-card shadow-soft">
           <CardContent className="p-4 space-y-2">
             <p className="text-sm font-medium flex items-center gap-2">
               <FolderOpen className="h-4 w-4" /> Shared Box folder
@@ -97,7 +97,7 @@ export function BoxEmbed() {
         </Card>
       )}
 
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card shadow-soft">
         <CardContent className="p-3">
           <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
             <p className="text-xs text-muted-foreground truncate">
@@ -107,7 +107,7 @@ export function BoxEmbed() {
               href={link}
               target="_blank"
               rel="noreferrer"
-              className="text-xs text-[#7a142e] inline-flex items-center gap-1 hover:underline shrink-0"
+              className="text-xs text-crimson-dark inline-flex items-center gap-1 hover:underline shrink-0"
             >
               <ExternalLink className="h-3 w-3" /> Open in Box
             </a>

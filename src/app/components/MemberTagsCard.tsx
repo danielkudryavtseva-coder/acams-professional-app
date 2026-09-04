@@ -151,7 +151,7 @@ export function MemberTagsCard({ memberId, editable = true }: Props) {
   };
 
   return (
-    <Card className="bg-white">
+    <Card className="bg-white dark:bg-card shadow-soft">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <TagIcon className="h-4 w-4 text-crimson" />
@@ -191,7 +191,7 @@ export function MemberTagsCard({ memberId, editable = true }: Props) {
                       setTagId("");
                     }}
                   >
-                    <SelectTrigger className="bg-white">
+                    <SelectTrigger className="bg-white dark:bg-card">
                       <SelectValue placeholder="Select a category" />
                     </SelectTrigger>
                     <SelectContent>
@@ -234,7 +234,7 @@ export function MemberTagsCard({ memberId, editable = true }: Props) {
                       onValueChange={setTagId}
                       disabled={!category || tagsForCategory.length === 0}
                     >
-                      <SelectTrigger className="bg-white">
+                      <SelectTrigger className="bg-white dark:bg-card">
                         <SelectValue
                           placeholder={
                             !category

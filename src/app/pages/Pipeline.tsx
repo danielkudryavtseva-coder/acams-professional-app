@@ -35,8 +35,8 @@ const STAGES: { id: PipelineStage; label: string; color: string }[] = [
 
 const PRIORITY_COLORS: Record<PipelineContact["priority"], string> = {
   high: "bg-crimson text-white",
-  medium: "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
-  low: "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
+  medium: "bg-white dark:bg-card text-foreground border border-border",
+  low: "bg-white dark:bg-card text-foreground border border-border",
 };
 
 function ContactCard({

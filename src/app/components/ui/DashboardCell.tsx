@@ -14,7 +14,7 @@ interface DashboardCellProps extends React.HTMLAttributes<HTMLDivElement> {
 const DashboardCell = React.forwardRef<HTMLDivElement, DashboardCellProps>(
   ({ className, title, value, description, icon, trend, trendValue, children, ...props }, ref) => {
     return (
-      <Card ref={ref} className={cn("bg-white", className)} {...props}>
+      <Card ref={ref} className={cn("bg-white dark:bg-card shadow-soft", className)} {...props}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
           {icon && <div className="text-muted-foreground">{icon}</div>}
@@ -26,8 +26,8 @@ const DashboardCell = React.forwardRef<HTMLDivElement, DashboardCellProps>(
           {trendValue && (
             <p className={cn(
               "text-xs mt-1",
-              trend === "up" && "text-[#c63f60]",
-              trend === "down" && "text-[#2f2e2e]",
+              trend === "up" && "text-crimson",
+              trend === "down" && "text-destructive",
               trend === "neutral" && "text-muted-foreground"
             )}>
               {trendValue}

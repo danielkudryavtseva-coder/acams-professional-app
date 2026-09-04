@@ -78,7 +78,7 @@ export default function ExecToolsPage() {
   };
 
   return (
-    <div className="p-6 space-y-4 max-w-content mx-auto">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
       <PageHeader title="Exec Tools" description="Member standing, tag approvals, and society-wide notifications." />
       <Card className="bg-white dark:bg-card">
         <CardHeader>

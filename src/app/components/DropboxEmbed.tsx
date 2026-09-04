@@ -145,7 +145,7 @@ export function DropboxEmbed() {
 
   if (!appKey) {
     return (
-      <Card className="bg-white border-amber-300">
+      <Card className="bg-white dark:bg-card border-amber-300">
         <CardContent className="p-4 space-y-2 text-sm">
           <p className="font-semibold flex items-center gap-2">
             <FolderOpen className="h-4 w-4" /> Dropbox embed not configured
@@ -155,7 +155,7 @@ export function DropboxEmbed() {
             <code className="px-1 py-0.5 rounded bg-muted text-xs ml-1">.env.local</code> and restart the dev server.
             Create an app at{" "}
             <a
-              className="underline text-[#7a142e]"
+              className="underline text-crimson-dark"
               href="https://www.dropbox.com/developers/apps"
               target="_blank"
               rel="noreferrer"
@@ -173,7 +173,7 @@ export function DropboxEmbed() {
   return (
     <div className="space-y-3">
       {(isExec || !link) && (
-        <Card className="bg-white">
+        <Card className="bg-white dark:bg-card shadow-soft">
           <CardContent className="p-4 space-y-2">
             <p className="text-sm font-medium flex items-center gap-2">
               <FolderOpen className="h-4 w-4" /> Shared folder link
@@ -201,7 +201,7 @@ export function DropboxEmbed() {
       )}
 
       {link && (
-        <Card className="bg-white">
+        <Card className="bg-white dark:bg-card shadow-soft">
           <CardContent className="p-3">
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-muted-foreground truncate">
@@ -214,7 +214,7 @@ export function DropboxEmbed() {
                 href={link}
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs text-[#7a142e] inline-flex items-center gap-1 hover:underline"
+                className="text-xs text-crimson-dark inline-flex items-center gap-1 hover:underline"
               >
                 <ExternalLink className="h-3 w-3" /> Open in Dropbox
               </a>

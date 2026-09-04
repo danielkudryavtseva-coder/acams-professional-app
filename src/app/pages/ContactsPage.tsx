@@ -175,7 +175,7 @@ export default function ContactsPage() {
   );
 
   return (
-    <div className="p-6 space-y-4 max-w-content mx-auto">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
       <PageHeader
         title="Contacts"
         description={`Manage your professional network of ${contacts.length} contacts`}

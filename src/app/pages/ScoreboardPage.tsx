@@ -166,7 +166,7 @@ export default function ScoreboardPage() {
   };
 
   return (
-    <div className="p-6 space-y-6 bg-paper min-h-full">
+    <div className="p-6 space-y-6 bg-paper min-h-full max-w-content mx-auto">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-display text-ink flex items-center gap-2">
@@ -198,11 +198,11 @@ export default function ScoreboardPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name..."
-            className="bg-white pl-9"
+            className="bg-white dark:bg-card pl-9"
           />
         </div>
         <select
-          className="h-10 rounded-md border px-3 text-sm bg-white"
+          className="h-10 rounded-md border px-3 text-sm bg-white dark:bg-card"
           value={committee}
           onChange={(e) => setCommittee(e.target.value as "all" | Committee)}
         >
@@ -214,7 +214,7 @@ export default function ScoreboardPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as Member["classYear"])}>
-        <TabsList className="grid grid-cols-4 w-full md:max-w-xl bg-white">
+        <TabsList className="grid grid-cols-4 w-full md:max-w-xl bg-white dark:bg-card">
           {CLASS_YEARS.map((year) => (
             <TabsTrigger key={year} value={year} className="data-[state=active]:bg-crimson data-[state=active]:text-white">
               {year}
@@ -288,7 +288,7 @@ function ClassBoard({ year, ranked, search, committee, sortKey, sortDir, toggleS
 
   if (ranked.length === 0) {
     return (
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card">
         <CardContent className="p-10 text-center text-sm text-muted-foreground">
           No {year.toLowerCase()}s yet. The first to register will take the top spot.
         </CardContent>
@@ -308,7 +308,7 @@ function ClassBoard({ year, ranked, search, committee, sortKey, sortDir, toggleS
               const rank = idx + 1;
               const accent = rankAccent(rank);
               return (
-                <Card key={s.member.id} className={cn("bg-white border", accent.ring)}>
+                <Card key={s.member.id} className={cn("bg-white dark:bg-card border", accent.ring)}>
                   <CardContent className="p-4 space-y-2">
                     <div className="flex items-center justify-between">
                       <span className={cn("inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-semibold", accent.pill)}>
@@ -340,7 +340,7 @@ function ClassBoard({ year, ranked, search, committee, sortKey, sortDir, toggleS
         )}
       </div>
 
-      <Card className="bg-white">
+      <Card className="bg-white dark:bg-card">
         <CardContent className="p-0 overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
@@ -415,7 +415,7 @@ function ClassBoard({ year, ranked, search, committee, sortKey, sortDir, toggleS
 
 function KpiCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <Card className="bg-white">
+    <Card className="bg-white dark:bg-card">
       <CardContent className="p-4">
         <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
         <p className="text-2xl font-bold tabular text-ink mt-1">{value}</p>

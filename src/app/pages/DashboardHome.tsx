@@ -177,7 +177,7 @@ export default function DashboardHome() {
       />
 
       {showGettingStarted && (
-        <Card className="bg-white border-crimson/30">
+        <Card className="bg-white dark:bg-card border-crimson/30">
           <CardContent className="p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -256,7 +256,7 @@ export default function DashboardHome() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-4">
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div>
@@ -342,7 +342,7 @@ export default function DashboardHome() {
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="bg-white">
+            <Card className="bg-white dark:bg-card">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">Portfolio Management</p>
                 <p className="text-xs text-muted-foreground mt-1 tabular">
@@ -356,7 +356,7 @@ export default function DashboardHome() {
                 </button>
               </CardContent>
             </Card>
-            <Card className="bg-white">
+            <Card className="bg-white dark:bg-card">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">Deal Pipeline</p>
                 <p className="text-xs text-muted-foreground mt-1">{activePipeline.length} active · {offerStageCount} offer stage</p>
@@ -368,7 +368,7 @@ export default function DashboardHome() {
                 </button>
               </CardContent>
             </Card>
-            <Card className="bg-white">
+            <Card className="bg-white dark:bg-card">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">CRM & Contacts</p>
                 <p className="text-xs text-muted-foreground mt-1">{pipelineContacts.length} contacts tracked</p>
@@ -380,7 +380,7 @@ export default function DashboardHome() {
                 </button>
               </CardContent>
             </Card>
-            <Card className="bg-white">
+            <Card className="bg-white dark:bg-card">
               <CardContent className="p-4">
                 <p className="text-sm font-semibold">Recruiting Portal</p>
                 <p className="text-xs text-muted-foreground mt-1">{openPrograms.length} programs open · {soonDeadlines} deadlines soon</p>
@@ -396,7 +396,7 @@ export default function DashboardHome() {
         </div>
 
         <div className="space-y-4">
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
               <CardDescription>Last 7 days</CardDescription>
@@ -421,7 +421,7 @@ export default function DashboardHome() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <CardTitle className="text-sm font-medium">Team Updates</CardTitle>
               <CardDescription>Latest club news</CardDescription>
@@ -455,7 +455,7 @@ export default function DashboardHome() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-medium">Upcoming Deadlines</CardTitle>
@@ -482,7 +482,7 @@ export default function DashboardHome() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader><CardTitle className="text-sm font-medium">Upcoming Events</CardTitle></CardHeader>
             <CardContent className="space-y-2">
               {upcomingEvents.length === 0 && (

@@ -27,7 +27,7 @@ export default function EventsPage() {
   }, [attendance, members, getConsecutiveMisses, setPnlTag]);
 
   return (
-    <div className="p-6 space-y-4 max-w-content mx-auto">
+    <div className="p-6 space-y-6 max-w-content mx-auto">
       <PageHeader title="Events" />
       {events.length === 0 && (
         <p className="text-sm text-muted-foreground py-8 text-center">

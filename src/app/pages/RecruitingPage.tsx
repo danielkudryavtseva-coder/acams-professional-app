@@ -338,7 +338,7 @@ export default function RecruitingPage() {
           <div className={cn("grid grid-cols-1 gap-4", filtersOpen ? "xl:grid-cols-[280px_1fr]" : "xl:grid-cols-1")}>
             {filtersOpen && (
               <div className="space-y-4">
-              <aside className="bg-white border rounded-xl p-4 h-fit space-y-4">
+              <aside className="bg-white dark:bg-card border rounded-xl p-4 h-fit space-y-4">
                 <div className="flex items-center justify-between">
                   <h2 className="font-semibold flex items-center gap-2">
                     <SlidersHorizontal className="h-4 w-4" /> Filters
@@ -401,7 +401,7 @@ export default function RecruitingPage() {
                             "hover:bg-crimson",
                             selectedTargetYears.includes(year)
                               ? "bg-crimson text-white"
-                              : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
+                              : "bg-white dark:bg-card text-foreground border border-border",
                           )}
                         >
                           {GRAD_YEAR[year]}
@@ -480,7 +480,7 @@ export default function RecruitingPage() {
                             "hover:bg-crimson cursor-pointer",
                             selectedCategories.includes(c)
                               ? "bg-crimson text-white"
-                              : "bg-white text-[#2f2e2e] border border-[#2f2e2e]/20",
+                              : "bg-white dark:bg-card text-foreground border border-border",
                           )}
                         >
                           {CATEGORY_LABELS[c]}
@@ -562,7 +562,7 @@ export default function RecruitingPage() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="gap-2 bg-white hover:bg-white"
+                  className="gap-2 bg-white dark:bg-card hover:bg-white dark:hover:bg-card"
                   onClick={() => setFiltersOpen(true)}
                 >
                   <PanelLeft className="h-4 w-4" /> Show Filters
@@ -595,9 +595,9 @@ export default function RecruitingPage() {
                 />
               </div>
 
-              <div className="bg-white border rounded-xl p-4 space-y-4">
+              <div className="bg-white dark:bg-card border rounded-xl p-4 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-                  <Card className="bg-white h-full flex flex-col">
+                  <Card className="bg-white dark:bg-card h-full flex flex-col">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">Sector Distribution</CardTitle>
                       <p className="text-[11px] text-muted-foreground mt-1">{MOCK_PROGRAMS.length} programs across {sectorData.length} sectors</p>
@@ -639,7 +639,7 @@ export default function RecruitingPage() {
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-white h-full flex flex-col">
+                  <Card className="bg-white dark:bg-card h-full flex flex-col">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">Upcoming Deadlines</CardTitle>
                       <p className="text-[11px] text-muted-foreground mt-1">
@@ -670,7 +670,7 @@ export default function RecruitingPage() {
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-white h-full flex flex-col">
+                  <Card className="bg-white dark:bg-card h-full flex flex-col">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-sm">Opening & Closing Timeline (Next 8 weeks)</CardTitle>
                       <p className="text-[11px] text-muted-foreground mt-1">Programs opening and closing by calendar week</p>
@@ -694,7 +694,7 @@ export default function RecruitingPage() {
                 </div>
               </div>
 
-              <div className="bg-white border rounded-xl p-4">
+              <div className="bg-white dark:bg-card border rounded-xl p-4">
                 <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                   <h3 className="font-semibold flex items-center gap-2">
                     <Filter className="h-4 w-4" />
@@ -707,7 +707,7 @@ export default function RecruitingPage() {
                     <Button
                       variant={selectedStatusFilters.length === 0 ? "default" : "outline"}
                       size="sm"
-                      className={selectedStatusFilters.length === 0 ? "bg-[#2f2e2e] hover:bg-[#2f2e2e]" : ""}
+                      className={selectedStatusFilters.length === 0 ? "bg-ink text-paper hover:bg-ink" : ""}
                       onClick={() => setSelectedStatusFilters([])}
                     >
                       All Programs
@@ -759,7 +759,7 @@ export default function RecruitingPage() {
         </TabsContent>
 
         <TabsContent value="calendar">
-          <Card className="bg-white">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
@@ -986,7 +986,7 @@ const TOP_TACTICS: IntelPoint[] = [
 
 function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () => void }) {
   return (
-    <div className="bg-white border rounded-xl overflow-hidden">
+    <div className="bg-white dark:bg-card border rounded-xl overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
@@ -1039,7 +1039,7 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
               <ul className="space-y-3">
                 {RATE_DRIVERS.map((p) => (
                   <li key={p.title} className="text-xs">
-                    <p className="font-medium text-sm text-[#2f2e2e]">{p.title}</p>
+                    <p className="font-medium text-sm text-foreground">{p.title}</p>
                     <p className="text-muted-foreground mt-0.5 leading-relaxed">{p.body}</p>
                     <a
                       href={p.source.href}
@@ -1063,7 +1063,7 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
               <ul className="space-y-3">
                 {TOP_TACTICS.map((p) => (
                   <li key={p.title} className="text-xs">
-                    <p className="font-medium text-sm text-[#2f2e2e]">{p.title}</p>
+                    <p className="font-medium text-sm text-foreground">{p.title}</p>
                     <p className="text-muted-foreground mt-0.5 leading-relaxed">{p.body}</p>
                     <a
                       href={p.source.href}
@@ -1092,7 +1092,7 @@ function MarketIntelBriefing({ open, onToggle }: { open: boolean; onToggle: () =
 
 function SummaryStat({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className="bg-white border rounded-xl p-3">
+    <div className="bg-white dark:bg-card border rounded-xl p-3">
       <div className="text-xs text-muted-foreground flex items-center gap-1.5">
         {icon}
         {label}
@@ -1132,7 +1132,7 @@ function ProgramRow({
             {TRACK_LABELS[program.type]}
           </Badge>
           {program.category && (
-            <Badge variant="outline" className="border-[#2f2e2e]/30 text-[#2f2e2e]">
+            <Badge variant="outline" className="border-border text-foreground">
               {CATEGORY_LABELS[program.category]}
             </Badge>
           )}
