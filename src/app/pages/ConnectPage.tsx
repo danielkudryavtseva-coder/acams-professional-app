@@ -42,7 +42,10 @@ export default function ConnectPage() {
 
   return (
     <div className="p-6 space-y-4 max-w-content mx-auto">
-      <PageHeader title="Connect" />
+      <PageHeader
+        title="Connect"
+        description="Coffee chats booked with alumni here count toward your Scoreboard activity score."
+      />
       <Tabs defaultValue="rolodex">
         <TabsList>
           <TabsTrigger value="rolodex">Alumni Rolodex</TabsTrigger>

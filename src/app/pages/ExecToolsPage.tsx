@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
@@ -194,77 +195,91 @@ export default function ExecToolsPage() {
             </CardContent>
           </Card>
 
-          <Card className="bg-white dark:bg-card">
-            <CardHeader>
-              <CardTitle className="text-base">Tag catalog (custom)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 max-w-md">
-              <div>
-                <Label className="text-xs">Label</Label>
-                <Input
-                  className="mt-1"
-                  value={customLabel}
-                  onChange={(e) => setCustomLabel(e.target.value)}
-                  placeholder="e.g. Sector — Healthcare"
-                />
-              </div>
-              <div>
-                <Label className="text-xs">Category</Label>
-                <select
-                  className="mt-1 h-10 w-full rounded-md border px-3 text-sm bg-white dark:bg-card"
-                  value={customCategory}
-                  onChange={(e) => setCustomCategory(e.target.value as TagCategory)}
-                >
-                  {(Object.keys(TAG_CATEGORY_LABELS) as TagCategory[]).map((c) => (
-                    <option key={c} value={c}>
-                      {TAG_CATEGORY_LABELS[c]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <Label className="text-xs">Tailwind chip classes (optional)</Label>
-                <Input
-                  className="mt-1"
-                  value={customColor}
-                  onChange={(e) => setCustomColor(e.target.value)}
-                  placeholder="bg-teal-100 text-teal-900"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="req-appr"
-                  checked={customRequiresApproval}
-                  onCheckedChange={(v) => setCustomRequiresApproval(v === true)}
-                />
-                <Label htmlFor="req-appr" className="text-sm font-normal cursor-pointer">
-                  Requires exec approval
-                </Label>
-              </div>
-              <Button
-                type="button"
-                disabled={!customLabel.trim() || !currentUser}
-                onClick={() => {
-                  if (!currentUser) return;
-                  createCustomTag(
-                    {
-                      category: customCategory,
-                      label: customLabel.trim(),
-                      color: customColor.trim() || undefined,
-                      requiresApproval: customRequiresApproval,
-                      execOnly: true,
-                    },
-                    currentUser.id,
-                  );
-                  setCustomLabel("");
-                  setCustomColor("");
-                  setCustomRequiresApproval(false);
-                }}
-              >
-                Add to catalog
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Authoring a new tag type is an occasional admin task, not the primary reason an
+              exec opens this tab (approving pending requests, above, is) — collapsed by
+              default so it doesn't compete with the approval queue for attention. */}
+          <Accordion type="single" collapsible>
+            <AccordionItem value="tag-catalog" className="border-none">
+              <Card className="bg-white dark:bg-card">
+                <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                  <div className="text-left">
+                    <p className="text-base font-semibold">Tag catalog (custom)</p>
+                    <p className="text-xs text-muted-foreground font-normal mt-0.5">
+                      Admin — define a new tag type members can request
+                    </p>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-6">
+                  <div className="space-y-3 max-w-md">
+                    <div>
+                      <Label className="text-xs">Label</Label>
+                      <Input
+                        className="mt-1"
+                        value={customLabel}
+                        onChange={(e) => setCustomLabel(e.target.value)}
+                        placeholder="e.g. Sector — Healthcare"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Category</Label>
+                      <select
+                        className="mt-1 h-10 w-full rounded-md border px-3 text-sm bg-white dark:bg-card"
+                        value={customCategory}
+                        onChange={(e) => setCustomCategory(e.target.value as TagCategory)}
+                      >
+                        {(Object.keys(TAG_CATEGORY_LABELS) as TagCategory[]).map((c) => (
+                          <option key={c} value={c}>
+                            {TAG_CATEGORY_LABELS[c]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <Label className="text-xs">Tailwind chip classes (optional)</Label>
+                      <Input
+                        className="mt-1"
+                        value={customColor}
+                        onChange={(e) => setCustomColor(e.target.value)}
+                        placeholder="bg-teal-100 text-teal-900"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="req-appr"
+                        checked={customRequiresApproval}
+                        onCheckedChange={(v) => setCustomRequiresApproval(v === true)}
+                      />
+                      <Label htmlFor="req-appr" className="text-sm font-normal cursor-pointer">
+                        Requires exec approval
+                      </Label>
+                    </div>
+                    <Button
+                      type="button"
+                      disabled={!customLabel.trim() || !currentUser}
+                      onClick={() => {
+                        if (!currentUser) return;
+                        createCustomTag(
+                          {
+                            category: customCategory,
+                            label: customLabel.trim(),
+                            color: customColor.trim() || undefined,
+                            requiresApproval: customRequiresApproval,
+                            execOnly: true,
+                          },
+                          currentUser.id,
+                        );
+                        setCustomLabel("");
+                        setCustomColor("");
+                        setCustomRequiresApproval(false);
+                      }}
+                    >
+                      Add to catalog
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </Card>
+            </AccordionItem>
+          </Accordion>
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-4">

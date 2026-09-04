@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router-dom";
 import { addDays, addMonths, endOfMonth, format, startOfMonth } from "date-fns";
 import {
   CalendarDays,
@@ -30,6 +31,7 @@ import { FirmIntelModal } from "../components/FirmIntelModal";
 import { PageHeader } from "../components/PageHeader";
 import { MOCK_PROGRAMS, type Program, type ProgramCategory, type ProgramClassYear, type ProgramTrack } from "../data/mockData";
 import { GRAD_YEAR_LABEL } from "../data/constants";
+import { useAuth } from "../context/AuthContext";
 
 const TARGET_YEARS: ProgramClassYear[] = ["Senior", "Junior", "Sophomore", "Freshman"];
 
@@ -162,9 +164,15 @@ function formatDateShort(iso?: string): string {
 }
 
 export default function RecruitingPage() {
+  const { currentUser } = useAuth();
   const [search, setSearch] = React.useState("");
   const [filtersOpen, setFiltersOpen] = React.useState(true);
-  const [selectedTargetYears, setSelectedTargetYears] = React.useState<ProgramClassYear[]>([...TARGET_YEARS]);
+  // Default to the viewing member's own class year rather than "everything selected" — a
+  // Junior shouldn't have to manually deselect Freshman-only programs on every visit. Still
+  // fully adjustable; falls back to all years when class year isn't known (logged out, etc.).
+  const [selectedTargetYears, setSelectedTargetYears] = React.useState<ProgramClassYear[]>(
+    currentUser?.classYear ? [currentUser.classYear] : [...TARGET_YEARS],
+  );
   const [selectedStatusFilters, setSelectedStatusFilters] = React.useState<StatusFilter[]>([]);
   const [selectedTracks, setSelectedTracks] = React.useState<ProgramTrack[]>(
     Object.keys(TRACK_LABELS) as ProgramTrack[],
@@ -566,6 +574,11 @@ export default function RecruitingPage() {
                 description={`Capstone Asset Management Society · University of Alabama · ${headlineCounts.total} tracked programs`}
                 actions={<p className="text-xs text-muted-foreground">Today: {today.toLocaleDateString()}</p>}
               />
+              <p className="text-xs text-muted-foreground -mt-2">
+                Structured internship/FT pipelines only. Looking for a specific opening a
+                member or alum posted?{" "}
+                <Link to="/dashboard/jobs" className="text-crimson hover:underline">See Jobs →</Link>
+              </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <SummaryStat label="Now Open" value={headlineCounts.now} icon={<Sparkles className="h-3.5 w-3.5" />} />

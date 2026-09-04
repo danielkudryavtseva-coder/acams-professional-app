@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Link } from "react-router-dom";
 import { differenceInDays } from "date-fns";
 import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -26,6 +27,11 @@ export default function JobsPage() {
   return (
     <div className="p-6 space-y-4 max-w-content mx-auto">
       <PageHeader title="Jobs" />
+      <p className="text-xs text-muted-foreground -mt-2">
+        Member/alumni-posted openings only. Looking for structured internship or full-time
+        pipelines?{" "}
+        <Link to="/dashboard/recruiting" className="text-crimson hover:underline">See Recruiting →</Link>
+      </p>
       <div className="grid xl:grid-cols-[280px_1fr] gap-4">
         <Card className="bg-white dark:bg-card h-fit">
           <CardContent className="p-4 space-y-3">
