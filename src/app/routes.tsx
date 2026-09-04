@@ -95,11 +95,10 @@ export function AppRoutes() {
           <Route path="members/:memberId" element={<MemberProfilePage />} />
           <Route path="coming-soon" element={<ComingSoon />} />
 
-          {/* Exec Tools: password gate on page; not globally RequireExec */}
-          <Route path="exec" element={<ExecToolsPage />} />
-
-          {/* Exec-only routes */}
+          {/* Exec-only routes — gated by real role, not a shared client-side password
+              (VITE_* env vars are always bundled into the JS anyone can read). */}
           <Route element={<RequireExec />}>
+            <Route path="exec" element={<ExecToolsPage />} />
             <Route path="exec/new-post" element={<ExecNewPostPage />} />
             <Route path="exec/attendance" element={<AttendancePage />} />
             <Route path="exec/member-report" element={<MemberReportPage />} />

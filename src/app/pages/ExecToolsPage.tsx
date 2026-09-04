@@ -8,7 +8,6 @@ import { Progress } from "../components/ui/progress";
 import { Checkbox } from "../components/ui/checkbox";
 import { Label } from "../components/ui/label";
 import { Link } from "react-router-dom";
-import { EXEC_PASSWORD } from "../data/constants";
 import { useAuth } from "../context/AuthContext";
 import { useMembers } from "../context/MembersContext";
 import { useEvents } from "../context/EventsContext";
@@ -22,7 +21,9 @@ import {
 } from "../data/tags";
 
 export default function ExecToolsPage() {
-  const { isExec, currentUser } = useAuth();
+  // This whole page lives behind RequireExec (see routes.tsx) — every viewer
+  // here is already a confirmed exec, enforced server-side by Supabase RLS.
+  const { currentUser } = useAuth();
   const { members, setPnlTag } = useMembers();
   const { getConsecutiveMisses, events, attendance } = useEvents();
   const {
@@ -33,8 +34,6 @@ export default function ExecToolsPage() {
     createCustomTag,
   } = useTags();
   const { posts } = useNews();
-  const [password, setPassword] = React.useState("");
-  const [unlocked, setUnlocked] = React.useState(isExec);
   const [reason, setReason] = React.useState("");
 
   const [customLabel, setCustomLabel] = React.useState("");
@@ -73,60 +72,21 @@ export default function ExecToolsPage() {
     return m ? `${m.firstName} ${m.lastName}` : id;
   };
 
-  if (!unlocked) {
-    return (
-      <div className="p-6">
-        <Card className="max-w-md mx-auto bg-white dark:bg-card">
-          <CardContent className="p-6 space-y-3">
-            <p className="font-semibold">Exec Access Required</p>
-            <Input
-              type="password"
-              placeholder="Exec password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <Button onClick={() => setUnlocked(password === EXEC_PASSWORD)}>Unlock</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 space-y-4">
-      {isExec && (
-        <Card className="sticky top-0 z-10 bg-paper border-border shadow-sm">
-          <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="space-y-1 min-w-0">
-              <h2 className="font-display text-xl font-semibold tracking-tight">Publish update</h2>
-              <p className="text-sm text-muted-foreground">
-                Society news appears on <span className="text-crimson font-medium">/news</span> and the home page.
-              </p>
-            </div>
-            <Button className="bg-crimson text-white hover:bg-crimson/90 shrink-0 w-full sm:w-auto" asChild>
-              <Link to="/dashboard/exec/new-post">New post</Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-      {unlocked && !isExec && (
-        <Card className="border-amber-200 bg-amber-50/80 dark:bg-amber-950/20 dark:border-amber-900">
-          <CardContent className="p-4 text-sm">
-            <p className="font-medium text-foreground">Only executives can publish society news.</p>
-            <p className="text-muted-foreground mt-1">
-              Your account does not have the executive role. If you are on the board, ask an admin to update your role, or review the{" "}
-              <Link to="/roster" className="text-crimson font-medium underline-offset-4 hover:underline">
-                roster
-              </Link>
-              {" "}and{" "}
-              <Link to="/dashboard/profile" className="text-crimson font-medium underline-offset-4 hover:underline">
-                your profile
-              </Link>
-              .
+      <Card className="sticky top-0 z-10 bg-paper border-border shadow-sm">
+        <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-1 min-w-0">
+            <h2 className="font-display text-xl font-semibold tracking-tight">Publish update</h2>
+            <p className="text-sm text-muted-foreground">
+              Society news appears on <span className="text-crimson font-medium">/news</span> and the home page.
             </p>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+          <Button className="bg-crimson text-white hover:bg-crimson/90 shrink-0 w-full sm:w-auto" asChild>
+            <Link to="/dashboard/exec/new-post">New post</Link>
+          </Button>
+        </CardContent>
+      </Card>
       <Card className="bg-white dark:bg-card">
         <CardHeader>
           <CardTitle>Cohort Health Score: {score}</CardTitle>
@@ -178,17 +138,7 @@ export default function ExecToolsPage() {
         </TabsContent>
 
         <TabsContent value="tags" className="space-y-4">
-          {!isExec ? (
-            <Card className="bg-white dark:bg-card">
-              <CardContent className="p-6">
-                <p className="text-sm text-muted-foreground">
-                  Alumni &amp; tag approvals are restricted to executive board members.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              <Card className="bg-white dark:bg-card">
+          <Card className="bg-white dark:bg-card">
             <CardHeader>
               <CardTitle className="text-base">Pending tag requests</CardTitle>
             </CardHeader>
@@ -323,63 +273,49 @@ export default function ExecToolsPage() {
               </Button>
             </CardContent>
           </Card>
-            </>
-          )}
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-4">
-          {!isExec ? (
-            <Card className="bg-white dark:bg-card">
-              <CardContent className="p-6">
-                <p className="text-sm text-muted-foreground">
-                  Mass notifications are restricted to executive board members.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              <Card className="bg-white dark:bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base">Send a notification</CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Publishes to <span className="text-crimson font-medium">/news</span> and
-                    the relevant home surfaces, scoped to the audience you pick below.
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <ExecNewsPostForm idPrefix="mass-notify" />
-                </CardContent>
-              </Card>
+          <Card className="bg-white dark:bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Send a notification</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Publishes to <span className="text-crimson font-medium">/news</span> and
+                the relevant home surfaces, scoped to the audience you pick below.
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ExecNewsPostForm idPrefix="mass-notify" />
+            </CardContent>
+          </Card>
 
-              <Card className="bg-white dark:bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base">Recently sent</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {posts.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">Nothing published yet.</p>
-                  ) : (
-                    sortNewsPosts(posts).slice(0, 8).map((p) => (
-                      <div
-                        key={p.id}
-                        className="flex items-center justify-between gap-2 border-b pb-2 last:border-0 last:pb-0"
-                      >
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium truncate">{p.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(p.publishedAt).toLocaleString()} · {p.author}
-                          </p>
-                        </div>
-                        <Badge variant="outline" className="shrink-0 text-xs">
-                          {NEWS_AUDIENCE_LABELS[p.audience ?? "all"]}
-                        </Badge>
-                      </div>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-            </>
-          )}
+          <Card className="bg-white dark:bg-card">
+            <CardHeader>
+              <CardTitle className="text-base">Recently sent</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {posts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nothing published yet.</p>
+              ) : (
+                sortNewsPosts(posts).slice(0, 8).map((p) => (
+                  <div
+                    key={p.id}
+                    className="flex items-center justify-between gap-2 border-b pb-2 last:border-0 last:pb-0"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{p.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(p.publishedAt).toLocaleString()} · {p.author}
+                      </p>
+                    </div>
+                    <Badge variant="outline" className="shrink-0 text-xs">
+                      {NEWS_AUDIENCE_LABELS[p.audience ?? "all"]}
+                    </Badge>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

@@ -1,8 +1,5 @@
 import type { FinanceTrack, Committee } from "./mockData";
 
-// Set via Vercel env var (VITE_EXEC_PASSWORD). NOT hardcoded here — if the env var is
-// missing, the Exec Tools unlock rejects all attempts.
-export const EXEC_PASSWORD = (import.meta.env.VITE_EXEC_PASSWORD as string | undefined) ?? "";
 export const CRIMSON_EMAIL_DOMAIN = "@crimson.ua.edu";
 export const CURRENT_COHORT = "Spring 2026";
 export const FINANCE_TRACKS: FinanceTrack[] = ["IB", "PE", "VC", "ER", "AM", "Consulting"];
