@@ -84,6 +84,15 @@ export default function Profile() {
     setSaving(true);
     setSaveError(null);
     const [firstName, ...rest] = draft.name.split(" ");
+    // Email and School are deliberately excluded: Email is the Supabase Auth login
+    // identity, not just a profile field — writing it here would desync the displayed
+    // address from what actually authenticates the account (a real change needs its own
+    // supabase.auth.updateUser() + confirmation flow, not a silent profile-field write).
+    // School is hardcoded to "University of Alabama" for every member (see
+    // profileDataFromMember below) — there's no real per-member field for it to save to.
+    // Both are read-only in the form for the same reason: they used to be editable
+    // <Input>s that silently did nothing on save (excluded from this payload the whole
+    // time), which is exactly the "edit, save, nothing happens" bug this fixes.
     const result = await updateProfile({
       firstName,
       lastName: rest.join(" ") || "",
@@ -94,6 +103,7 @@ export default function Profile() {
       location: draft.location,
       major: draft.major,
       gpa: draft.gpa,
+      graduationYear: Number(draft.graduationYear) || currentUser.graduationYear,
     });
     setSaving(false);
     if (!result.success) {
@@ -171,16 +181,19 @@ export default function Profile() {
           <CardHeader><CardTitle className="font-display text-base">Personal Info</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {([
-              { icon: Mail, label: "Email", key: "email" as const },
-              { icon: Phone, label: "Phone", key: "phone" as const },
-              { icon: MapPin, label: "Location", key: "location" as const },
-              { icon: User, label: "LinkedIn", key: "linkedin" as const },
-            ]).map(({ icon: Icon, label, key }) => (
+              { icon: Mail, label: "Email", key: "email" as const, editable: false },
+              { icon: Phone, label: "Phone", key: "phone" as const, editable: true },
+              { icon: MapPin, label: "Location", key: "location" as const, editable: true },
+              { icon: User, label: "LinkedIn", key: "linkedin" as const, editable: true },
+            ]).map(({ icon: Icon, label, key, editable }) => (
               <div key={key} className="flex items-start gap-3">
                 <Icon className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">{label}</p>
-                  {isEditing ? (
+                  <p className="text-xs text-muted-foreground">
+                    {label}
+                    {isEditing && !editable && " (contact an exec to change)"}
+                  </p>
+                  {isEditing && editable ? (
                     <Input
                       value={draft[key]}
                       onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
@@ -199,14 +212,17 @@ export default function Profile() {
           <CardHeader><CardTitle className="font-display text-base">Education</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             {([
-              { label: "School", key: "school" as const },
-              { label: "Major", key: "major" as const },
-              { label: "Expected Graduation", key: "graduationYear" as const },
-              { label: "GPA", key: "gpa" as const },
-            ]).map(({ label, key }) => (
+              { label: "School", key: "school" as const, editable: false },
+              { label: "Major", key: "major" as const, editable: true },
+              { label: "Expected Graduation", key: "graduationYear" as const, editable: true },
+              { label: "GPA", key: "gpa" as const, editable: true },
+            ]).map(({ label, key, editable }) => (
               <div key={key}>
-                <p className="text-xs text-muted-foreground">{label}</p>
-                {isEditing ? (
+                <p className="text-xs text-muted-foreground">
+                  {label}
+                  {isEditing && !editable && " (same for every member)"}
+                </p>
+                {isEditing && editable ? (
                   <Input
                     value={draft[key]}
                     onChange={(e) => setDraft({ ...draft, [key]: e.target.value })}
